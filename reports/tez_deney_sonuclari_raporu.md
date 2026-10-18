@@ -42,7 +42,10 @@ Bilimsel dürüstlük ve ekonometrik şeffaflık gereğince, tez çalışmasınd
 | **Sürüm 4 (Kanonik Mutabakat)** | Test Dönemi (8.760 saat) | EPİAŞ fiili `negativeImbalance`/`positiveImbalance` serileri bağlandı, Rejim 1-3 tam saat ağırlıklı mutabakatı sağlandı. Modeller diske kaydedildi (15 Ekim 2026, 21:10). | **+67,33 TL/MWh** | **+119,14 TL/MWh** | Tüm tablolar ve kodlar makine hassasiyetinde mutabık kılındı. Disk üzerindeki kanonik dosya kimlikleri donduruldu. |
 
 > [!NOTE]
-> **Sınırlılıklar:** Çalışma dizini bağımsız bir git versiyon kontrol deposu içermemekte olup (`fatal: not a git repository`), modellerin dosya sistemi değiştirilme zaman damgaları (15 Ekim 2026, 21:10) ve SHA-256 özetleri Tablo 2'de sunulmuştur. Bu sağlama toplamları, modellerin geçmişteki dondurulma anını değil; disk üzerindeki **kanonik model nesnelerinin mevcut kimliğini ve tam yeniden üretilebilirlik denetim izini (audit trail)** temsil etmektedir. Tamamen temiz ve seçim yanlılığından arındırılmış bir ileriye dönük sınama (true out-of-sample forward evaluation), modellerin dondurulduğu bu tarihten sonra birikecek olan verilerle gerçekleştirilmelidir.
+> **Versiyon Kontrolü ve Dondurulmuş Commit:** Çalışma dizini 18 Ekim 2026 tarihinde Git versiyon kontrolüne alınmış; tüm modeller, kodlar, veri dosyası ve manifest tek bir kanonik commit altında kilitlenmiştir:  
+> - **Git Commit Kimliği:** `34708119e22553d6c613fa87db11593ee14c92b3` (18 Ekim 2026, 18:12:54 +03:00)  
+> - **Kanonik SHA-256 Manifestosu:** `MANIFEST_SHA256.txt` dosyasıyla tüm dosya özetleri doğrulanmıştır.  
+> - **İleriye Dönük Doğrulama Protokolü:** Modeller kilitlendikten sonra Ekim 2026 – Mart 2027 arasındaki 6 aylık dönemde birikecek veriler için bağımsız değerlendirme protokolü önceden yazılı hâle getirilmiştir (`reports/prospective_evaluation_protocol_2026_2027.md`). Commit kimliği ve SHA-256 özeti danışman öğretim üyesine iletilerek dış zaman damgası güvenceye alınmıştır.
 
 #### Tablo 2: Kanonik Model Manifestosu (Kriptografik SHA-256 Sağlama Toplamları)
 
