@@ -1,0 +1,16 @@
+# Environment & Credentials
+.env
+.eptr2-tgt
+
+# Python Caches & Virtualenvs
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# OS Specific
+.DS_Store
+Thumbs.db

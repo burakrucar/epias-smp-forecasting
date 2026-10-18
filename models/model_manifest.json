@@ -1,0 +1,14 @@
+{
+  "canonical_stage2_regressor.pkl": {
+    "sha256": "583a2912c3d0ea1ba58200030208d4aec131b6ab7d94707eec780b772cb24fa5",
+    "size_bytes": 537896
+  },
+  "canonical_stage1_classifier.pkl": {
+    "sha256": "d4aac8a6a6f4c2e9f25f786bec6e8fa1a66427585fce8f1331613ac9612429ff",
+    "size_bytes": 2058822
+  },
+  "canonical_stage1_calibrator.pkl": {
+    "sha256": "5db315973a293f9eb43d4f01b1543167c8f143e41883bd8a9ff732ac68e5106a",
+    "size_bytes": 911
+  }
+}
