@@ -3,20 +3,28 @@
 
 **Tez Danışmanı:** Prof. Ali Dinler  
 **Kurum:** T.C. İstanbul Medeniyet Üniversitesi  
-**Protokol Tarihi:** 18 Ekim 2026  
-**Dondurulmuş Git Commit:** *(İlk commit SHA'sı eklenecektir)*  
+**Protokol Tarihi:** 19 Ekim 2026  
+**Dondurulmuş Git Versiyon Etiketi:** `v1.0-frozen-manifest`  
 
 ---
 
 ### 1. Amaç ve Kapsam
-Bu protokol, lisansüstü tez çalışması kapsamında geliştirilen ve 15 Ekim 2026 tarihi itibarıyla disk üzerinde dondurulan makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
+Bu protokol, lisansüstü tez çalışması kapsamında geliştirilen ve 18 Ekim 2026 tarihi itibarıyla disk üzerinde kilitlenen makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
 
-Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı için, gerçek out-of-sample başarı ancak modeller kilitlendikten sonra piyasada fiilen oluşacak verilerle ölçülebilir.
+Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–18 Ekim 2026 dönemi keşifsel incelemelere konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
 
 ---
 
-### 2. Değerlendirme Penceresi ve Veri Akışı
-- **Zaman Aralığı:** 01 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00 (6 Ay / 182 Gün / 4.368 Saat).
+### 2. Bağımsız Değerlendirme Penceresi ve Veri Akışı
+- **Zaman Aralığı:** **19 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00** (164 Gün / 3.936 Saat).  
+  *Gerekçe:* 01–18 Ekim 2026 dönemi geliştirme, denetim ve model dondurma takviminde yer aldığından, ileriye dönük bağımsız test penceresi modellerin dondurulmasını takip eden ilk tam gün olan 19 Ekim 2026 saat 00:00 itibarıyla başlatılmıştır.
+  - Ekim 2026 (19–31 Ekim): 13 gün $\times$ 24 = 312 saat
+  - Kasım 2026: 30 gün $\times$ 24 = 720 saat
+  - Aralık 2026: 31 gün $\times$ 24 = 744 saat
+  - Ocak 2027: 31 gün $\times$ 24 = 744 saat
+  - Şubat 2027: 28 gün $\times$ 24 = 672 saat
+  - Mart 2027: 31 gün $\times$ 24 = 744 saat  
+  *Toplam:* **164 gün / 3.936 saat**.
 - **Veri Kaynağı:** EPİAŞ Şeffaflık Platformu Resmi Web Servisleri (`eptr2` kütüphanesi):
   1. `mcp-smp-imb`: PTF, SMF, Pozitif Dengesizlik Fiyatı, Negatif Dengesizlik Fiyatı, Resmi Sistem Durumu.
   2. `load-plan`: TEİAŞ Gün Öncesi Yük Tahmini (`lep`).
@@ -60,7 +68,7 @@ Aşağıdaki modeller hiçbir yeniden eğitim, hiperparametre güncellemesi veya
    - 3-sınıflı doğruluk, Brier skoru, Test Brier Beceri Skoru (BSS), Ağırlıklı Beklenen Kalibrasyon Hatası (ECE).  
    - Günlük doğruluk farkı için Wilcoxon işaretli sıra testi ve Holm-Bonferroni düzeltmesi.
 3. **Ekonomik Getiri ve Üstünlük Sınaması:**  
-   - Yıllıklandırılmış birim getiri (TL/MWh).  
+   - Birim getiri (TL/MWh).  
    - Eşleştirilmiş 7 günlük blok bootstrap ile fark analizi ($H_0: \mu_{\text{Model}} - \mu_{\text{Açık}} \le 0$).
 4. **Risk ve Maruziyet Sınaması (2.000 Tekrarlı Permütasyon Testi):**  
    - Modelin aktif maruziyet oranı dondurulup 2.000 kez rastgele zamanlama permütasyonu oluşturulacak.  
