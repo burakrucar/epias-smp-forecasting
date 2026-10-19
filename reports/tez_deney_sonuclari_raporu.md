@@ -40,9 +40,10 @@ Bilimsel dürüstlük ve ekonometrik şeffaflık gereğince, tez çalışmasınd
 | **Sürüm 2 ($n=100$ Yayılım Modeli)** | Test Dönemi (8.760 saat) | Seviye yerine yayılım ($S=SMF-PTF$) modeli ($n=100$), 3-sınıflı DUY yönü, ffill ile 8.760 tam saat. | +55,95 TL/MWh (Ham) | +135,58 TL/MWh ($n=100$) | Aşama 2 rejim değerleri (87,09 / 139,85 / 158,16 TL) ağırlıklı ortalamada +135,58 TL getirdi. |
 | **Sürüm 3 ($n=250$ ve Kalibrasyon)** | Test Dönemi (8.760 saat) | Aşama 2 hiperparametreleri $n=250$, derinlik 5 olarak güncellendi. Aşama 1'e Platt kalibrasyonu ve $\tau=70$ TL eşiği eklendi. | +70,55 TL/MWh (Validasyon-Platt) | +119,14 TL/MWh ($n=250$) | Aşama 2 P&L'i 135,58'den 119,14 TL'ye geriledi; Aşama 1 Platt doğrulama eşiği incelemesinde +70,55 TL verdi (ham OOF değerleri 59,15 ve 70,58 TL'dir). |
 | **Sürüm 4 (Kanonik Mutabakat)** | Test Dönemi (8.760 saat) | EPİAŞ fiili `negativeImbalance`/`positiveImbalance` serileri bağlandı, Rejim 1-3 tam saat ağırlıklı mutabakatı sağlandı. Modeller diske kaydedildi (15 Ekim 2026, 21:10). | **+67,33 TL/MWh** | **+119,14 TL/MWh** | Tüm tablolar ve kodlar makine hassasiyetinde mutabık kılındı. Disk üzerindeki kanonik dosya kimlikleri donduruldu. |
+| **Post-hoc Teşhis Modelleri (Keşifsel)** | Test Dönemi (8.760 saat) | Aşama 2'nin mekanizmasını ayrıştırmak üzere test kümesi sonuçları görüldükten sonra $PTF < 2.500$ TL eşik kuralı (+140,57 TL) ve doğrusal regresyon kuralları türetildi. | — | +140,57 TL (PTF<2.500) | Önceden kilitlenmiş model değildir; test kümesi sonuçlarına bakılarak geliştirilmiş geriye dönük (post-hoc) teşhis kurallarıdır. |
 
 > [!NOTE]
-> **Versiyon Kontrolü ve Dondurulmuş Model Kütüğü:** Çalışma dizini Git versiyon kontrolüne alınmış; modeller, eğitim ve test veri dosyaları ve kaynak kodlar kilitlenmiştir. Modellerin disk üzerindeki değişmezliğini denetlemek üzere kriptografik SHA-256 manifestosu (`MANIFEST_SHA256.txt`) ve 19 Ekim 2026 – 31 Mart 2027 dönemini kapsayan bağımsız ileriye dönük doğrulama protokolü (`reports/prospective_evaluation_protocol_2026_2027.md`) hazırlanmıştır. Bu paket, dondurulmuş kod ve model kütüğünün değişmezliğini dış bir zaman damgasıyla sabitlemek üzere danışman öğretim üyesine e-posta ile iletilmek üzere hazır edilmiştir.
+> **Versiyon Kontrolü ve Dondurulmuş Model Kütüğü:** Çalışma dizini Git versiyon kontrolüne alınmış; modeller, eğitim ve test veri dosyaları ve kaynak kodlar kilitlenmiştir. Modellerin disk üzerindeki değişmezliğini denetlemek üzere kriptografik SHA-256 manifestosu (`MANIFEST_SHA256.txt`) ve 20 Ekim 2026 – 31 Mart 2027 dönemini kapsayan bağımsız ileriye dönük doğrulama protokolü (`reports/prospective_evaluation_protocol_2026_2027.md`) hazırlanmıştır. Bu paket, dondurulmuş kod ve model kütüğünün değişmezliğini dış bir zaman damgasıyla sabitlemek üzere danışman öğretim üyesine e-posta ile iletilmek üzere hazır edilmiştir.
 
 #### Tablo 2: Kanonik Model Manifestosu (Kriptografik SHA-256 Sağlama Toplamları)
 
@@ -119,18 +120,23 @@ Aşama 2 modelinin kanonik P&L değeri (+119,14 TL/MWh), $L_2$ yayılım regresy
 | **5. Geri Kalan Normal Saatler** | 4.361 | +70,46 TL | +49,54 TL | **+138,09 TL** | -27,17 TL | -29,62 TL |
 | **TOPLAM YILLIK P&L (TL/MWh)** | **8.760** | **+71,73 TL** | **+67,33 TL** | **+119,14 TL** | **+29,57 TL** | **-20,81 TL** |
 
-##### Saat Türlerine Göre Model Eylem Payları, Genel Doğruluk ve Aktif İsabet Oranları
-| Saat Türü / Piyasa Dilimi | Saat ($N$) | Aşama 2 $L_2$ Eylem Dağılımı | $L_2$ Doğruluk | Aşama 2 Sınıflandırıcı ($EV>70$) Eylem Dağılımı | Sınıflandırıcı Genel Doğruluk | Sınıflandırıcı Aktif İsabet (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1. Üst %1 Ekstrem Yayılım** | 88 | %80,7 Uzun / %19,3 Kısa | **%78,4** | %29,5 Uzun / %31,8 Kısa / %38,6 Pasif | **%2,3** | **%3,7 (2 / 54 aktif)** |
-| **2. Tavan Fiyat Saatleri** | 2.113 | %8,6 Uzun / %91,4 Kısa | %20,3 | %68,4 Uzun / %1,5 Kısa / %30,1 Pasif | %58,6 | %83,4 |
-| **3. -106 / -103 TL Anomali Saatleri** | 1.534 | %69,5 Uzun / %30,5 Kısa | %33,1 | %1,8 Uzun / %66,5 Kısa / %31,7 Pasif | %62,3 | %91,3 |
-| **4. $PTF = SMF$ Sıfır Yayılım Saatleri** | 664 | %34,6 Uzun / %65,4 Kısa | %32,5 | %34,0 Uzun / %9,0 Kısa / %56,9 Pasif | %50,8 | %75,9 |
-| **5. Geri Kalan Normal Piyasa Saatleri** | 4.361 | %47,0 Uzun / %53,0 Kısa | **%55,8** | %29,2 Uzun / %14,1 Kısa / %56,7 Pasif | **%25,3** | **%58,4** |
-| **GENEL TEST YILI TOPLAMI** | **8.760** | **%41,1 Uzun / %58,9 Kısa** | **%41,7** | **%34,2 Uzun / %20,0 Kısa / %45,7 Pasif** | **%41,5** | **%76,4** |
+##### Saat Türlerine Göre Model Eylem Payları, Doğruluk ve Aktif İsabet Oranları
+| Saat Türü / Piyasa Dilimi | Saat ($N$) | Aşama 2 $L_2$ Eylem Dağılımı | $L_2$ Doğruluk | Aşama 2 Sınıflandırıcı ($EV>70$) Eylem Dağılımı | Sınıflandırıcı 3-Sınıflı Doğruluk (Pasif=$D_0$ Doğru) | Sınıflandırıcı Doğruluk (Pasif=Hata) | Sınıflandırıcı Aktif İsabet (%) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1. Üst %1 Ekstrem Yayılım** | 88 | %80,7 Uzun / %19,3 Kısa | **%78,4** | %29,5 Uzun / %31,8 Kısa / %38,6 Pasif | **%2,3** | **%2,3** | **%3,7 (2 / 54 aktif)** |
+| **2. Tavan Fiyat Saatleri** | 2.113 | %8,6 Uzun / %91,4 Kısa | %20,3 | %68,4 Uzun / %1,5 Kısa / %30,1 Pasif | %58,6 | %58,3 | %83,4 |
+| **3. -106 / -103 TL Anomali Saatleri** | 1.534 | %69,5 Uzun / %30,5 Kısa | %33,1 | %1,8 Uzun / %66,5 Kısa / %31,7 Pasif | %62,3 | %62,3 | %91,3 |
+| **4. $PTF = SMF$ Sıfır Yayılım Saatleri** | 664 | %34,6 Uzun / %65,4 Kısa | %32,5 | %34,0 Uzun / %9,0 Kısa / %56,9 Pasif | **%50,8** | **%32,7** | %75,9 (217 / 286 aktif) |
+| **5. Geri Kalan Normal Piyasa Saatleri** | 4.361 | %47,0 Uzun / %53,0 Kısa | **%55,8** | %29,2 Uzun / %14,1 Kısa / %56,7 Pasif | **%25,3** | **%25,3** | **%58,4** |
+| **GENEL TEST YILI TOPLAMI** | **8.760** | **%41,1 Uzun / %58,9 Kısa** | **%41,7** | **%34,2 Uzun / %20,0 Kısa / %45,7 Pasif** | **%41,5** | **%40,1** | **%73,9 (2.955 / 4.001 aktif)** |
 
 > [!NOTE]
-> **Metodolojik Not:** Tablo 4B'deki "Doğruluk" sütunları kuralın tüm saatlerdeki yönsel isabetini (Pasif kalınan saatler hedef gerçekleşmeyle eşleşmediğinden hata sayılarak) yansıtmaktadır; Tablo 9'daki %62,21 değeri ise yön sınıflandırıcısının test kümesindeki argmax doğruluğudur. Tablo 4B'nin son sütununda ayrıca modelin pasif kalmayıp fiilen pozisyon aldığı aktif saatlerdeki yön isabeti verilmiştir.
+> **Metodolojik Not – Doğruluk Tanımları ve Kategori 4 Ayrıştırması:**  
+> - **$L_2$ Regresör Doğruluğu (4. sütun):** $L_2$ model hiçbir zaman Pasif kalmaz; doğruluk = tüm saatlerdeki fiili yönle ($D_t$) işaret eşleşmesidir.  
+> - **Sınıflandırıcı 3-Sınıflı Doğruluk (6. sütun, %41,5):** Standart 3-sınıflı sınıflandırma metriğidir ($\hat{y}_t = y_t$). Sınıflandırıcının Pasif kaldığı saatler Dengede eylemi ($a_t = 0$) kabul edilir. Sistem fiilen Dengede ($D_t=0$) olduğunda Pasif kalmak **doğru tahmin** sayılır ($126 / 159$ saat eşleşmiştir). Kategori 4'teki 664 saatin 151'i $D_t=0$'dır; model bu 151 saatin 120'sinde Pasif kalmış ve doğru sayılmıştır. Aktif pozisyondaki 217 doğru ile birlikte toplam $217 + 120 = 337$ doğru elde edilmiş ve 3-sınıflı doğruluk **$337 / 664 = \%50,8$** çıkmıştır.  
+> - **Sınıflandırıcı Doğruluk (Pasif=Hata, 7. sütun, %40,1):** Pasif kalmanın her zaman hata kabul edildiği katı ticaret metriğidir ($a_t = y_t \land a_t \ne 0$). Bu tanımda Kategori 4'te yalnızca aktif saatlerdeki doğrular ($217$ saat) paya yazılır ve doğruluk **$217 / 664 = \%32,7$** olur ($= \text{Aktif Pay \%43,1} \times \text{Aktif İsabet \%75,9}$). Yıllık genel toplamda ise $3.510 / 8.760 = \mathbf{\%40,1}$'dir.  
+> - **Sınıflandırıcı Aktif İsabet (8. sütun):** Modelin fiilen pozisyon aldığı aktif saatlerdeki yön isabetidir ($2.955 / 4.001 = \%73,9$; Kategori 4'te $217 / 286 = \%75,9$).  
+> - **Tablo 9 Karşılaştırması:** Tablo 9'daki %62,21 değeri argmax kuralıyla (Pasif seçeneği olmaksızın, her saat zorunlu 3 sınıftan en yüksek olasılıklıya atanarak) elde edilen 3-sınıflı doğruluktur. Tablo 4B'deki değerler ise $\tau=70$ TL marjinal eşiği altındaki ekonomik kararları yansıtmaktadır.
 
 > [!IMPORTANT]
 > **P&L Saat Türleri Atıf Analizi ve Aşama 2 Çelişkisinin Ekonometrik Ayrıştırması:**  
@@ -156,18 +162,36 @@ Aşama 2 $L_2$ regresörünün genel yön isabetinin **%41,7** ile piyasanın ç
 
 #### Tablo 4C: PTF Seviye ve Ortalamaya Dönüş Hipotezi Sınaması (N = 8.760 Saat)
 
-| Karar Kurgusu / Sınama Modeli | Dahil Edilen Öznitelikler ve Karar Kuralı | Test P&L (TL/MWh) | Yön İsabeti (%) | Uzun Payı (%) | Ekonometrik Açıklama ve Karşılaştırma |
-| :--- | :--- | :---: | :---: | :---: | :--- |
-| **1. Kanonik Aşama 2 ($L_2$ LightGBM)** | Tüm GÖP sonrası öznitelikler (32 öznitelik, $n=250$) | **+119,14 TL** | %41,7 | %41,1 | $L_2$ yayılım koşullu ortalama modeli. |
-| **2. (a) Doğrusal Regresyon (PTF + Saat)** | Yalnızca $PTF_t$ ve günün saati ($N_{\text{feat}}=2$) | **+108,51 TL** | %33,2 | %29,6 | 30 ek makine öğrenmesi değişkeni olmaksızın getirisinin %91,1'ini üretir. |
-| **3. (a2) Tek Değişkenli Doğrusal Regresyon (PTF)**| Yalnızca $PTF_t$ ($N_{\text{feat}}=1$) | **+94,77 TL** | %33,0 | %28,2 | Yalnızca tek bir doğrusal katsayı dahi +94,77 TL getiri sağlamaktadır. |
-| **4. (b) Naif Medyan Kuralı (Eğitim Eşiği)** | $PTF_t < 2.500$ TL ise Uzun, $\ge 2.500$ TL ise Kısa | **+140,57 TL** | %35,3 | %48,5 | Hiçbir optimizasyon içermeyen medyan kuralı LightGBM'den 21,43 TL daha kârlıdır. |
-| **5. (c) PTF Özellikleri Çıkarılmış $L_2$ Modeli**| PTF hariç 26 öznitelikle eğitilen LightGBM | **+70,73 TL** | %43,9 | %39,6 | PTF çıkarıldığında getiri doğrudan naif kural (+71,73 TL) seviyesine çöker. |
+| Karar Kurgusu / Sınama Modeli | Dahil Edilen Öznitelikler ve Karar Kuralı | Test P&L (%95 Blok GA) | L2 İle Fark (%95 Blok GA) | Yön İsabeti (%) | Uzun Payı (%) | Ekonometrik Açıklama ve Kaynak Örneklem |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **1. Kanonik Aşama 2 ($L_2$ LightGBM)** | Tüm GÖP sonrası öznitelikler (32 öznitelik, $n=250$) | **+119,14 TL**<br>([+61,85; +183,31]) | — (Referans Model) | %41,7 | %41,1 | $L_2$ yayılım koşullu ortalama modeli. |
+| **2. (a) Doğrusal Regresyon (PTF + Saat)** | Yalnızca $PTF_t$ ve Saat ($N_{\text{feat}}=2$)<br>$\hat{S} = -0,0806 \cdot PTF + 3,50 \cdot h + 77,75$ | **+108,51 TL**<br>([+49,04; +167,17]) | -10,63 TL<br>([-68,71; +41,21]) | %33,2 | %29,6 | Eğitim+Doğrulama OLS; 30 ek ML değişkeni olmadan $L_2$'nin %91,1'ini üretir ($p>0,60$). |
+| **3. (a2) Tek Değişkenli Doğrusal Regresyon (PTF)**| Yalnızca $PTF_t$ ($N_{\text{feat}}=1$)<br>$\hat{S} = -0,0755 \cdot PTF + 105,92$ | **+94,77 TL**<br>([+36,05; +153,55]) | -24,36 TL<br>([-87,65; +29,16]) | %33,0 | %28,2 | Eğitim+Doğrulama OLS; tek bir doğrusal katsayı dahi $L_2$ ile istatistiki olarak farksızdır. |
+| **4. (b) Naif Medyan Kuralı (Eğitim Eşiği)** | $PTF_t < 2.500$ TL ise Uzun, $\ge 2.500$ TL ise Kısa | **+140,57 TL**<br>([+87,74; +205,77]) | **+21,43 TL**<br>([-14,85; +62,71]) | %35,3 | %48,5 | Eşik = Eğitim+Doğrulama PTF medyanı (2.500 TL). Nokta tahmini üstündür; GA sıfırı içerir. |
+| **5. (c) PTF Özellikleri Çıkarılmış $L_2$ Modeli**| PTF hariç 26 öznitelikle eğitilen LightGBM | **+70,73 TL**<br>([+15,98; +132,41]) | **-48,40 TL**<br>([-84,83; -13,95]) | %43,9 | %39,6 | PTF çıkarıldığında $L_2$'ye göre anlamlı kayıp ($p<0,01$); getiri naif seviyede kalır. |
+
+> [!NOTE]
+> **Eşik ve Katsayıların Örneklem Kaynağı, Eşik Izgarası Duyarlılığı ve Güven Aralıkları:**  
+> 1. **Parametrelerin Örneklem Kaynağı:**  
+>    - **(a) ve (a2) Doğrusal Katsayıları:** Test öncesi dönemdeki (Eğitim + Doğrulama: 2023–2025 ilk 9 ayı, $N = 23.376$ saat) veriler üzerinde OLS ile uydurulmuştur ($\hat{S} = -0,0755 \cdot PTF + 105,92$). Katsayılar test yılı görülmeden önceki döneme aittir.  
+>    - **(b) 2.500 TL Eşiği:** Yine test öncesi dönemdeki (Tr+Val) fiili PTF medyan değeridir ($Medyan_{\text{TrVal}}(PTF) = 2.500,00$ TL; test yılı medyanı ise $2.567,00$ TL'dir).  
+> 2. **Eşik Izgarası Duyarlılık Analizi (1.500 – 3.500 TL):**  
+>    Sabit PTF eşiği test kümesinde sistematik olarak tarandığında getiri profili şu şekildedir:  
+>    - $PTF < 1.500$ TL: +105,09 TL/MWh (Uzun: %30,9, Doğruluk: %33,2) | Fark vs $L_2$: -14,04 TL [%95 GA: -71,81; +37,21]  
+>    - $PTF < 2.000$ TL: +127,14 TL/MWh (Uzun: %40,1, Doğruluk: %33,8) | Fark vs $L_2$: +8,01 TL [%95 GA: -34,74; +47,84]  
+>    - $PTF < 2.250$ TL: +138,10 TL/MWh (Uzun: %43,8, Doğruluk: %34,5) | Fark vs $L_2$: +18,96 TL [%95 GA: -16,43; +59,85]  
+>    - **$PTF < 2.500$ TL:** **+140,57 TL/MWh** (Uzun: %48,5, Doğruluk: %35,3) | Fark vs $L_2$: **+21,43 TL** [%95 GA: -14,85; +62,71]  
+>    - $PTF < 2.750$ TL: +135,48 TL/MWh (Uzun: %54,9, Doğruluk: %36,2) | Fark vs $L_2$: +16,35 TL [%95 GA: -21,57; +61,93]  
+>    - $PTF < 3.000$ TL: +108,77 TL/MWh (Uzun: %64,2, Doğruluk: %37,9) | Fark vs $L_2$: -10,37 TL [%95 GA: -57,11; +42,70]  
+>    - $PTF < 3.500$ TL: +74,96 TL/MWh (Uzun: %91,6, Doğruluk: %51,2) | Fark vs $L_2$: -44,18 TL [%95 GA: -120,30; +26,89]  
+>    Görüldüğü üzere 2.000–2.750 TL aralığındaki tüm eşikler +127 ile +141 TL bandında stabil ve yüksek getiri üretmektedir; 2.500 TL eşiğinin $L_2$'ye göre +21,43 TL'lik farkı ise 7 günlük blok bootstrap %95 güven aralığında **[-14,85; +62,71]** olup sıfırı rahatlıkla içermektedir ($p > 0,25$). Dolayısıyla *"deterministik kural LightGBM'i geride bırakmaktadır"* tespiti yalnızca bir **nokta tahmini üstünlüğüdür**; ekonometrik olarak iki strateji istatistiksel açıdan farksızdır.  
+> 3. **(c) PTF Çıkarılmış Model Mekanizması:**  
+>    PTF öznitelikleri modelden çıkarıldığında yön doğruluğu %43,9, Uzun pozisyon oranı ise **%39,6'dır (3.472 saat)**. Model naif kural gibi %100 Uzun kalmamakta; bilakis saatlerin %60,4'ünde (5.288 saat) Kısa pozisyon almaktadır. Ancak aldığı 3.472 Uzun saatinde saat başına ortalama +182,23 TL (toplam katkı: +72,23 TL) kazanırken, 5.288 Kısa saatinde saat başına ortalama -2,47 TL (toplam katkı: -1,49 TL) kaybetmiş ve net getiri tesadüfi bir dengeyle **+70,73 TL/MWh** seviyesinde kalmıştır. Bu durum, modelin naif kurala çöktüğünü değil; PTF öznitelikleri olmaksızın modelin naif kuralın (+71,73 TL) ötesinde hiçbir ekonomik alfa üretemediğini ve $L_2$'ye göre istatistiki olarak anlamlı düzeyde kayba uğradığını (fark: -48,40 TL [%95 GA: -84,83; -13,95], $p < 0,01$) kanıtlamaktadır.
 
 *Ekonometrik Değerlendirme ve Çıkarımlar:*  
 Tablo 4C bulguları, Aşama 2'nin ekonomik getirisinin karmaşık bir makine öğrenmesi örüntüsünden türemediğini doğrulamaktadır:
-1. **Yapısal Sınırlar ve Ortalamaya Dönüş:** Fiyatların sıfır tabanı ile tavan limitleri arasına sıkışması, yayılım üzerinde güçlü bir seviye bağımlılığı yaratmaktadır. $PTF$ düşük olduğunda (gece/yenilenebilir saatleri), fiyat ancak yukarı sıçrayabilir veya sıfırda kalabilir; kural Uzun pozisyona geçerek pozitif sıçramaları toplar. $PTF$ tavandayken ise yayılım ancak negatif olabilir; kural Kısa kalarak tavan cezalarından kaçınır.
-2. **Algoritmik Beceri Değil, PTF Seviye Etkisi:** Hiçbir eğitim gerektirmeyen deterministik bir kural ($PTF < 2.500$ TL ise Uzun) **+140,57 TL/MWh** getiri sağlayarak LightGBM modelini geride bırakmaktadır. PTF öznitelikleri modelden çıkarıldığında ise getiri **+70,73 TL/MWh** seviyesine inerek modelsiz "Her Zaman Açık" naif kuralıyla (+71,73 TL) eşitlenmektedir. Dolayısıyla Aşama 2'nin başarısı bir yön veya sıçrama tahmin becerisi değil; piyasa sınırlarının yarattığı yapısal ortalamaya dönüş kuralının mekanik bir yansımasıdır.
+1. **Yapısal Sınırlar ve Ortalamaya Dönüş:** Fiyatların sıfır tabanı ile tavan limitleri arasına sıkışması, yayılım üzerinde güçlü bir seviye bağımlılığı yaratmaktadır. $PTF$ düşük olduğunda (gece/yenilenebilir saatleri), fiyat ancak yukarı sıçrayabilir veya sıfırda kalabilir; kural Uzun pozisyona geçerek pozitif sıçramaları toplar. $PTF$'nin azami fiyat tavanına dayandığı saatlerde ($PTF = \text{tavan}$) yayılım teorik olarak yalnızca negatif değer alabilir; bu saatlerde Kısa konum uygundur. Ancak Tablo 4B'nin Kategori 2'sinde tanımlanan **2.113 "tavan fiyat saati"nin büyük çoğunluğu** $PTF$'nin değil, $SMF$'nin tavan değerine ulaştığı saatlerdir ($SMF = \text{tavan}$, $PTF < \text{tavan}$, yayılım pozitif, Uzun pozisyon gerekli). $L_2$ regresörü bu saatlerde yüksek $PTF$'yi Kısa sinyali olarak yorumladığından tavan kategorisinde **−78,25 TL/MWh** zarar üretmektedir (naif kural: +227,86 TL). PTF seviye kuralının işlediği dilimler ağırlıklı olarak normal piyasa saatleri (+138,09 TL katkı) ve ekstrem sıçrama saatleridir (+21,42 TL katkı).
+2. **Algoritmik Beceri Değil, PTF Seviye Etkisi:** Eğitim kümesi medyanına dayanan deterministik bir kural ($PTF < 2.500$ TL ise Uzun) **+140,57 TL/MWh** nokta getiri sağlamakta ve LightGBM modelini (+119,14 TL) nokta tahmininde 21,43 TL aşmaktadır (blok bootstrap farkı [-14,85; +62,71] ile istatistiki başa başlık). PTF öznitelikleri çıkarıldığında ise getiri **+70,73 TL/MWh** seviyesine gerilemekte ve modelsiz "Her Zaman Açık" naif kuralının (+71,73 TL) düzeyini aşamamaktadır. Dolayısıyla Aşama 2'nin başarısı bir yön veya sıçrama tahmin becerisi değil; piyasa sınırlarının yarattığı yapısal ortalamaya dönüş dinamiğinin mekanik bir sonucudur.
 
 ---
 
@@ -265,8 +289,8 @@ Test kümesindeki 8.760 saatte teorik mevzuat formülleri ile EPİAŞ'ın yayım
 | *Rejim 3 Toplamı* | *(1.220 Saat Anomali)*| **55** | **1.165** | **3.100** | **4.320 saat** |
 | **GENEL TOPLAM (N = 8.760)** | — | **70 saat (%0,8)** | **1.468 saat (%16,8)** | **7.222 saat (%82,4)** | **8.760 saat (%100,0)** |
 
-*EPİAŞ Şeffaflık Platformu Veri Denetimi ve Örnek Saatler:*  
-Yerel veri setindeki kayıtların platform yayınıyla uyumunu denetlemek üzere EPİAŞ Şeffaflık Platformu Resmi API servisleri üzerinden farklı aylardan münferit saatler incelenmiş ve yerel parquet dosyasındaki değerlerin platformdaki ham veri akışıyla birebir örtüştüğü doğrulanmıştır:
+*Yerel Dosya ve EPİAŞ API Akışı Tutarlılık Denetimi ve Örnek Saatler:*  
+Yerel veri setindeki kayıtların API veri akışıyla tutarlılığını denetlemek üzere EPİAŞ Şeffaflık Platformu Resmi API servisleri üzerinden farklı aylardan münferit saatler sorgulanmış ve yerel parquet dosyasındaki değerlerin API'den çekilen ham akışla birebir tutarlı olduğu görülmüştür:
 - **$-103,00$ TL (Enerji Açığı) Örnekleri:**  
   * 15 Şubat 2026, 08:00 $\rightarrow$ PTF: 50,01 TL | SMF: 1.450,00 TL | $P_{\text{pos}}$: **-103,00 TL** | Durum: Enerji Açığı
   * 07 Mart 2026, 12:00 $\rightarrow$ PTF: 100,00 TL | SMF: 3.000,00 TL | $P_{\text{pos}}$: **-103,00 TL** | Durum: Enerji Açığı
@@ -281,7 +305,7 @@ Yerel veri setindeki kayıtların platform yayınıyla uyumunu denetlemek üzere
   * 01 Nisan 2026, 04:00 $\rightarrow$ PTF: 500,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: **-106,00 TL** | Durum: Enerji Fazlası
   * 01 Nisan 2026, 05:00 $\rightarrow$ PTF: 600,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: **-106,00 TL** | Durum: Enerji Fazlası
 
-Bu denetim, yerel veri dosyasında herhangi bir saklama veya aktarım hatası bulunmadığını; söz konusu değerlerin doğrudan EPİAŞ veri ambarından kaynaklandığını göstermektedir.
+Bu denetim, yerel veri dosyası ile EPİAŞ API veri akışı arasında tam bir tutarlılık bulunduğunu; ayrışmanın yerel bir aktarım veya saklama hatasından değil, doğrudan API'nin sağladığı ham veri serisinden kaynaklandığını göstermektedir. Ancak bu kontrol aynı veri akışına yönelik bir iç tutarlılık doğrulaması olup bağımsız bir web arayüzü doğrulaması niteliği taşımamaktadır. Bu nedenle değerler tezde ihtiyatla karşılanmış ve hem fiili seri hem yasal formül paralel olarak değerlendirilmiştir.
 
 #### Tablo 8: Fiyatlandırma Varsayımlarına Göre P&L Duyarlılık Analizi (TL/MWh)
 
@@ -387,7 +411,7 @@ Formül $D_t$'den tamamen bağımsızdır. $\alpha = 0,50$ durumunda getirinin $
 
 | Strateji | Genel P&L (TL/MWh) | %95 Blok Bootstrap GA | Rejim 1 (N=2.208) | Rejim 2 (N=2.232) | Rejim 3 (N=4.320) | Ağırlıklı Toplam | Mutabakat Farkı |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Oracle (Mükemmel Üst Sınır)** | **820,38** | [756,25; 884,46] | 525,61 TL | 890,99 TL | 934,57 TL | **820,38 TL** | **0,00 TL** |
+| **Oracle (Tam Bilgi / Teorik Tavan)** | **820,38** | [756,25; 884,46] | 525,61 TL | 890,99 TL | 934,57 TL | **820,38 TL** | **0,00 TL** |
 | **Her Zaman Açık (Çoğunluk)** | **71,73** | [6,51; 153,68] | -20,87 TL | -0,80 TL | 156,54 TL | **71,73 TL** | **0,00 TL** |
 | **Her Zaman Fazla (Ters Kural)** | **-74,45** | [-156,16; -9,42] | +16,01 TL | -1,38 TL | -158,43 TL | **-74,45 TL** | **0,00 TL** |
 | **Lag-168 Naif Takipçi** | **19,30** | [-21,41; 60,21] | +36,43 TL | +19,90 TL | +10,23 TL | **19,30 TL** | **0,00 TL** |
@@ -490,7 +514,7 @@ Aşama 1 modelinin sağladığı çekilme ve oynaklık düşüşünün bir "akı
 
 ## 8. Keşifsel Gözlem Penceresi (Ekim 2026 / 12 Gün / 288 Saat)
 
-Modellerin gelişim sürecinde incelenen 01–12 Ekim 2026 tarihleri arasındaki 288 saatlik dönem, **keşifsel (exploratory) bir vaka incelemesi** olarak ele alınmıştır. Kanonik model kütüğü ve manifestosu 18 Ekim 2026 tarihinde kilitlendiğinden, bu keşifsel pencere tam bağımsız bir ileriye dönük test sayılamaz. Tarafsız, veri sızıntısından arındırılmış bağımsız ileriye dönük değerlendirme penceresi, dondurma zamanını takip eden ilk tam gün olan **19 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00** tarihleri arasını (164 gün / 3.936 saat) kapsamak üzere protokole bağlanmıştır (`reports/prospective_evaluation_protocol_2026_2027.md`):
+Modellerin gelişim sürecinde incelenen 01–12 Ekim 2026 tarihleri arasındaki 288 saatlik dönem, **keşifsel (exploratory) bir vaka incelemesi** olarak ele alınmıştır. Kanonik model ağırlıkları 15 Ekim 2026 21:10 itibarıyla kaydedilmiş; modeller, veri kütüğü ve değerlendirme kodu 19 Ekim 2026 tarihinde `protocol-v1` etiketiyle dondurulmuştur. Tarafsız, veri sızıntısından arındırılmış bağımsız ileriye dönük değerlendirme penceresi, harici zaman damgasını takip eden ilk tam gün olan **20 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00** tarihleri arasını (163 gün / 3.912 saat) kapsamak üzere protokole bağlanmıştır (`reports/prospective_evaluation_protocol_2026_2027.md`):
 
 #### Tablo 16: Keşifsel Gözlem Penceresi Sonuçları (288 Saat)
 
@@ -517,10 +541,11 @@ Tez kapsamında yürütülen ampirik deneyler, ekonometrik testler ve duyarlıl�
    Türkiye elektrik piyasasında SMF tahmininde en kritik bilgi girdisi PTF'dir. Saatlerin %21,56'sında $PTF=SMF$ gerçekleşmekte olup medyan yayılım sıfırdır. Bu nedenle modelsiz $SMF=PTF$ naif kuralı, mutlak hata kaybında ($L_1$ / MAE) tüm makine öğrenmesi modellerini geride bırakmaktadır (682,75 TL vs 748,14 TL). Karesel hatada ($L_2$ / RMSE) yayılım modelinin sağladığı 12,48 TL'lik fark ise Harvey-Leybourne-Newbold testi ile doğrulandığı üzere **istatistiki bir üstünlük göstermemektedir ($p = 0,2702$)**.
 2. **Sınıflandırma Becerisi İstatistiki Olarak Anlamlı Fakat Sınırlıdır:**  
    GÖP öncesinde makine öğrenmesi modeli sistem yönünü %59,66 doğrulukla tahmin ederek çoğunluk sınıfına (%55,74) göre +3,92 puanlık mütevazı bir yönsel fark sağlamıştır (Holm-düzeltmeli $p_{\text{adj}} \approx 0,034$). Ancak saat dilimi analizi, bu başarının yalnızca sabah (+11,87 puan) ve gündüz (+7,76 puan) saatlerinde üretildiğini; akşam zirvesinde çoğunluğun gerisinde kalındığını (-1,01 puan), gece saatlerinde ise çoğunluğun 2,97 puan altında kalındığını (%46,21 vs %49,18) ortaya koymaktadır.
-3. **Aşama 2'de Olasılık Kalitesi Artar Fakat Kararlarda P&L'e Dönüşmez; +119,14 TL Getiri Algoritmik Beceri Değil, PTF Seviye ve Ortalamaya Dönüş Etkisidir:**  
-   GÖP sonrası dönemde PTF bilgisinin dahil edilmesiyle yön doğruluğu %59,66'dan %62,21'e yükselmekte, BSS skoru ise %6,43'ten %12,33'e çıkmaktadır. Ancak bu olasılık kalitesi sınıflandırıcı tabanlı kararlarda ekonomik getiriye dönüşmemektedir; marjinal beklenen değer kuralı $\tau=70$ TL altında **-20,81 TL/MWh** (doğrulamada optimize edilmiş $\tau=140$ TL ile **-7,46 TL/MWh**, argmax kuralı ile **-33,18 TL/MWh**) zarar üretmektedir. Aşama 2'nin raporlanan **+119,14 TL/MWh** getirisi sınıflandırıcıya değil, $L_2$ koşullu ortalama yayılım regresyonunun işaret kuralına ($\hat{S}_{L2} > 0$) bağlıdır. Tablo 4B ve 4C'nin ortaya koyduğu üzere:
-   - İki kural arasındaki **+139,95 TL/MWh**'lik farkın ana taşıyıcısı, **normal piyasa saatlerindeki büyüklük ağırlıklı koşullu ortalama kararlarıdır (+167,71 TL net fark katkısı, %119,8 pay)**. Ekstrem sıçrama saatleri (88 saat) ise +42,40 TL (%30,3) katkı sağlamaktadır (kalan tavan ve anomali saatlerinin -70,16 TL'lik dengeleyici etkisiyle net 139,95 TL).
-   - $L_2$ regresörünün genel yön isabeti (%41,7) çoğunluk sınıfının (%55,7) ve yazı-turanın altındadır. Tablo 4C ile kanıtlandığı üzere, bu getiri karmaşık bir yön tahmininden değil; 0 tabanı ile tavan limitlerinin dayattığı **PTF seviyesi ve yapısal ortalamaya dönüş (mean-reversion)** dinamiğinden kaynaklanmaktadır. Nitekim tek değişkenli doğrusal regresyon ($PTF$ + Saat) tek başına **+108,51 TL** üretmekte; hiçbir model içermeyen deterministik *"PTF < 2.500 TL ise Uzun"* kuralı ise **+140,57 TL** ile LightGBM'i geride bırakmaktadır. PTF öznitelikleri çıkarıldığında ise model getirisi doğrudan modelsiz naif kural seviyesine (**+70,73 TL**) çökmektedir.
+3. **P&L Spread Büyüklüğüne Bağlıdır, Yön Etiketine Değil; Sınıflandırıcı Hedefle Uyumsuzdur:**  
+   GÖP sonrası dönemde PTF bilgisinin dahil edilmesiyle yön doğruluğu %59,66'dan %62,21'e yükselmekte, BSS skoru ise %6,43'ten %12,33'e çıkmaktadır. Ancak bu olasılık kalitesi sınıflandırıcı tabanlı kararlarda ekonomik getiriye dönüşmemekte; marjinal beklenen değer kuralı $\tau=70$ TL altında **-20,81 TL/MWh** (doğrulamada optimize edilmiş $\tau=140$ TL ile **-7,46 TL/MWh**, argmax kuralı ile **-33,18 TL/MWh**) zarar üretmektedir. Aşama 2'nin raporlanan **+119,14 TL/MWh** getirisi sınıflandırıcıya değil, $L_2$ koşullu ortalama yayılım regresyonunun işaret kuralına ($\hat{S}_{L2} > 0$) bağlıdır.  
+   - **Hedef Uyumsuzluğu Mekanizması:** Uzun pozisyon getirisi Enerji Açığı saatinde $\approx S^+ + k \cdot \max(PTF, SMF)$, Enerji Fazlası saatinde ise $\approx -S^- - l \cdot \min(PTF, SMF)$ biçimindedir ($S = SMF - PTF$). Dolayısıyla **getiri yaklaşık olarak $SMF - PTF$ spread'inin işaretine ve büyüklüğüne bağlıdır; $D_t$ yön etiketini tahmin eden sınıflandırıcı bu hedefle yapısal olarak uyumsuzdur.** Nitekim yön doğruluğu %62,21 olan sınıflandırıcı -20,81 TL kaybettirirken, yön doğruluğu yalnızca %41,7 olan $L_2$ regresörü +119,14 TL kazandırmaktadır. Kurallar $D$'yi tahmin etmemekte; spread'in işaretini ve asimetrik büyüklüğünü kullanmaktadır.
+   - **Normal Saatler ve Ekstrem Dilim Dekompozisyonu:** Tablo 4B'nin gösterdiği üzere iki model arasındaki **+139,95 TL/MWh**'lik farkın ana taşıyıcısı, **normal piyasa saatlerindeki büyüklük ağırlıklı koşullu ortalama kararlarıdır (+167,71 TL net fark katkısı, %119,8 pay)**. Ekstrem sıçrama saatleri (88 saat) ise +42,40 TL (%30,3) katkı sağlamaktadır (kalan tavan ve anomali saatlerinin -70,16 TL'lik dengeleyici etkisiyle net 139,95 TL).
+   - **Ortalamaya Dönüş ve PTF Seviye Etkisi:** $L_2$ regresörünün genel yön isabeti (%41,7) çoğunluk sınıfının (%55,7) ve şans düzeyinin altındadır. Tablo 4C bulgularının gösterdiği üzere bu getiri karmaşık bir yön tahmininden değil; sıfır tabanı ve fiyat tavanlarının dayattığı **PTF seviyesi ve yapısal ortalamaya dönüş (mean-reversion)** dinamiğinden kaynaklanmaktadır. Nitekim iki değişkenli doğrusal regresyon ($PTF$ + Saat) tek başına **+108,51 TL** (L2 ile fark: -10,63 TL [%95 GA: -68,71; +41,21]), tek değişkenli doğrusal regresyon (yalnızca $PTF$) ise **+94,77 TL** (L2 ile fark: -24,36 TL [%95 GA: -87,65; +29,16]) üretmektedir. Eğitim kümesi PTF medyanına dayanan deterministik *"PTF < 2.500 TL ise Uzun"* kuralı nokta tahmininde **+140,57 TL** üretse de, L2 ile bloklu bootstrap farkı (+21,43 TL [%95 GA: -14,85; +62,71]) sıfırı kapsadığından bu üstünlük istatistiksel olarak kesin bir üstünlük değil, nokta tahmini düzeyindedir. PTF öznitelikleri çıkarıldığında ise model getirisi doğrudan naif kural düzeyine (**+70,73 TL**) inmekte ve $L_2$'ye göre istatistiki olarak anlamlı düzeyde kaybetmektedir (-48,40 TL [%95 GA: -84,83; -13,95], $p < 0,01$).
 4. **Ekonomik Üstünlük (Alfa) Gösterilememiştir:**  
    Yönsel tahmin başarısı ekonomik bir avantaja dönüşmemektedir. Yıllık toplam P&L'de Aşama 1 yön modeli (**67,33 TL/MWh**), naif "Her Zaman Açık" kuralının (**71,73 TL/MWh**) altında kalmıştır. Eşleştirilmiş blok bootstrap farkı (-4,41 TL/MWh [%95 GA: -59,28; +44,81], $p > 0,75$) iki stratejinin getirisinin istatistiksel olarak başa baş olduğunu göstermektedir. Bu durum EPİAŞ'ın -106 / -103 TL'lik ampirik veri kalıntılarından bağımsız olup kuramsal yasal formül duyarlılık analizinde de aynen geçerlidir.
 5. **Sonuçlar Rejim ve Tek Ay Bağımlılığı Taşımaktadır:**  
