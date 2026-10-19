@@ -4,18 +4,18 @@
 **Tez Danışmanı:** Prof. Ali Dinler  
 **Kurum:** T.C. İstanbul Medeniyet Üniversitesi  
 **Protokol Tarihi:** 19 Ekim 2026  
-**Dondurulmuş Git Versiyon Etiketi:** `v1.0-frozen-manifest`  
+**Dondurulmuş Git Versiyon Etiketi:** `v1.0-frozen-manifest` (Referans Commit: `3470811`, 18 Ekim 2026, 18:12)  
 
 ---
 
 ### 1. Amaç ve Kapsam
 Bu protokol, lisansüstü tez çalışması kapsamında geliştirilen ve 18 Ekim 2026 tarihi itibarıyla disk üzerinde kilitlenen makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
 
-Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–18 Ekim 2026 dönemi keşifsel incelemelere konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
+Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–18 Ekim 2026 dönemi geliştirme/denetim süreçlerine konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
 
 ---
 
-### 2. Bağımsız Değerlendirme Penceresi ve Veri Akışı
+### 2. Bağımsız Değerlendirme Penceresi, İstatistiksel Güç ve Veri Akışı
 - **Zaman Aralığı:** **19 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00** (164 Gün / 3.936 Saat).  
   *Gerekçe:* 01–18 Ekim 2026 dönemi geliştirme, denetim ve model dondurma takviminde yer aldığından, ileriye dönük bağımsız test penceresi modellerin dondurulmasını takip eden ilk tam gün olan 19 Ekim 2026 saat 00:00 itibarıyla başlatılmıştır.
   - Ekim 2026 (19–31 Ekim): 13 gün $\times$ 24 = 312 saat
@@ -25,6 +25,8 @@ Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip
   - Şubat 2027: 28 gün $\times$ 24 = 672 saat
   - Mart 2027: 31 gün $\times$ 24 = 744 saat  
   *Toplam:* **164 gün / 3.936 saat**.
+- **İstatistiksel Güç ve Örneklem Sınırlılığı Uyarısı:**  
+  164 günlük pencerede ($N = 164$ gün), eşleştirilmiş günlük fark serisinin ($\text{Aşama 1} - \text{Açık}$) standart hatası yaklaşık $SE \approx 39,0$ TL/MWh seviyesindedir (365 günlük tam yılda $SE \approx 26,5$ TL/MWh idi). Bu durum, %95 güven aralığı yarı-genişliğinin (margin of error) yaklaşık $\pm 76,5$ TL/MWh olacağı anlamına gelmektedir. Dolayısıyla 164 günlük pencere, ancak Aşama 1'in tüm yıllık getirisinden ($67,33$ TL/MWh) daha büyük devasa bir etki büyüklüğünü ($\Delta > 77$ TL/MWh) istatistiki olarak anlamlı biçimde tespit edebilecek bir güce sahiptir. Bu istatistiksel güç kısıtı önceden kabul edilmiştir.
 - **Veri Kaynağı:** EPİAŞ Şeffaflık Platformu Resmi Web Servisleri (`eptr2` kütüphanesi):
   1. `mcp-smp-imb`: PTF, SMF, Pozitif Dengesizlik Fiyatı, Negatif Dengesizlik Fiyatı, Resmi Sistem Durumu.
   2. `load-plan`: TEİAŞ Gün Öncesi Yük Tahmini (`lep`).
@@ -46,10 +48,13 @@ Aşağıdaki modeller hiçbir yeniden eğitim, hiperparametre güncellemesi veya
    - SHA-256: `5db315973a293f9eb43d4f01b1543167c8f143e41883bd8a9ff732ac68e5106a`  
    - Algoritma: Doğrulama kümesinde uydurulmuş One-vs-Rest Lojistik Regresyon.
 
+*Git Model Değişmezliği Denetimi:*  
+`git diff 3470811..HEAD models/` çıktısı boştur; `models/` altındaki 3 kanonik model ve `data/raw/` altındaki ham veri kütüğü 18 Ekim 2026 18:12 commit'inden bu yana tek bir bit dahi değişmemiştir.
+
 ---
 
 ### 4. Sınanacak Stratejiler Listesi ve Karar Kuralları
-1. **Oracle (Kusursuz Bilgi - Teorik Tavan):** Fiili yönün kusursuz bilindiği durum ($D_t=1 \rightarrow +1$, $D_t=-1 \rightarrow -1$, $D_t=0 \rightarrow 0$).
+1. **Oracle (Tam Bilgi / Teorik Tavan):** Fiili yönün tam olarak bilindiği durum ($D_t=1 \rightarrow +1$, $D_t=-1 \rightarrow -1$, $D_t=0 \rightarrow 0$).
 2. **Her Zaman Açık (Çoğunluk Sınıfı Naif Kural):** $a_t = +1$ (Her saat sabit Uzun pozisyon).
 3. **Her Zaman Fazla (Ters Kural):** $a_t = -1$ (Her saat sabit Kısa pozisyon).
 4. **Lag-168 Naif Takipçi:** $a_t = D_{t-168}$ (Tam bir hafta önceki aynı saatin yönü).
@@ -60,17 +65,27 @@ Aşağıdaki modeller hiçbir yeniden eğitim, hiperparametre güncellemesi veya
 
 ---
 
-### 5. Hipotezler, Ölçütler ve Ekonometrik Testler
-1. **Fiyat Seviyesi Hata Analizi:**  
-   - $SMF=PTF$ naif kuralı ile Aşama 2 yayılım regresörünün MAE ve RMSE karşılaştırması.  
-   - Karesel hata üstünlüğü için Harvey-Leybourne-Newbold (HLN) testi ($H_0: \text{MSE}_{\text{Aşama 2}} \ge \text{MSE}_{\text{Naif}}$).
-2. **Sınıflandırma ve Kalibrasyon:**  
-   - 3-sınıflı doğruluk, Brier skoru, Test Brier Beceri Skoru (BSS), Ağırlıklı Beklenen Kalibrasyon Hatası (ECE).  
-   - Günlük doğruluk farkı için Wilcoxon işaretli sıra testi ve Holm-Bonferroni düzeltmesi.
-3. **Ekonomik Getiri ve Üstünlük Sınaması:**  
-   - Birim getiri (TL/MWh).  
-   - Eşleştirilmiş 7 günlük blok bootstrap ile fark analizi ($H_0: \mu_{\text{Model}} - \mu_{\text{Açık}} \le 0$).
-4. **Risk ve Maruziyet Sınaması (2.000 Tekrarlı Permütasyon Testi):**  
-   - Modelin aktif maruziyet oranı dondurulup 2.000 kez rastgele zamanlama permütasyonu oluşturulacak.  
-   - 6 ekonometrik gösterge test edilecek: (1) Tüm Dönem P&L, (2) Aylık Oynaklık (SD), (3) Günlük %95 CVaR, (4) En Kötü Ay Getirisi, (5) Kümülatif Günlük MDD, (6) Tek ay dışlama duyarlılığı.  
-   - İki yönlü $p$-değerlerine Holm-Bonferroni adım-küçültme ($m=6$) çoklu test düzeltmesi uygulanacaktır.
+### 5. Önceden Tanımlı Hipotez Hiyerarşisi, Fiyat Spesifikasyonu ve Protokol Kuralları
+
+1. **Tek Birincil Hipotez (Single Primary Hypothesis):**  
+   Bu protokolün tek birincil hipotezi, Aşama 1 modelinin ekonomik olarak çoğunluk kuralını geçip geçemeyeceğidir:  
+   $$H_0: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} \le 0 \quad \text{vs} \quad H_1: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} > 0$$  
+   Test istatistiği eşleştirilmiş 7 günlük blok bootstrap ile hesaplanacak ve tek taraflı $\alpha = 0,05$ anlamlılık düzeyinde değerlendirilecektir. Diğer tüm metrikler ikincil veya keşifsel niteliktedir.
+
+2. **Birincil ve İkincil Fiyat Spesifikasyonları:**  
+   - *Birincil Spesifikasyon:* EPİAŞ Şeffaflık Platformu'nun fiilen yayımladığı ham nakit akışı serileri (`positiveImbalance`, `negativeImbalance`).
+   - *İkincil / Sağlamlık Spesifikasyonu:* EPDK Karar 14030 yasal formül rekonstrüksiyonu ($P_{\text{neg}}^{\text{stat}}$, $P_{\text{pos}}^{\text{stat}}$).
+
+3. **Rejim Değişikliği Önceden Tanımlı Kuralı:**  
+   19 Ekim 2026 – 31 Mart 2027 döneminde EPDK tarafından yeni bir azami fiyat limiti (tavan fiyat) veya dengesizlik katsayısı ($k/l$) kararı alınması hâlinde:  
+   - Yeni tavan veya katsayılar EPDK'nın resmi yürürlük tarihi itibarıyla dinamik olarak uzlaştırma formülüne yansıtılacaktır.  
+   - Dondurulan modellerin özniteliklerinde, katsayılarında veya karar eşiklerinde geriye ya da ileriye dönük hiçbir değişiklik yapılmayacaktır.
+
+4. **Durdurma Kuralı (Pre-defined Stopping Rule):**  
+   - Değerlendirme süresi 164 takvim günü ile kesin olarak sabittir.  
+   - 31 Mart 2027 saat 23:00'e kadar hiçbir erken durdurma (early stopping) veya ara veri dikizleme (peeking) yapılmayacak; sonuçlar pencere tamamlandığında topluca hesaplanacaktır.
+
+5. **İkincil Hipotezler ve Risk Sınamaları:**  
+   - Fiyat seviyesi hata analizi: $SMF=PTF$ naif kuralı ile Aşama 2 yayılım regresörünün RMSE karşılaştırması ve HLN testi.  
+   - Sınıflandırma ve kalibrasyon: Doğruluk, Brier skoru, BSS ve ECE.  
+   - Maruziyet-eşleşmiş 2.000 tekrarlı permütasyon testi (Tüm Dönem P&L, SD, CVaR, En Kötü Ay, MDD) ve $m=6$ Holm-Bonferroni çoklu test düzeltmesi.

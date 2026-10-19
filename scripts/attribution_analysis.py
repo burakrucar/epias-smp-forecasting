@@ -121,7 +121,7 @@ mask_ceiling = (
     ((ts >= "2026-01-01") & (ts < "2026-04-04") & ((smf >= 3400) | (ptf >= 3400))) |
     ((ts >= "2026-04-04") & ((smf >= 4500) | (ptf >= 4500)))
 )
-mask_anom = (pos == -106) | (neg == -103)
+mask_anom = (pos == -106) | (pos == -103)
 mask_eq = (smf == ptf)
 
 cat = np.full(n_test, "5. Geri Kalan Normal Saatler", dtype=object)
