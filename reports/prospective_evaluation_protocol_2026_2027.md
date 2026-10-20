@@ -3,7 +3,7 @@
 
 **Tez Danışmanı:** Prof. Ali Dinler  
 **Kurum:** T.C. İstanbul Medeniyet Üniversitesi  
-**Protokol Tarihi:** 19/20 Ekim 2026  
+**Protokol Tarihi:** 20 Ekim 2026  
 **Dondurulmuş Git Versiyon Etiketi:** `protocol-v1` (Açıklamalı/İmzalı Etiket — Uzak Depoya İtilmek ve SHA-256 Manifestosuyla E-postaya Eklenmek Üzere Hazırlanmış)  
 **Harici Zaman Damgası:** Danışman Öğretim Üyesine İletilecek Kayıt E-postası (Gönderim Öncesi Kilitli Metin)  
 
@@ -12,39 +12,31 @@
 ### 1. Amaç ve Kapsam
 Bu protokol, lisansüstü tez çalışması kapsamında geliştirilen ve disk üzerinde dondurulan makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
 
-Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–19 Ekim 2026 dönemi geliştirme/denetim süreçlerine konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten ve harici zaman damgası e-posta ile tescil edildikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
+Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–20 Ekim 2026 dönemi geliştirme/denetim süreçlerine konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten ve harici zaman damgası e-posta ile tescil edildikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
 
 ---
 
 ### 2. Bağımsız Değerlendirme Penceresi, İstatistiksel Güç ve Veri Akışı
 - **Zaman Aralığı ve Başlangıç Kuralı:**  
-  Değerlendirme penceresi, zaman damgasını sabitleyen kayıt e-postasının danışman öğretim üyesine iletildiği takvim gününü takip eden ilk tam gün saat 00:00:00 itibarıyla başlar:
-  - **Kanonik Pencere (19 Ekim Gece Yarısından Önce Gönderim Durumu):** **20 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00** (163 Gün / 3.912 Saat).  
-    - Ekim 2026 (20–31 Ekim): 12 gün $\times$ 24 = 288 saat  
-    - Kasım 2026: 30 gün $\times$ 24 = 720 saat  
-    - Aralık 2026: 31 gün $\times$ 24 = 744 saat  
-    - Ocak 2027: 31 gün $\times$ 24 = 744 saat  
-    - Şubat 2027: 28 gün $\times$ 24 = 672 saat  
-    - Mart 2027: 31 gün $\times$ 24 = 744 saat  
-    *Toplam:* **163 gün / 3.912 saat**.
-  - **Kaydırmalı Başlangıç Kuralı (20 Ekim İletimi Durumu):** E-postanın 20 Ekim günü mesai veya gece saatlerinde gönderilmesi hâlinde, pencere başlangıcı otomatik olarak takip eden ilk tam gün olan **21 Ekim 2026 00:00:00+03:00** olarak güncellenir (162 gün / 3.888 saat).
+  Değerlendirme penceresi, zaman damgasını sabitleyen kayıt e-postasının danışman öğretim üyesine iletildiği 20 Ekim 2026 gününü takip eden ilk tam gün olan **21 Ekim 2026 00:00:00+03:00** itibarıyla başlar ve **31 Mart 2027 23:00:00+03:00** tarihinde sona erer (**162 Gün / 3.888 Saat**; 23 tam hafta + 1 artık gün):  
+  - Ekim 2026 (21–31 Ekim): 11 gün $\times$ 24 = 264 saat  
+  - Kasım 2026: 30 gün $\times$ 24 = 720 saat  
+  - Aralık 2026: 31 gün $\times$ 24 = 744 saat  
+  - Ocak 2027: 31 gün $\times$ 24 = 744 saat  
+  - Şubat 2027: 28 gün $\times$ 24 = 672 saat  
+  - Mart 2027: 31 gün $\times$ 24 = 744 saat  
+  *Toplam:* **162 gün / 3.888 saat**.
 
-- **İstatistiksel Güç, Örneklem Sınırlılığı ve Alfa Harcaması Kuralı:**  
-  163 günlük pencerede ($N = 163$ gün / 23 tam hafta + 2 gün), eşleştirilmiş günlük fark serisinin ($\text{Aşama 1} - \text{Açık}$) standart hatası yaklaşık $SE \approx 39,0$ TL/MWh seviyesindedir.  
-  - Tek yönlü $\alpha = 0,05$ düzeyinde istatistiksel anlamlılık için gereken asgari kritik fark $\approx 64,1$ TL/MWh, %80 güç ($1 - \beta = 0,80$) için gereken gerçek etki büyüklüğü ise $\approx 97,0$ TL/MWh'dir.  
-  - Tezin örneklem içi test yılında gözlenen fark yalnızca $-4,41$ TL/MWh olduğundan, birincil hipotezin 163 gün sonunda $p > 0,05$ vererek **bilgisiz (inconclusive / yetersiz güç)** kalma olasılığı çok yüksektir.  
-  - **I. Tip Hata Enflasyonu ve Çift Bakış Yasağı:**  
-    Önce 163 günde test edip anlamlı çıkmadığında önceden tanımlı kural olmaksızın süreyi 12 aya (365 güne) uzatıp yeniden test etmek, I. tip hatayı (yanlış pozitif oranını) kabul edilemez biçimde şişirir. Bu çelişkiyi önlemek üzere protokol iki kesin seçenekten birini bağlar:
-    1. **Kanonik Tasarım (Sabit Tek Bakış - Single Confirmatory Look):** 163 takvim günü kesin durdurma noktasıdır. 163 gün sonunda $p > 0,05$ çıkarsa sonuç "bilgisiz / hipotez reddedilemedi" olarak tescil edilir ve konfirmatorik test kapatılır. Sonraki 12 aylık izleme sadece betimsel/keşifsel nitelik taşır.
-    2. **Grup-Ardışık Tasarım (Group-Sequential Design - Alternatif Seçenek):** Eğer her iki noktada da formel hipotez testi hakkı korunmak istenirse, toplam $\alpha = 0,05$ hata payı **Lan-DeMets O'Brien-Fleming $\alpha$-harcama fonksiyonu** ile bölüştürülür:
-       - 1. Bakış ($t_1 = 163/365 \approx 0,447$ bilgi oranı, 163. gün): $\alpha_1 = 0,008$ (kritik $Z_1 = 2,41$).
-       - 2. Bakış ($t_2 = 1,0$ tam bilgi, 365. gün): $\alpha_2 = 0,048$ (kritik $Z_2 = 1,67$).
-  
-- **TOST Eşdeğerlik Testi Marjı ve Güç Gerçeği:**  
-  Tek yönlü %5 düzeyinde eşdeğerlik için ($|\hat{\Delta}| + 1,645 \cdot SE < \text{marj}$) gerekmektedir.  
-  - 163 günlük örneklemde $SE \approx 39,0$ TL olduğundan, $\hat{\Delta} = 0,00$ TL çıksa dahi $1,645 \times 39,0 = 64,15$ TL'dir. Dolayısıyla $\pm 35$ TL gibi dar bir marjın 163 günde reddedilmesi **matematiksel olarak imkânsızdır** (güç = %0).  
-  - 365 günde dahi ($SE \approx 26,5$ TL) alt sınır $1,645 \times 26,5 = 43,6$ TL'dir.  
-  - Bu nedenle, formel bir TOST eşdeğerlik testi yürütülecekse ekonomik tolerans marjı piyasa spread oynaklığı ve risk primi gerekçelendirilerek **$\Delta \in [-65, +65]$ TL/MWh** (yaklaşık $1 \cdot SE$) olarak belirlenmelidir; aksi takdirde dar marjlarda ($\pm 35$ TL) eşdeğerliğin bu örneklemle kanıtlanamayacağı peşinen tescil edilmiştir.
+- **Tek Birincil Konfirmatorik Tasarım (Single Confirmatory Look):**  
+  Protokol, 162 günlük pencereyi tek ve nihai birincil doğrulama durağı olarak tanımlar.  
+  - 162 günlük pencerede ($N = 162$ gün), eşleştirilmiş günlük fark serisinin ($\text{Aşama 1} - \text{Açık}$) standart hatası yaklaşık $SE \approx 39,1$ TL/MWh seviyesindedir.  
+  - Tek yönlü $\alpha = 0,05$ düzeyinde istatistiksel anlamlılık için gereken asgari kritik fark $\approx 64,3$ TL/MWh, %80 güç ($1 - \beta = 0,80$) için gereken gerçek etki büyüklüğü ise $\approx 97,5$ TL/MWh'dir.  
+  - Örneklem içi test yılında gözlenen fark yalnızca $-4,41$ TL/MWh olduğundan, birincil hipotezin 162 gün sonunda $p > 0,05$ vererek **bilgisiz (inconclusive / yetersiz güç)** kalma olasılığı çok yüksektir.  
+  - **Durdurma ve Tek Bakış Kuralı:** 162 gün sonunda $p > 0,05$ çıkarsa sonuç formel olarak *"bilgisiz / hipotez reddedilemedi"* kabul edilir ve konfirmatorik test kapatılır. I. tip hata şişmesini önlemek amacıyla, çalışma 12 aya uzatılsa dahi ikinci bir serbest test yapılmaz; 12 aylık veriler yalnızca betimsel/keşifsel olarak izlenir.  
+  - *(Grup-Ardışık Tasarım Notu):* Eğer çalışmanın ilerleyen safhasında 365 günlük tam yılda formel bir ikinci test hakkı saklı tutulmak istenirse, bu ancak O'Brien-Fleming $\alpha$-harcama fonksiyonu ile önceden kilitlenen sınırlar dahilinde icra edilebilir: 1. Bakış (162. gün, $t_1 \approx 0,444$): kritik $Z_1 \approx 2,46$ ($\alpha_1 \approx 0,007$); 2. Bakış (365. gün, $t_2 = 1,0$): kritik $Z_2 \approx 1,67$ ($\alpha_2 \approx 0,047$).
+
+- **TOST Eşdeğerlik Testi Kapsamı:**  
+  162 günlük pencerede $SE \approx 39,1$ TL/MWh iken $\pm 65$ TL eşdeğerlik marjı $1,67 \cdot SE$'ye denk gelmekte olup, testin eşdeğerliği reddedebilmesi için gözlenen nokta farkın $|\hat{\Delta}| < 0,8$ TL olması gerekir; bu durum pratikte imkânsız bir güç kısıtı yaratmaktadır. Bu nedenle **formel TOST eşdeğerlik testi 162 günlük kısa pencereden tamamen çıkarılmış; yeterli istatistiksel gücün ($SE \approx 26,5$ TL) oluştuğu 365 günlük tam yıl değerlendirmesine bırakılmıştır.**
 
 - **Veri Kaynağı:** EPİAŞ Şeffaflık Platformu Resmi Web Servisleri (`eptr2` kütüphanesi):
   1. `mcp-smp-imb`: PTF, SMF, Pozitif Dengesizlik Fiyatı, Negatif Dengesizlik Fiyatı, Resmi Sistem Durumu.
@@ -93,10 +85,10 @@ Yerel Git etiketlerinin silinip taşınabilme riskine karşı protokolün deği�
 #### B. Post-hoc / Keşifsel Referans Stratejiler (Kilitli Parametrelerle)
 8. **Deterministik PTF Eşik Kuralı (Keşifsel):**  
    $PTF_t < 2.500,00$ TL ise $a_t = +1$, aksi halde $a_t = -1$.  
-   *Parametre:* 2.500,00 TL sabit eşik (Eğitim+Doğrulama dönemi medyanı, $N = 15.168$ saat).
+   *Parametre:* 2.500,00 TL sabit eşik (Eğitim+Doğrulama dönemi medyanı, $N = 15.168$ saat; lag ısınması düşülmüş net saat).
 9. **Doğrusal Yayılım Kuralı (Keşifsel):**  
    $\hat{S}_t = -0,0755 \cdot PTF_t + 105,92$. Eğer $\hat{S}_t > 0$ ise $a_t = +1$, aksi halde $a_t = -1$.  
-   *Parametreler:* Eğitim+Doğrulama kümesi (TrVal: 2024–2025 ilk 9 ayı, $N = 15.168$ saat) OLS regresyon katsayıları (eğim: -0,0755, sabit: 105,92; başabaş $PTF \approx 1.403$ TL).
+   *Parametreler:* Eğitim+Doğrulama kümesi (TrVal: 2024–2025 ilk 9 ayı, $N = 15.168$ saat; ham veri 24.096 saat, 168 saatlik lag ısınması sonrası net veri kütüğü 23.928 saat) OLS regresyon katsayıları (eğim: -0,0755, sabit: 105,92; başabaş $PTF \approx 1.403$ TL).
 
 ---
 
@@ -106,9 +98,9 @@ Yerel Git etiketlerinin silinip taşınabilme riskine karşı protokolün deği�
    Bu protokolün tek birincil hipotezi, GÖP öncesi Aşama 1 modelinin ekonomik olarak çoğunluk kuralını geçip geçemeyeceğidir:  
    $$H_0: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} \le 0 \quad \text{vs} \quad H_1: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} > 0$$  
    - **Birincil Test Yöntemi ve Artık Gün Protokolü:**  
-     163 günlük pencere ($N = 163$ gün / 3.912 saat), 23 tam hafta (161 gün / 3.864 saat) ve 2 artık günden (48 saat) oluşmaktadır.  
+     162 günlük pencere ($N = 162$ gün / 3.888 saat), 23 tam hafta (161 gün / 3.864 saat) ve 1 artık günden (24 saat) oluşmaktadır.  
      - Birincil test, **haftalık blok ortalamaları üzerinde işaret-çevirme permütasyon testi (sign-flip permutation test)** olarak yürütülecek ve tek taraflı $\alpha = 0,05$ düzeyinde değerlendirilecektir.  
-     - **Artık Günlerin Ele Alınışı:** Birincil sınamada 23 tam 7-günlük hafta (Pazartesi–Pazar döngüsü) ana permütasyon birimleri olarak alınacaktır. Kalan 2 artık gün (30–31 Mart 2027), birincil testte 23. haftaya eklenerek 9 günlük bir kapanış bloğu olarak dahil edilecek; paralel olarak 23 haftalık saf blok ve 163 günlük hareketli blok bootstrap (%95 GA) sonuçlarıyla sağlamlık kontrolü sunulacaktır.  
+     - **Artık Günün Ele Alınışı:** Birincil sınamada 23 tam 7-günlük hafta (Çarşamba–Salı döngüsü) ana permütasyon birimleri olarak alınacaktır. Kalan 1 artık gün (31 Mart 2027), birincil testte 23. haftaya eklenerek 8 günlük bir kapanış bloğu olarak dahil edilecek; paralel olarak 23 haftalık saf blok ve 162 günlük hareketli blok bootstrap (%95 GA) sonuçlarıyla sağlamlık kontrolü sunulacaktır.  
      - **Simetri Varsayımı Notu:** İşaret-çevirme permütasyon testi sıfır hipotezi altında haftalık farkların sıfır etrafında simetrik dağıldığı varsayımına dayanır. Elektrik piyasasında ekstrem fiyat sıçramalarının (Haziran 2026 benzeri) haftalık getiri serisinde belirgin çarpıklık yaratabileceği ve simetri varsayımını zayıflatabileceği dikkate alınarak, serisel bağımlılığa dirençli 7 günlük hareketli blok bootstrap güven aralığı destekleyici olarak sunulacaktır.
    - Diğer tüm karşılaştırmalar ikincil veya keşifsel niteliktedir.
 
@@ -123,7 +115,7 @@ Yerel Git etiketlerinin silinip taşınabilme riskine karşı protokolün deği�
    - Dondurulan modellerin özniteliklerinde, katsayılarında veya karar eşiklerinde geriye ya da ileriye dönük hiçbir değişiklik yapılmayacaktır.
 
 4. **Durdurma Kuralı (Pre-defined Stopping Rule):**  
-   - Değerlendirme süresi kanonik olarak 163 takvim günü (veya 20 Ekim gönderiminde 162 gün) ile kesin olarak sabittir.  
+   - Değerlendirme süresi 162 takvim günü ile kesin olarak sabittir.  
    - 31 Mart 2027 saat 23:00'e kadar hiçbir erken durdurma (early stopping) veya ara veri dikizleme (peeking) yapılmayacak; sonuçlar pencere tamamlandığında topluca hesaplanacaktır.
 
 5. **İkincil Hipotezler ve Risk Sınamaları:**  
