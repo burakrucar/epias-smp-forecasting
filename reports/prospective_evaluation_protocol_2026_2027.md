@@ -10,7 +10,7 @@
 ---
 
 ### 1. Amaç ve Kapsam
-Bu protokol, lisansüstü tez çalışması kapsamında geliştirilen ve disk üzerinde dondurulan makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
+Bu protokol, lisans bitirme tezi çalışması kapsamında geliştirilen ve disk üzerinde dondurulan makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. 
 
 Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–20 Ekim 2026 dönemi geliştirme/denetim süreçlerine konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten ve harici zaman damgası e-posta ile tescil edildikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.
 

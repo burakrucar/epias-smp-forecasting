@@ -1,4 +1,4 @@
-# T.C. İstanbul Medeniyet Üniversitesi - Lisansüstü Tez Deneyleri Ortam Kilidi (Frozen Environment)
+# T.C. İstanbul Medeniyet Üniversitesi - Lisans Bitirme Tezi Deneyleri Ortam Kilidi (Frozen Environment)
 # Python: 3.12+ / 3.14 compatible
 # Sabit Tohum (Seed): 42
 

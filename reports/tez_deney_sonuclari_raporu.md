@@ -1,5 +1,5 @@
 # T.C. İSTANBUL MEDENİYET ÜNİVERSİTESİ
-## LİSANSÜSTÜ TEZ ÇALIŞMASI: EPİAŞ ELEKTRİK PİYASASINDA SİSTEM MARJİNAL FİYATI (SMF) VE SİSTEM YÖNÜ TAHMİNİ
+## LİSANS BİTİRME TEZİ: EPİAŞ ELEKTRİK PİYASASINDA SİSTEM MARJİNAL FİYATI (SMF) VE SİSTEM YÖNÜ TAHMİNİ
 ### Deneysel Bulgular, Ekonometrik Doğrulama ve Tartışma Bölümü
 
 **Tez Danışmanı:** Prof. Ali Dinler  
@@ -557,7 +557,7 @@ Modellerin gelişim sürecinde incelenen 01–12 Ekim 2026 tarihleri arasındaki
 
 ---
 
-## 9. Lisansüstü Tez Bulguları ve Ekonometrik Tartışma Sentezi
+## 9. Lisans Bitirme Tezi Bulguları ve Ekonometrik Tartışma Sentezi
 
 Tez kapsamında yürütülen ampirik deneyler, ekonometrik testler ve duyarlılık analizleri aşağıdaki 7 temel bilimsel sonucu ortaya koymuştur:
 
