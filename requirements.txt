@@ -1,0 +1,12 @@
+# T.C. İstanbul Medeniyet Üniversitesi - Lisansüstü Tez Deneyleri Ortam Kilidi (Frozen Environment)
+# Python: 3.12+ / 3.14 compatible
+# Sabit Tohum (Seed): 42
+
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.18.0
+scikit-learn==1.9.0
+lightgbm==4.7.0
+pyarrow==23.0.1
+eptr2>=0.8.0
+tabulate>=0.9.0

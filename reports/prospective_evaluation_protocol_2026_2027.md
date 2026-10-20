@@ -28,15 +28,15 @@ Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip
   *Toplam:* **162 gün / 3.888 saat**.
 
 - **Tek Birincil Konfirmatorik Tasarım (Single Confirmatory Look):**  
-  Protokol, 162 günlük pencereyi tek ve nihai birincil doğrulama durağı olarak tanımlar.  
+  Protokol, 162 günlük pencereyi tek ve nihai birincil konfirmatorik doğrulama durağı olarak tanımlar.  
   - 162 günlük pencerede ($N = 162$ gün), eşleştirilmiş günlük fark serisinin ($\text{Aşama 1} - \text{Açık}$) standart hatası yaklaşık $SE \approx 39,1$ TL/MWh seviyesindedir.  
   - Tek yönlü $\alpha = 0,05$ düzeyinde istatistiksel anlamlılık için gereken asgari kritik fark $\approx 64,3$ TL/MWh, %80 güç ($1 - \beta = 0,80$) için gereken gerçek etki büyüklüğü ise $\approx 97,5$ TL/MWh'dir.  
   - Örneklem içi test yılında gözlenen fark yalnızca $-4,41$ TL/MWh olduğundan, birincil hipotezin 162 gün sonunda $p > 0,05$ vererek **bilgisiz (inconclusive / yetersiz güç)** kalma olasılığı çok yüksektir.  
-  - **Durdurma ve Tek Bakış Kuralı:** 162 gün sonunda $p > 0,05$ çıkarsa sonuç formel olarak *"bilgisiz / hipotez reddedilemedi"* kabul edilir ve konfirmatorik test kapatılır. I. tip hata şişmesini önlemek amacıyla, çalışma 12 aya uzatılsa dahi ikinci bir serbest test yapılmaz; 12 aylık veriler yalnızca betimsel/keşifsel olarak izlenir.  
-  - *(Grup-Ardışık Tasarım Notu):* Eğer çalışmanın ilerleyen safhasında 365 günlük tam yılda formel bir ikinci test hakkı saklı tutulmak istenirse, bu ancak O'Brien-Fleming $\alpha$-harcama fonksiyonu ile önceden kilitlenen sınırlar dahilinde icra edilebilir: 1. Bakış (162. gün, $t_1 \approx 0,444$): kritik $Z_1 \approx 2,46$ ($\alpha_1 \approx 0,007$); 2. Bakış (365. gün, $t_2 = 1,0$): kritik $Z_2 \approx 1,67$ ($\alpha_2 \approx 0,047$).
+  - **Durdurma ve Tek Bakış Kuralı:** 162 gün sonunda $p > 0,05$ çıkarsa sonuç formel olarak *"bilgisiz / hipotez reddedilemedi"* kabul edilir ve konfirmatorik test kapatılır. I. tip hata şişmesini önlemek amacıyla, çalışma 12 aya uzatılsa dahi ikinci bir serbest test yapılmaz; 12 aylık veriler yalnızca betimsel/keşifsel (exploratory) olarak izlenir.  
+  - *(Tasarım Tercihi Notu):* Çoklu bakıştan kaynaklanan I. tip hata enflasyonunu önlemek ve test gücünü bölmemek adına grup-ardışık kurgu yerine **katı Tek Bakışlı (Single-Look)** tasarım kesin birincil standart olarak benimsenmiştir.
 
-- **TOST Eşdeğerlik Testi Kapsamı:**  
-  162 günlük pencerede $SE \approx 39,1$ TL/MWh iken $\pm 65$ TL eşdeğerlik marjı $1,67 \cdot SE$'ye denk gelmekte olup, testin eşdeğerliği reddedebilmesi için gözlenen nokta farkın $|\hat{\Delta}| < 0,8$ TL olması gerekir; bu durum pratikte imkânsız bir güç kısıtı yaratmaktadır. Bu nedenle **formel TOST eşdeğerlik testi 162 günlük kısa pencereden tamamen çıkarılmış; yeterli istatistiksel gücün ($SE \approx 26,5$ TL) oluştuğu 365 günlük tam yıl değerlendirmesine bırakılmıştır.**
+- **TOST Eşdeğerlik Analizi (Yalnızca İkincil / Keşifsel):**  
+  162 günlük pencerede $SE \approx 39,1$ TL/MWh iken $\pm 65$ TL eşdeğerlik marjı $1,67 \cdot SE$'ye denk gelmekte olup, testin eşdeğerliği reddedebilmesi için gözlenen nokta farkın $|\hat{\Delta}| < 0,8$ TL olması gerekir; bu durum kısa vadede ulaşılamaz bir güç kısıtı yaratmaktadır. Bu nedenle **TOST eşdeğerlik testi konfirmatorik birincil tasarımın parçası olmayıp, yeterli istatistiksel gücün ($SE \approx 26,5$ TL) oluştuğu 365 günlük tam yıl izlemesinde yalnızca ikincil ve betimsel bir analiz olarak raporlanacaktır.**
 
 - **Veri Kaynağı:** EPİAŞ Şeffaflık Platformu Resmi Web Servisleri (`eptr2` kütüphanesi):
   1. `mcp-smp-imb`: PTF, SMF, Pozitif Dengesizlik Fiyatı, Negatif Dengesizlik Fiyatı, Resmi Sistem Durumu.
@@ -112,13 +112,14 @@ Yerel Git etiketlerinin silinip taşınabilme riskine karşı protokolün deği�
 3. **Rejim Değişikliği Önceden Tanımlı Kuralı:**  
    Değerlendirme döneminde EPDK tarafından yeni bir azami fiyat limiti (tavan fiyat) veya dengesizlik katsayısı ($k/l$) kararı alınması hâlinde:  
    - Yeni tavan veya katsayılar EPDK'nın resmi yürürlük tarihi itibarıyla dinamik olarak uzlaştırma formülüne yansıtılacaktır.  
-   - Dondurulan modellerin özniteliklerinde, katsayılarında veya karar eşiklerinde geriye ya da ileriye dönük hiçbir değişiklik yapılmayacaktır.
+   - Dondurulan modellerin özniteliklerinde, katsayılarında veya karar eşiklerinde geriye ya da ileriye dönük hiçbir değişiklik yapılmaz.
 
 4. **Durdurma Kuralı (Pre-defined Stopping Rule):**  
-   - Değerlendirme süresi 162 takvim günü ile kesin olarak sabittir.  
-   - 31 Mart 2027 saat 23:00'e kadar hiçbir erken durdurma (early stopping) veya ara veri dikizleme (peeking) yapılmayacak; sonuçlar pencere tamamlandığında topluca hesaplanacaktır.
+   - Değerlendirme 31 Mart 2027 23:00'te sona erer. O tarihe kadar hiçbir ara sonuç hesaplanmaz, erken durdurma veya ara veri dikizleme (peeking) yapılmaz.
 
-5. **İkincil Hipotezler ve Risk Sınamaları:**  
-   - Fiyat seviyesi hata analizi: $SMF=PTF$ naif kuralı ile Aşama 2 yayılım regresörünün RMSE karşılaştırması ve HLN testi.  
-   - Sınıflandırma ve kalibrasyon: Doğruluk, Brier skoru, BSS ve ECE.  
-   - Maruziyet-eşleşmiş 2.000 tekrarlı permütasyon testi (Tüm Dönem P&L, SD, CVaR, En Kötü Ay, MDD) ve $m=6$ Holm-Bonferroni çoklu test düzeltmesi.
+5. **İkincil / Keşifsel Analizler (Secondary & Exploratory Analyses):**  
+   - HLN testi ($SMF = PTF$ vs Aşama 2), sınıflandırma ölçütleri (doğruluk, Brier, BSS, ECE), maruziyet-eşleşmiş permütasyon testleri (2.000 tekrar, $m = 6$ Holm-Bonferroni çoklu test düzeltmesi: Tüm Dönem P&L, SD, CVaR, En Kötü Ay, MDD), Strateji 8–9 (volatilite ve risk filtreli varyantlar) ve 365 günlük TOST (±65 TL) yalnızca betimsel ve ikincil olarak raporlanır.
+
+6. **Veri Sürümü ve İtiraz Revizyonları Güvencesi:**  
+   - EPİAŞ Şeffaflık Platformu'nda yayımlanan saatlik dengesizlik fiyatları piyasa katılımcılarının uzlaştırma itirazları doğrultusunda sonradan revize edilebildiğinden; değerlendirme veri seti dönem sonundan (31 Mart 2027) 30 gün sonra (nihai uzlaştırma bildiriminin kesinleşmesiyle) tek seferde indirilecektir.  
+   - İndirme tarihi, veri sürümü ve dosya SHA-256 sağlama toplamı kaydedilerek değerlendirme raporuna eklenecektir.

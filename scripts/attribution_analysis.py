@@ -166,3 +166,93 @@ for c in sorted(np.unique(cat)):
 print("-" * 120)
 print(f"{'TOPLAM P&L KATKISI':32s} | {n_test:5d} | {np.mean(pay_maj):8.2f} | {np.mean(pay_s1_cal):8.2f} | {np.mean(pay_s2_l2):10.2f} | {np.mean(pay_s2_l1):10.2f} | {np.mean(pay_s2_clf_ev70):11.2f}")
 print("=" * 120)
+
+# ========================================================================================
+# TABLO 4C: PTF SEVİYE VE ORTALAMAYA DÖNÜŞ HİPOTEZİ SINAMASI
+# ========================================================================================
+print("\n" + "=" * 120)
+print("TABLO 4C: PTF SEVİYE VE ORTALAMAYA DÖNÜŞ HİPOTEZİ SINAMASI (N = 8.760 Saat)")
+print("=" * 120)
+
+acc_s2_l2 = np.mean(np.where(spread > 0, 1, -1) == act_s2_l2) * 100
+long_s2_l2 = np.mean(act_s2_l2 == 1) * 100
+
+# (a) Doğrusal Regresyon (PTF + Saat): S = -0.0806 * PTF + 3.50 * h + 77.75
+h = test_df["hour"].values
+s_hat_lin = -0.0806 * ptf + 3.50 * h + 77.75
+act_lin = np.where(s_hat_lin > 0, 1, -1)
+pay_lin = calc_exact_pnl(act_lin, ptf, neg, pos, y_dir)
+acc_lin = np.mean(np.where(spread > 0, 1, -1) == act_lin) * 100
+long_lin = np.mean(act_lin == 1) * 100
+
+# (a2) Tek Değişkenli Doğrusal Regresyon (PTF): S = -0.0755 * PTF + 105.92
+s_hat_ptf = -0.0755 * ptf + 105.92
+act_ptf_rule = np.where(s_hat_ptf > 0, 1, -1)
+pay_ptf_rule = calc_exact_pnl(act_ptf_rule, ptf, neg, pos, y_dir)
+acc_ptf_rule = np.mean(np.where(spread > 0, 1, -1) == act_ptf_rule) * 100
+long_ptf_rule = np.mean(act_ptf_rule == 1) * 100
+
+# (b) Naif Medyan Kuralı (PTF < 2500)
+act_ptf2500 = np.where(ptf < 2500, 1, -1)
+pay_ptf2500 = calc_exact_pnl(act_ptf2500, ptf, neg, pos, y_dir)
+acc_ptf2500 = np.mean(np.where(spread > 0, 1, -1) == act_ptf2500) * 100
+long_ptf2500 = np.mean(act_ptf2500 == 1) * 100
+
+# (c) PTF Özellikleri Çıkarılmış L2 Modeli
+cols_no_ptf = [c for c in cols_post if "ptf" not in c.lower() and "price" not in c.lower() and "mcp" not in c.lower()]
+reg_no_ptf = lgb.LGBMRegressor(n_estimators=250, learning_rate=0.03, max_depth=5, min_child_samples=30, verbose=-1, random_state=42)
+reg_no_ptf.fit(df_clean.loc[trval_mask, cols_no_ptf], df_clean.loc[trval_mask, "target_smf"] - df_clean.loc[trval_mask, "ptf"])
+pred_no_ptf = reg_no_ptf.predict(test_df[cols_no_ptf])
+act_no_ptf = np.where(pred_no_ptf > 0, 1, -1)
+pay_no_ptf = calc_exact_pnl(act_no_ptf, ptf, neg, pos, y_dir)
+acc_no_ptf = np.mean(np.where(spread > 0, 1, -1) == act_no_ptf) * 100
+long_no_ptf = np.mean(act_no_ptf == 1) * 100
+
+print(f"1. Kanonik Aşama 2 (L2):        P&L = {np.mean(pay_s2_l2):7.2f} TL | Yön İsabeti = %{acc_s2_l2:4.1f} | Uzun Payı = %{long_s2_l2:4.1f}")
+print(f"2. (a) Doğrusal Reg (PTF+Saat): P&L = {np.mean(pay_lin):7.2f} TL | Yön İsabeti = %{acc_lin:4.1f} | Uzun Payı = %{long_lin:4.1f}")
+print(f"3. (a2) Tek Değ. Reg (PTF):     P&L = {np.mean(pay_ptf_rule):7.2f} TL | Yön İsabeti = %{acc_ptf_rule:4.1f} | Uzun Payı = %{long_ptf_rule:4.1f}")
+print(f"4. (b) PTF < 2.500 TL:          P&L = {np.mean(pay_ptf2500):7.2f} TL | Yön İsabeti = %{acc_ptf2500:4.1f} | Uzun Payı = %{long_ptf2500:4.1f}")
+print(f"5. (c) PTF Çıkarılmış Model:   P&L = {np.mean(pay_no_ptf):7.2f} TL | Yön İsabeti = %{acc_no_ptf:4.1f} | Uzun Payı = %{long_no_ptf:4.1f}")
+
+# ========================================================================================
+# TABLO 4D: P&L BİLEŞEN DEKOMPOZİSYONU
+# ========================================================================================
+print("\n" + "=" * 120)
+print("TABLO 4D: P&L BİLEŞEN DEKOMPOZİSYONU (YAYILIM, MARJ+UYUMSUZLUK, PLATFORM KALINTISI)")
+print("=" * 120)
+
+is_2026 = (ts >= "2026-01-01")
+k = np.where(is_2026, 0.06, 0.03)
+l = np.where(is_2026, 0.06, 0.03)
+neg_stat = np.where(y_dir == 1, np.maximum(ptf, smf) * (1.0 + k), np.maximum(ptf, smf) * (1.0 + k/2.0))
+pos_stat = np.where(y_dir == -1, np.minimum(ptf, smf) * (1.0 - l), np.minimum(ptf, smf) * (1.0 - l/2.0))
+
+strats = {
+    "Her Zaman Açık (Naif Kural)": (act_maj, pay_maj),
+    "Aşama 1 Kalibre Modeli": (act_s1_cal, pay_s1_cal),
+    "Aşama 2 L2 Regresör": (act_s2_l2, pay_s2_l2),
+    "Deterministik PTF < 2.500 TL": (act_ptf2500, pay_ptf2500),
+    "Tam Nötr Portföy (alpha = 0.50)": (None, 0.5 * (neg + pos - 2 * ptf))
+}
+
+print(f"{'Strateji':32s} | {'Fiili P&L':10s} | {'1. Yayılım':12s} | {'2. Marj+Uyum':14s} | {'3. Platform Sapma':17s} | {'Toplam Kontrol':14s}")
+print("-" * 120)
+
+for name, (act, pay) in strats.items():
+    if act is not None:
+        pnl_actual = np.mean(pay)
+        spread_comp = np.mean(act * spread)
+        pay_stat = calc_exact_pnl(act, ptf, neg_stat, pos_stat, y_dir)
+        plat_diff = pnl_actual - np.mean(pay_stat)
+        margin_mismatch = np.mean(pay_stat) - spread_comp
+    else:
+        pnl_actual = np.mean(pay)
+        spread_comp = 0.5 * np.mean(spread)
+        pay_stat = 0.5 * (neg_stat + pos_stat - 2 * ptf)
+        plat_diff = pnl_actual - np.mean(pay_stat)
+        margin_mismatch = np.mean(pay_stat) - spread_comp
+    
+    tot_check = spread_comp + margin_mismatch + plat_diff
+    print(f"{name:32s} | {pnl_actual:10.2f} | {spread_comp:12.2f} | {margin_mismatch:14.2f} | {plat_diff:17.2f} | {tot_check:14.2f}")
+
+print("=" * 120)
