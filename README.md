@@ -4,19 +4,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Protocol: protocol--v1](https://img.shields.io/badge/Protocol-protocol--v1-success.svg)](reports/prospective_evaluation_protocol_2026_2027.md)
-[![Academic: Lisans Bitirme Tezi](https://img.shields.io/badge/Academic-Lisans%20Bitirme%20Tezi-purple.svg)](#akademik-künye)
+[![Author: Burak Ramazan Uçar](https://img.shields.io/badge/Author-Burak%20Ramazan%20U%C3%A7ar-blue.svg)](https://github.com/burakrucar)
 
-> **T.C. İstanbul Medeniyet Üniversitesi — Mühendislik ve Doğa Bilimleri Fakültesi**  
-> **Lisans Bitirme Tezi Çalışması**  
-> **Yazar:** Burak Ramazan Uçar  
-> **Danışman:** Prof. Dr. Ali Dinler  
-> **Tarih:** Ekim 2026  
+> **Geliştirici & Araştırmacı:** Burak Ramazan Uçar  
+> **Proje:** Türkiye Elektrik Piyasası Algoritmik Fiyat & Denge Yönü Tahminleme ve Arbitraj Çerçevesi  
 
 ---
 
-## 📌 Proje ve Tez Hakkında
+## 📌 Proje Hakkında
 
-Bu depo; **Türkiye Elektrik Piyasası'nda (EPİAŞ GÖP & TEİAŞ DGP)** Sistem Marjinal Fiyatı (**SMF**) ile Sistem Denge Yönü'nün (**$D_t$**) makine öğrenmesi modelleriyle tahmin edilmesini, elde edilen tahminlerin finansal getiriye (**P&L / Arbitraj**) dönüştürülmesini ve makine öğrenmesi literatüründeki *p-hacking / lookahead bias* tuzaklarını ortadan kaldıran tıp standartlarında bir **Kayıtlı Rapor (Registered Report / Pre-Analysis Plan)** protokolünü içermektedir.
+Bu proje; **Türkiye Elektrik Piyasası'nda (EPİAŞ GÖP & TEİAŞ DGP)** Sistem Marjinal Fiyatı (**SMF**) ile Sistem Denge Yönü'nün (**$D_t$**) makine öğrenmesi modelleriyle tahmin edilmesini, elde edilen tahminlerin finansal getiriye (**P&L / Arbitraj**) dönüştürülmesini ve makine öğrenmesi literatüründeki *p-hacking / lookahead bias* tuzaklarını ortadan kaldıran yüksek standartlı bir **Kayıtlı Rapor (Registered Report / Pre-Analysis Plan)** protokolünü içermektedir.
 
 ### 🎯 Temel Araştırma Sorusu
 > *"Gelişmiş makine öğrenmesi modelleri (LightGBM, Platt kalibrasyonu), elektrik piyasasında sistem yönünü ve SMF'yi tahmin ederek piyasanın en basit kuralı olan 'Her Zaman Açık' stratejisine karşı istatistiki olarak anlamlı bir **ekonomik üstünlük (alfa)** sağlayabilir mi?"*
@@ -57,7 +54,7 @@ Piyasa katılımcılarının nakit akışını belirleyen cezalı uzlaştırma f
 
 ---
 
-## 🔬 Tezin Ortaya Koyduğu 7 Temel Bilimsel Çıkarım
+## 🔬 Araştırmanın Ortaya Koyduğu 7 Temel Bulgusu
 
 12 aylık (8.760 saat) test kümesi üzerinde yapılan ekonometrik analizlerin öne çıkan sonuçları:
 
@@ -103,11 +100,11 @@ epias-smp-forecasting/
 │   ├── canonical_stage2_regressor.pkl   # Dondurulmuş Aşama 2 yayılım regresörü
 │   └── model_manifest.json              # Model hiperparametreleri ve metaveri
 ├── reports/
-│   ├── figures/              # Yüksek çözünürlüklü tez grafikleri
+│   ├── figures/              # Yüksek çözünürlüklü grafikler ve görselleştirmeler
 │   ├── tables/               # Ekonometrik test ve karşılaştırma tabloları (CSV)
-│   ├── prospective_evaluation_protocol_2026_2027.md # Dondurulmuş protokol
-│   ├── tez_deney_sonuclari_raporu.md    # Kapsamlı deney sonuçları raporu
-│   └── tez_konusu_ve_calisma_rehberi.md # Sıfırdan tez çalışma rehberi
+│   ├── prospective_evaluation_protocol_2026_2027.md # Dondurulmuş test protokolü
+│   ├── tez_deney_sonuclari_raporu.md    # Kapsamlı deney ve doğrulama raporu
+│   └── tez_konusu_ve_calisma_rehberi.md # Detaylı model ve piyasa dokümantasyonu
 ├── scripts/
 │   └── build_html_report_v5.py          # Rapor derleme araçları
 ├── src/
@@ -142,10 +139,8 @@ shasum -a 256 -c MANIFEST_SHA256.txt
 
 ---
 
-## 🎓 Akademik Künye
+## 👤 Geliştirici & İletişim
 
-Bu çalışma, **T.C. İstanbul Medeniyet Üniversitesi Mühendislik ve Doğa Bilimleri Fakültesi** bünyesinde Lisans Bitirme Tezi olarak hazırlanmıştır.
-
-* **Öğrenci:** Burak Ramazan Uçar
-* **Tez Danışmanı:** Prof. Dr. Ali Dinler
-* **Yıl:** 2026
+* **Burak Ramazan Uçar**
+* **GitHub:** [@burakrucar](https://github.com/burakrucar)
+* **E-posta:** burakrucar@gmail.com
