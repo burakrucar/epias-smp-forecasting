@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İleriye Dönük Doğrulama Protokolü (protocol-v1)</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #1f2937;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 24px;
+    background-color: #f9fafb;
+  }
+  .container {
+    background: #ffffff;
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+  }
+  h1 { color: #111827; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; font-size: 26px; }
+  h2 { color: #1e40af; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-top: 32px; font-size: 22px; }
+  h3 { color: #1f2937; margin-top: 24px; font-size: 18px; }
+  h4 { color: #374151; margin-top: 20px; font-size: 16px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background-color: #f3f4f6;
+    color: #111827;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+  code {
+    background-color: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+    color: #ef4444;
+  }
+  pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    background-color: #eff6ff;
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  hr {
+    border: 0;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 32px 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>İLERİYE DÖNÜK DOĞRULAMA PROTOKOLÜ (PRE-ANALYSIS PLAN)</h1>
+<h2>EPİAŞ Elektrik Piyasasında SMF ve Sistem Yönü Tahmin Modellerinin Bağımsız İleriye Dönük (Out-of-Sample) Sınanması</h2>
+<p><strong>Tez Danışmanı:</strong> Prof. Ali Dinler<br />
+<strong>Kurum:</strong> T.C. İstanbul Medeniyet Üniversitesi<br />
+<strong>Protokol Tarihi:</strong> 20 Ekim 2026<br />
+<strong>Dondurulmuş Git Versiyon Etiketi:</strong> <code>protocol-v1</code> (Açıklamalı/İmzalı Etiket — Uzak Depoya İtilmek ve SHA-256 Manifestosuyla E-postaya Eklenmek Üzere Hazırlanmış)<br />
+<strong>Harici Zaman Damgası:</strong> Danışman Öğretim Üyesine İletilecek Kayıt E-postası (Gönderim Öncesi Kilitli Metin)  </p>
+<hr />
+<h3>1. Amaç ve Kapsam</h3>
+<p>Bu protokol, lisans bitirme tezi çalışması kapsamında geliştirilen ve disk üzerinde dondurulan makine öğrenmesi modellerinin seçim yanlılığından (data snooping / p-hacking) tamamen arındırılmış biçimde test edilmesini garanti altına almak üzere hazırlanmıştır. </p>
+<p>Modeller test kümesi verisi (Ekim 2025 – Eylül 2026) üzerinde geliştirilip ayarlandığı ve 01–20 Ekim 2026 dönemi geliştirme/denetim süreçlerine konu olduğu için; gerçek ve tarafsız out-of-sample başarı ancak modeller kilitlendikten ve harici zaman damgası e-posta ile tescil edildikten sonraki ilk tam gün başından itibaren piyasada fiilen oluşacak verilerle ölçülebilir.</p>
+<hr />
+<h3>2. Bağımsız Değerlendirme Penceresi, İstatistiksel Güç ve Veri Akışı</h3>
+<ul>
+<li><strong>Zaman Aralığı ve Başlangıç Kuralı:</strong><br />
+  Değerlendirme penceresi, zaman damgasını sabitleyen kayıt e-postasının danışman öğretim üyesine iletildiği 20 Ekim 2026 gününü takip eden ilk tam gün olan <strong>21 Ekim 2026 00:00:00+03:00</strong> itibarıyla başlar ve <strong>31 Mart 2027 23:00:00+03:00</strong> tarihinde sona erer (<strong>162 Gün / 3.888 Saat</strong>; 23 tam hafta + 1 artık gün):  </li>
+<li>Ekim 2026 (21–31 Ekim): 11 gün $\times$ 24 = 264 saat  </li>
+<li>Kasım 2026: 30 gün $\times$ 24 = 720 saat  </li>
+<li>Aralık 2026: 31 gün $\times$ 24 = 744 saat  </li>
+<li>Ocak 2027: 31 gün $\times$ 24 = 744 saat  </li>
+<li>Şubat 2027: 28 gün $\times$ 24 = 672 saat  </li>
+<li>
+<p>Mart 2027: 31 gün $\times$ 24 = 744 saat<br />
+<em>Toplam:</em> <strong>162 gün / 3.888 saat</strong>.</p>
+</li>
+<li>
+<p><strong>Tek Birincil Konfirmatorik Tasarım (Single Confirmatory Look):</strong><br />
+  Protokol, 162 günlük pencereyi tek ve nihai birincil konfirmatorik doğrulama durağı olarak tanımlar.  </p>
+</li>
+<li>162 günlük pencerede ($N = 162$ gün), eşleştirilmiş günlük fark serisinin ($\text{Aşama 1} - \text{Açık}$) standart hatası yaklaşık $SE \approx 39,1$ TL/MWh seviyesindedir.  </li>
+<li>Tek yönlü $\alpha = 0,05$ düzeyinde istatistiksel anlamlılık için gereken asgari kritik fark $\approx 64,3$ TL/MWh, %80 güç ($1 - \beta = 0,80$) için gereken gerçek etki büyüklüğü ise $\approx 97,5$ TL/MWh'dir.  </li>
+<li>Örneklem içi test yılında gözlenen fark yalnızca $-4,41$ TL/MWh olduğundan, birincil hipotezin 162 gün sonunda $p &gt; 0,05$ vererek <strong>bilgisiz (inconclusive / yetersiz güç)</strong> kalma olasılığı çok yüksektir.  </li>
+<li><strong>Durdurma ve Tek Bakış Kuralı:</strong> 162 gün sonunda $p &gt; 0,05$ çıkarsa sonuç formel olarak <em>"bilgisiz / hipotez reddedilemedi"</em> kabul edilir ve konfirmatorik test kapatılır. I. tip hata şişmesini önlemek amacıyla, çalışma 12 aya uzatılsa dahi ikinci bir serbest test yapılmaz; 12 aylık veriler yalnızca betimsel/keşifsel (exploratory) olarak izlenir.  </li>
+<li>
+<p><em>(Tasarım Tercihi Notu):</em> Çoklu bakıştan kaynaklanan I. tip hata enflasyonunu önlemek ve test gücünü bölmemek adına grup-ardışık kurgu yerine <strong>katı Tek Bakışlı (Single-Look)</strong> tasarım kesin birincil standart olarak benimsenmiştir.</p>
+</li>
+<li>
+<p><strong>TOST Eşdeğerlik Analizi (Yalnızca İkincil / Keşifsel):</strong><br />
+  162 günlük pencerede $SE \approx 39,1$ TL/MWh iken $\pm 65$ TL eşdeğerlik marjı $1,67 \cdot SE$'ye denk gelmekte olup, testin eşdeğerliği reddedebilmesi için gözlenen nokta farkın $|\hat{\Delta}| &lt; 0,8$ TL olması gerekir; bu durum kısa vadede ulaşılamaz bir güç kısıtı yaratmaktadır. Bu nedenle <strong>TOST eşdeğerlik testi konfirmatorik birincil tasarımın parçası olmayıp, yeterli istatistiksel gücün ($SE \approx 26,5$ TL) oluştuğu 365 günlük tam yıl izlemesinde yalnızca ikincil ve betimsel bir analiz olarak raporlanacaktır.</strong></p>
+</li>
+<li>
+<p><strong>Veri Kaynağı:</strong> EPİAŞ Şeffaflık Platformu Resmi Web Servisleri (<code>eptr2</code> kütüphanesi):</p>
+</li>
+<li><code>mcp-smp-imb</code>: PTF, SMF, Pozitif Dengesizlik Fiyatı, Negatif Dengesizlik Fiyatı, Resmi Sistem Durumu.</li>
+<li><code>load-plan</code>: TEİAŞ Gün Öncesi Yük Tahmini (<code>lep</code>).</li>
+<li><code>wind-forecast</code>: TEİAŞ Gün Öncesi Rüzgar Üretim Tahmini (<code>forecast</code>).</li>
+<li><strong>Veri Bütünlüğü Kuralı:</strong> Saatlik eksik veriler yalnızca geçmişe dönük ileri taşıma (<code>ffill</code>) ile doldurulacak, hiçbir aşamada geleceğe dönük bilgi sızıntısına (<code>lookahead bias</code>) izin verilmeyecektir.</li>
+</ul>
+<hr />
+<h3>3. Dondurulan Modeller, Kaynak Kodlar ve Değişmezlik Güvencesi</h3>
+<p>Aşağıdaki modeller hiçbir yeniden eğitim, hiperparametre güncellemesi veya kalibrasyon katmanı değişikliğine tabi tutulmaksızın dondurulmuştur:</p>
+<ol>
+<li><strong>Aşama 2 Regresörü:</strong> <code>models/canonical_stage2_regressor.pkl</code>  </li>
+<li>SHA-256: <code>583a2912c3d0ea1ba58200030208d4aec131b6ab7d94707eec780b772cb24fa5</code>  </li>
+<li>İlk Kayıt: 15 Ekim 2026, 21:10 (15–20 Ekim arasında model ağırlıkları hiç değişmemiştir).  </li>
+<li>Algoritma: LightGBM Regressor ($S = SMF - PTF$), $n=250$, Derinlik=5, Öğrenme Oranı=0,03.</li>
+<li><strong>Aşama 1 Sınıflandırıcısı:</strong> <code>models/canonical_stage1_classifier.pkl</code>  </li>
+<li>SHA-256: <code>d4aac8a6a6f4c2e9f25f786bec6e8fa1a66427585fce8f1331613ac9612429ff</code>  </li>
+<li>İlk Kayıt: 15 Ekim 2026, 21:10 (Değişmemiştir).  </li>
+<li>Algoritma: LightGBM 3-Sınıflı Yön Sınıflandırıcısı, $n=100$, Yaprak=31.</li>
+<li><strong>Aşama 1 Platt Kalibratörü:</strong> <code>models/canonical_stage1_calibrator.pkl</code>  </li>
+<li>SHA-256: <code>5db315973a293f9eb43d4f01b1543167c8f143e41883bd8a9ff732ac68e5106a</code>  </li>
+<li>İlk Kayıt: 15 Ekim 2026, 21:10 (Değişmemiştir).  </li>
+<li>Algoritma: Doğrulama kümesinde uydurulmuş One-vs-Rest Lojistik Regresyon.</li>
+</ol>
+<p><em>Git Model, Kod ve Değişmezlik Güvencesi Protokolü:</em><br />
+Yerel Git etiketlerinin silinip taşınabilme riskine karşı protokolün değişmezlik güvencesi şu üç aşamalı adımla sabitlenmiştir:
+1. Değerlendirme kodları (<code>src/reproduce_all_thesis_results.py</code>, <code>src/features.py</code>, <code>src/significance_tests.py</code>), model ikilileri ve ham veri kütüğü yerel depoda açıklamalı (annotated) <code>protocol-v1</code> etiketiyle kilitlenmiştir.
+2. Yerel etiket ve dondurulmuş commit hash'i özel bir uzak depoya (remote Git repository) itilerek (<code>git push origin --tags</code>) merkezi olarak zaman damgalanacaktır.
+3. Danışman öğretim üyesine gönderilecek resmi e-postaya dondurulan Git commit hash'i ve <code>MANIFEST_SHA256.txt</code> arşiv özeti eklenerek harici zaman damgası tescil edilecektir.</p>
+<hr />
+<h3>4. Sınanacak Stratejiler Listesi ve Karar Kuralları</h3>
+<h4>A. Önceden Tanımlı Birincil ve Karşılaştırmalı Stratejiler</h4>
+<ol>
+<li><strong>Oracle (Tam Bilgi / Teorik Tavan):</strong> Fiili yönün tam olarak bilindiği durum ($D_t=1 \rightarrow +1$, $D_t=-1 \rightarrow -1$, $D_t=0 \rightarrow 0$).</li>
+<li><strong>Her Zaman Açık (Çoğunluk Sınıfı Naif Kural - Birincil Benchmark):</strong> $a_t = +1$ (Her saat sabit Uzun pozisyon).</li>
+<li><strong>Her Zaman Fazla (Ters Kural):</strong> $a_t = -1$ (Her saat sabit Kısa pozisyon).</li>
+<li><strong>Lag-168 Naif Takipçi:</strong> $a_t = D_{t-168}$ (Tam bir hafta önceki aynı saatin yönü).</li>
+<li><strong>Aşama 1 Kalibre Modeli (GÖP Öncesi - Birincil Aday):</strong> $\tau = 70.0$ TL sabit eşik kuralı:<br />
+   $EV_{\text{Long}} &gt; 70$ ve $EV_{\text{Long}} &gt; EV_{\text{Short}} \rightarrow a_t = +1$; aksi halde simetrik Kısa veya Pasif.</li>
+<li><strong>Aşama 2 Yayılım Modeli (GÖP Sonrası):</strong> $\hat{S}_{L2} &gt; 0 \rightarrow a_t = +1$, aksi halde $a_t = -1$.</li>
+<li><strong>Aşama 2 Sınıflandırıcısı (Post-DAM EV):</strong> $EV &gt; 70$ TL kuralı.</li>
+</ol>
+<h4>B. Post-hoc / Keşifsel Referans Stratejiler (Kilitli Parametrelerle)</h4>
+<ol>
+<li><strong>Deterministik PTF Eşik Kuralı (Keşifsel):</strong><br />
+   $PTF_t &lt; 2.500,00$ TL ise $a_t = +1$, aksi halde $a_t = -1$.<br />
+<em>Parametre:</em> 2.500,00 TL sabit eşik (Eğitim+Doğrulama dönemi medyanı, $N = 15.168$ saat; lag ısınması düşülmüş net saat).</li>
+<li><strong>Doğrusal Yayılım Kuralı (Keşifsel):</strong><br />
+   $\hat{S}_t = -0,0755 \cdot PTF_t + 105,92$. Eğer $\hat{S}_t &gt; 0$ ise $a_t = +1$, aksi halde $a_t = -1$.<br />
+<em>Parametreler:</em> Eğitim+Doğrulama kümesi (TrVal: 2024–2025 ilk 9 ayı, $N = 15.168$ saat; ham veri 24.096 saat, 168 saatlik lag ısınması sonrası net veri kütüğü 23.928 saat) OLS regresyon katsayıları (eğim: -0,0755, sabit: 105,92; başabaş $PTF \approx 1.403$ TL).</li>
+</ol>
+<hr />
+<h3>5. Önceden Tanımlı Hipotez Hiyerarşisi, Fiyat Spesifikasyonu ve Test Metodolojisi</h3>
+<ol>
+<li><strong>Tek Birincil Hipotez (Single Primary Hypothesis):</strong><br />
+   Bu protokolün tek birincil hipotezi, GÖP öncesi Aşama 1 modelinin ekonomik olarak çoğunluk kuralını geçip geçemeyeceğidir:<br />
+   $$H_0: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} \le 0 \quad \text{vs} \quad H_1: \mu_{\text{Aşama 1 Kalibre}} - \mu_{\text{Her Zaman Açık}} &gt; 0$$  </li>
+<li><strong>Birincil Test Yöntemi ve Artık Gün Protokolü:</strong><br />
+     162 günlük pencere ($N = 162$ gün / 3.888 saat), 23 tam hafta (161 gün / 3.864 saat) ve 1 artık günden (24 saat) oluşmaktadır.  <ul>
+<li>Birincil test, <strong>haftalık blok ortalamaları üzerinde işaret-çevirme permütasyon testi (sign-flip permutation test)</strong> olarak yürütülecek ve tek taraflı $\alpha = 0,05$ düzeyinde değerlendirilecektir.  </li>
+<li><strong>Artık Günün Ele Alınışı:</strong> Birincil sınamada 23 tam 7-günlük hafta (Çarşamba–Salı döngüsü) ana permütasyon birimleri olarak alınacaktır. Kalan 1 artık gün (31 Mart 2027), birincil testte 23. haftaya eklenerek 8 günlük bir kapanış bloğu olarak dahil edilecek; paralel olarak 23 haftalık saf blok ve 162 günlük hareketli blok bootstrap (%95 GA) sonuçlarıyla sağlamlık kontrolü sunulacaktır.  </li>
+<li><strong>Simetri Varsayımı Notu:</strong> İşaret-çevirme permütasyon testi sıfır hipotezi altında haftalık farkların sıfır etrafında simetrik dağıldığı varsayımına dayanır. Elektrik piyasasında ekstrem fiyat sıçramalarının (Haziran 2026 benzeri) haftalık getiri serisinde belirgin çarpıklık yaratabileceği ve simetri varsayımını zayıflatabileceği dikkate alınarak, serisel bağımlılığa dirençli 7 günlük hareketli blok bootstrap güven aralığı destekleyici olarak sunulacaktır.</li>
+</ul>
+</li>
+<li>
+<p>Diğer tüm karşılaştırmalar ikincil veya keşifsel niteliktedir.</p>
+</li>
+<li>
+<p><strong>Birincil ve İkincil Fiyat Spesifikasyonları:</strong>  </p>
+</li>
+<li><strong>Birincil Spesifikasyon (Tek Temel Seçim):</strong> EPİAŞ Şeffaflık Platformu'nun fiilen yayımladığı ham nakit akışı serileri (<code>positiveImbalance</code>, <code>negativeImbalance</code>).<br />
+<em>Gerekçe:</em> Piyasa katılımcılarının teminatlandırma, faturalandırma ve fiili nakit uzlaştırmaları EPİAŞ'ın yayımladığı bu seriler üzerinden yürütülmektedir; dolayısıyla fiili piyasa gerçekliğini temsil eden tek resmi nakit akışı budur.  </li>
+<li>
+<p><strong>İkincil / Sağlamlık Spesifikasyonu:</strong> EPDK Karar 14030 yasal formül rekonstrüksiyonu ($P_{\text{neg}}^{\text{stat}}$, $P_{\text{pos}}^{\text{stat}} \ge 0$). Veri ambarı veri kalıntısı veya tarife sapmalarına karşı sağlamlık kontrolü olarak paralel raporlanacaktır.</p>
+</li>
+<li>
+<p><strong>Rejim Değişikliği Önceden Tanımlı Kuralı:</strong><br />
+   Değerlendirme döneminde EPDK tarafından yeni bir azami fiyat limiti (tavan fiyat) veya dengesizlik katsayısı ($k/l$) kararı alınması hâlinde:  </p>
+</li>
+<li>Yeni tavan veya katsayılar EPDK'nın resmi yürürlük tarihi itibarıyla dinamik olarak uzlaştırma formülüne yansıtılacaktır.  </li>
+<li>
+<p>Dondurulan modellerin özniteliklerinde, katsayılarında veya karar eşiklerinde geriye ya da ileriye dönük hiçbir değişiklik yapılmaz.</p>
+</li>
+<li>
+<p><strong>Durdurma Kuralı (Pre-defined Stopping Rule):</strong>  </p>
+</li>
+<li>
+<p>Değerlendirme 31 Mart 2027 23:00'te sona erer. O tarihe kadar hiçbir ara sonuç hesaplanmaz, erken durdurma veya ara veri dikizleme (peeking) yapılmaz.</p>
+</li>
+<li>
+<p><strong>İkincil / Keşifsel Analizler (Secondary &amp; Exploratory Analyses):</strong>  </p>
+</li>
+<li>
+<p>HLN testi ($SMF = PTF$ vs Aşama 2), sınıflandırma ölçütleri (doğruluk, Brier, BSS, ECE), maruziyet-eşleşmiş permütasyon testleri (2.000 tekrar, $m = 6$ Holm-Bonferroni çoklu test düzeltmesi: Tüm Dönem P&amp;L, SD, CVaR, En Kötü Ay, MDD), Strateji 8–9 (volatilite ve risk filtreli varyantlar) ve 365 günlük TOST (±65 TL) yalnızca betimsel ve ikincil olarak raporlanır.</p>
+</li>
+<li>
+<p><strong>Veri Sürümü ve İtiraz Revizyonları Güvencesi:</strong>  </p>
+</li>
+<li>EPİAŞ Şeffaflık Platformu'nda yayımlanan saatlik dengesizlik fiyatları piyasa katılımcılarının uzlaştırma itirazları doğrultusunda sonradan revize edilebildiğinden; değerlendirme veri seti dönem sonundan (31 Mart 2027) 30 gün sonra (nihai uzlaştırma bildiriminin kesinleşmesiyle) tek seferde indirilecektir.  </li>
+<li>İndirme tarihi, veri sürümü ve dosya SHA-256 sağlama toplamı kaydedilerek değerlendirme raporuna eklenecektir.</li>
+</ol>
+</div>
+</body>
+</html>

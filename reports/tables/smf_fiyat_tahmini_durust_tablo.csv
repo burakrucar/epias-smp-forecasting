@@ -1,0 +1,7 @@
+Model Adı,Model Tipi,MAE (TL/MWh),NMAE (%),RMSE (TL/MWh),sMAPE (%),Günlük DM Stat,Günlük DM p-değeri,Karar (Meşru Baza Karşı)
+1. Meşru Dinamik Aynı Saat Bazı (Legit Naive),Meşru Baz Model,1065.39,48.47,1557.38,74.04,0.0,1.0000,Referans Baz
+2. Haftalık Aynı Saat Bazı (Lag 168 Naive),Uzak Baz Model,1011.8,46.03,1497.2,71.34,1.766,0.0387,İstatistiki Üstün (p<0.05)
+3. GÖP Sonrası Kural: SMF = PTF,GÖP Sonrası Doğal Baz,682.75,31.06,1019.49,59.78,17.615,0.0000,İstatistiki Üstün (p<0.01)
+4. Doğrusal / Düzenlileştirilmiş: Ridge (ARX),İstatistiksel,915.31,41.64,1102.4,68.58,7.305,0.0000,İstatistiki Üstün (p<0.01)
+5. GÖP Öncesi Ağaç Tabanlı: LightGBM,Makine Öğrenmesi,954.47,43.42,1176.35,67.3,4.445,0.0000,İstatistiki Üstün (p<0.01)
+6. GÖP Sonrası Yayılım: LightGBM (PTF + Spread),Makine Öğrenmesi,725.84,33.02,1003.48,67.88,15.728,0.0000,İstatistiki Üstün (p<0.01)

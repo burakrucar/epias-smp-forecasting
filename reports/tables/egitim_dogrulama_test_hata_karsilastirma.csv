@@ -1,0 +1,3 @@
+Model,Eğitim (Train) MAE (TL),Doğrulama (Val) MAE (TL),Dış Test MAE (TL),Val -> Test Artışı
+Ridge Regresyon,498.46,670.91,918.13,247.22
+LightGBM Seviye Modeli,363.05,635.71,947.81,312.1

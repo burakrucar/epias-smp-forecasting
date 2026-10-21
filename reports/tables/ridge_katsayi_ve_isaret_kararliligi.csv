@@ -1,0 +1,40 @@
+run_id,Özellik,Ridge Standartlaştırılmış Katsayı (Beta),Bootstrap Ortalama,Bootstrap 95% GA,Pozitif Katsayı Oranı (%),İşaret Kararlılığı
+run_1792585978,hour_00,23.18,23.49,"[+12.89, +33.26]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_01,40.04,40.07,"[+28.07, +51.87]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_02,43.51,43.49,"[+31.00, +55.81]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_03,39.73,40.18,"[+27.04, +53.32]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_04,39.39,39.76,"[+26.40, +52.87]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_05,45.17,45.68,"[+31.77, +59.73]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_06,46.28,46.89,"[+32.80, +60.33]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_07,14.26,14.82,"[+1.29, +28.39]",98.0,Kararlı (Pozitif)
+run_1792585978,hour_08,-5.1,-5.21,"[-14.29, +4.02]",13.9,Kararsız / Nötr
+run_1792585978,hour_09,-23.78,-24.07,"[-35.36, -12.63]",0.0,Kararlı (Negatif)
+run_1792585978,hour_10,-59.08,-59.48,"[-73.63, -45.33]",0.0,Kararlı (Negatif)
+run_1792585978,hour_11,-63.46,-64.06,"[-77.71, -51.13]",0.0,Kararlı (Negatif)
+run_1792585978,hour_12,-89.54,-90.38,"[-108.75, -72.06]",0.0,Kararlı (Negatif)
+run_1792585978,hour_13,-70.92,-70.97,"[-87.11, -54.50]",0.0,Kararlı (Negatif)
+run_1792585978,hour_14,-42.99,-43.33,"[-58.27, -29.13]",0.0,Kararlı (Negatif)
+run_1792585978,hour_15,-39.14,-39.19,"[-54.17, -24.81]",0.0,Kararlı (Negatif)
+run_1792585978,hour_16,-23.93,-24.54,"[-36.34, -13.47]",0.0,Kararlı (Negatif)
+run_1792585978,hour_17,9.41,8.9,"[-0.54, +18.92]",96.8,Kararlı (Pozitif)
+run_1792585978,hour_18,23.57,23.43,"[+14.17, +32.86]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_19,28.12,28.13,"[+16.89, +39.75]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_20,22.57,22.88,"[+10.17, +35.10]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_21,22.47,22.63,"[+11.68, +33.99]",100.0,Kararlı (Pozitif)
+run_1792585978,hour_22,9.33,9.69,"[-0.16, +19.49]",97.3,Kararlı (Pozitif)
+run_1792585978,hour_23,10.9,11.19,"[+2.67, +20.67]",99.6,Kararlı (Pozitif)
+run_1792585978,is_weekend,-34.93,-33.96,"[-69.55, +2.33]",3.3,Kararlı (Negatif)
+run_1792585978,quarter_sin,-24.12,-20.53,"[-68.74, +25.54]",18.4,Kararsız / Nötr
+run_1792585978,quarter_cos,-49.22,-49.86,"[-88.86, -10.17]",1.1,Kararlı (Negatif)
+run_1792585978,load_forecast_mw,225.22,225.94,"[+169.87, +284.79]",100.0,Kararlı (Pozitif)
+run_1792585978,forecast_wind_ratio,-104.89,-104.5,"[-143.52, -69.51]",0.0,Kararlı (Negatif)
+run_1792585978,ptf_lag_24,93.43,91.14,"[+54.49, +127.69]",100.0,Kararlı (Pozitif)
+run_1792585978,ptf_lag_48,-15.62,-13.25,"[-47.51, +22.93]",24.3,Kararsız / Nötr
+run_1792585978,ptf_lag_168,79.91,82.09,"[+34.34, +127.31]",100.0,Kararlı (Pozitif)
+run_1792585978,latest_known_smf,53.81,52.3,"[+16.78, +89.13]",99.8,Kararlı (Pozitif)
+run_1792585978,legit_same_hour_smf,63.38,63.05,"[+38.19, +86.21]",100.0,Kararlı (Pozitif)
+run_1792585978,smf_lag_48,-13.59,-13.24,"[-50.66, +20.57]",22.6,Kararsız / Nötr
+run_1792585978,smf_lag_72,44.56,44.16,"[+5.77, +79.37]",99.1,Kararlı (Pozitif)
+run_1792585978,smf_lag_168,-19.66,-20.2,"[-57.73, +15.48]",14.6,Kararsız / Nötr
+run_1792585978,smf_median_4w,168.46,167.45,"[+117.65, +218.97]",100.0,Kararlı (Pozitif)
+run_1792585978,smf_clean_same_hour_7d_mean,32.91,31.49,"[-15.60, +80.32]",88.9,Kararsız / Nötr

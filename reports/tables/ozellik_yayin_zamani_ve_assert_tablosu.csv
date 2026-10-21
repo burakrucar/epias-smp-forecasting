@@ -1,0 +1,7 @@
+Özellik,Veri Kaynağı,Yayın Zamanı Kuralı,Sızıntı Durumu,Point-in-Time Assert
+ptf_lag_24,EPİAŞ GÖP,D-2 saat 14:00'te 24 saatin tamamı kesinleşir,Sızıntısız,GEÇTİ (0 fark)
+latest_known_smf,TEİAŞ / EPİAŞ,D-1 12:00'de en son D-1 09:00 (t-15-h) kesin yayındadır,Sızıntısız,GEÇTİ (0 fark)
+legit_same_hour_smf,TEİAŞ / EPİAŞ,h<=9 ise D-1 saat h (lag 24); h>=10 ise D-2 saat h (lag 48),Sızıntısız,GEÇTİ (0 fark)
+smf_lag_168,TEİAŞ / EPİAŞ,D-7 saat h (1 hafta önceki kesin değer),Sızıntısız,GEÇTİ (0 fark)
+load_forecast_mw,TEİAŞ,Gün öncesi yük tahmini,Yayın damgası bağımsız doğrulanamadı*,GEÇTİ (0 fark)
+wind_forecast_mw,TEİAŞ RİTM,Gün öncesi rüzgar tahmini,Yayın damgası bağımsız doğrulanamadı*,GEÇTİ (0 fark)

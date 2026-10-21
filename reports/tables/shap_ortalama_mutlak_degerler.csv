@@ -1,0 +1,11 @@
+Sıra,Özellik,Ortalama Mutlak SHAP Değeri (TL)
+1,ptf_lag_24,190.26
+2,hour_cos,165.62
+3,ptf_lag_168,115.99
+4,forecast_residual_load_mw,93.03
+5,smf_clean_same_hour_7d_mean,90.99
+6,legit_same_hour_smf,72.73
+7,quarter_sin,53.21
+8,latest_known_smf,47.79
+9,dow,46.63
+10,wind_forecast_mw,45.44

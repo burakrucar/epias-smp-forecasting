@@ -1,0 +1,41 @@
+Özellik,Kaynak,Yayın Zamanı Kuralı,Sızıntı Durumu
+hour_00,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_01,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_02,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_03,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_04,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_05,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_06,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_07,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_08,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_09,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_10,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_11,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_12,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_13,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_14,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_15,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_16,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_17,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_18,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_19,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_20,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_21,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_22,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+hour_23,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+is_weekend,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+quarter_sin,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+quarter_cos,Takvim / Deterministik,Teslimat saatinin bilinen takvim bilgisi,Sızıntısız
+load_forecast_mw,TEİAŞ / RİTM,Gün öncesi yük/rüzgar tahmin planı,Yayın damgası veri setinde bulunmadığından bağımsız doğrulanamadı
+forecast_wind_ratio,TEİAŞ / RİTM,Gün öncesi yük/rüzgar tahmin planı,Yayın damgası veri setinde bulunmadığından bağımsız doğrulanamadı
+forecast_residual_load_mw,TEİAŞ / RİTM,Gün öncesi yük/rüzgar tahmin planı,Yayın damgası veri setinde bulunmadığından bağımsız doğrulanamadı
+ptf_lag_24,EPİAŞ GÖP,D-2 saat 14:00'te 24 saatin tamamı açıklanır,Sızıntısız
+ptf_lag_48,EPİAŞ GÖP,D-3 veya 1 hafta önceki kesin değer,Sızıntısız
+ptf_lag_168,EPİAŞ GÖP,D-3 veya 1 hafta önceki kesin değer,Sızıntısız
+latest_known_smf,TEİAŞ / EPİAŞ,D-1 12:00'de en son D-1 09:00 (t-15-h) kesin yayındadır,Sızıntısız
+legit_same_hour_smf,TEİAŞ / EPİAŞ,h<=9 ise D-1 saat h; h>=10 ise D-2 saat h,Sızıntısız
+smf_lag_48,TEİAŞ / EPİAŞ,D-2 veya daha önceki günlerin kesinleşmiş saatleri,Sızıntısız
+smf_lag_72,TEİAŞ / EPİAŞ,D-2 veya daha önceki günlerin kesinleşmiş saatleri,Sızıntısız
+smf_lag_168,TEİAŞ / EPİAŞ,D-2 veya daha önceki günlerin kesinleşmiş saatleri,Sızıntısız
+smf_median_4w,TEİAŞ / EPİAŞ,"Son 4 haftanın aynı saatlerinin (lag 168, 336, 504, 672) medyanı",Sızıntısız
+smf_clean_same_hour_7d_mean,TEİAŞ / EPİAŞ,D-2 ile D-7 arasındaki 6 günün aynı saat ortalaması (D-1 kesinlikle YOKTUR),Sızıntısız

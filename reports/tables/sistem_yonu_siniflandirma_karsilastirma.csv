@@ -1,0 +1,6 @@
+Model Adı,Model Ailesi,Doğruluk (Accuracy),Dengeli Doğruluk (Bal. Acc),Macro F1,MCC
+1. Çoğunluk Sınıfı (Her Zaman Açık),Baz Model,0.5574,0.3333,0.2386,0.0
+2. Dünkü Yön Takipçisi (Lag 24),Baz Model,0.5944,0.4389,0.4392,0.2025
+3. Geçen Haftanın Yön Takipçisi (Lag 168),Baz Model,0.5742,0.4128,0.4129,0.1624
+4. İstatistiksel Model: Lojistik Regresyon,İstatistiksel,0.4736,0.5235,0.3822,0.1818
+5. Gelişmiş Model: LightGBM Sınıflandırıcı,Makine Öğrenmesi,0.5977,0.4608,0.4452,0.21

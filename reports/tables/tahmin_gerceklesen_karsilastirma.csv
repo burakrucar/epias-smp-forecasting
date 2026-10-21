@@ -1,0 +1,3 @@
+Değişken,Gerçekleşen Karşılığı,Korelasyon,MAPE (%),Yorum
+Yük Tahmini (load_forecast_mw),consumption_mwh,0.96,3.55,Gerçekleşen değer değildir; tipik gün öncesi yük tahmin hatası seviyesindedir (%3-4).
+Rüzgar Tahmini (wind_forecast_mw),wind_actual_mw (gen_total * wind_share),0.9595,19.93,Gerçekleşen değer değildir; rüzgar üretiminde beklenen yüksek hata payını (%19.9) içermektedir.

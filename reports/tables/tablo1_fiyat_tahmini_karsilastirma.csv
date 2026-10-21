@@ -1,0 +1,12 @@
+run_id,Model Adı,Model Ailesi,MAE (TL/MWh),RMSE (TL/MWh),NMAE (%),sMAPE (%),Resmi Baza Göre MAE Farkı (TL),95% Blok Bootstrap GA (TL),Günlük HAC DM t-stat,Günlük HAC DM İki Taraflı p
+run_1792585978,1. Resmi Referans Baz: Son 4 Haftanın Medyan SMF'si,Meşru Baz Model,911.41,1316.31,41.46,67.44,0.0,-,0.0,-
+run_1792585978,2. Haftalık Aynı Saat Bazı (Lag 168),Uzak Baz Model,1011.8,1497.2,46.03,71.34,100.39,"[+55.74, +150.43]",3.978,<0.0001
+run_1792585978,3. Dünkü Aynı Saat PTF (ptf_lag_24),Dünkü PTF Bazı,865.57,1246.04,39.38,67.91,-45.84,"[-94.32, +0.21]",-1.93,0.0536
+run_1792585978,4. Meşru Dinamik Aynı Saat Bazı,Dinamik Baz Model,1065.39,1557.38,48.47,74.04,153.99,"[+102.38, +208.52]",5.793,<0.0001
+run_1792585978,5. GÖP Sonrası Doğal Kural: SMF = PTF,GÖP Sonrası Doğal Baz,682.75,1019.49,31.06,59.78,-228.66,"[-273.15, -179.57]",-9.608,<0.0001
+run_1792585978,6. GÖP Öncesi: Ridge Regresyon (Sabit Model),İstatistiksel,918.13,1104.21,41.77,68.32,6.72,"[-34.87, +52.61]",0.291,0.7709
+run_1792585978,7. GÖP Öncesi: Ridge Regresyon (Genişleyen Pencere),İstatistiksel (Aylık Refit),891.97,1095.85,40.58,68.73,-19.44,"[-57.15, +22.18]",-0.94,0.3474
+run_1792585978,8. GÖP Öncesi: Ridge Ablasyonu (Yük ve Rüzgarsız),İstatistiksel Ablasyon,899.33,1114.42,40.91,69.61,-12.07,"[-45.60, +24.17]",-0.649,0.5161
+run_1792585978,9. GÖP Öncesi: LightGBM Seviye (Sabit Model),Makine Öğrenmesi,947.81,1168.67,43.12,68.68,36.4,"[-17.43, +91.76]",1.256,0.2093
+run_1792585978,10. GÖP Öncesi: LightGBM Seviye (Genişleyen Pencere),Makine Öğrenmesi (Aylık Refit),897.82,1128.03,40.84,69.03,-13.59,"[-53.30, +29.84]",-0.631,0.5280
+run_1792585978,11. GÖP Sonrası: LightGBM Yayılım Modeli (PTF + Spread),Makine Öğrenmesi,730.14,1003.11,33.21,68.27,-181.27,"[-226.45, -131.63]",-7.425,<0.0001

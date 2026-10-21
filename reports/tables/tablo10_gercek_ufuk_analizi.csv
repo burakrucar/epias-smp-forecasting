@@ -1,0 +1,4 @@
+run_id,Kesme Anı (Cutoff),Gerçek Ufuk,Kullanılan Model,Ridge MAE (TL),Resmi Baz (Medyan 4w) MAE (TL),Dünkü PTF (ptf_lag_24) MAE (TL),Son Bilinen SMF Baz MAE (TL)
+run_1792585978,D-1 saat 12:00 (GÖP Öncesi),30 - 33 Saat Öncesi,Ridge Regresyon (Sabit),819.38,799.69,744.1,1519.95
+run_1792585978,D günü saat 06:00 (Gün İçi Sabah),12 - 15 Saat Öncesi,Ridge Regresyon (Sabit),808.42,799.69,744.1,1519.86
+run_1792585978,D günü saat 15:00 (Teslimat Öncesi),3 - 6 Saat Öncesi,Ridge Regresyon (Sabit),818.38,799.69,744.1,1832.81

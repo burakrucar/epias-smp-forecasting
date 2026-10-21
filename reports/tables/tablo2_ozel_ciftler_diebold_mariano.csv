@@ -1,0 +1,7 @@
+run_id,Karşılaştırma Çifti (Model 1 vs Model 2),Model 1 MAE,Model 2 MAE,MAE Farkı (M1 - M2),DM t-stat (MAE),DM İki Taraflı p (MAE),Model 1 RMSE,Model 2 RMSE,RMSE Farkı (M1 - M2),DM t-stat (RMSE),DM İki Taraflı p (RMSE)
+run_1792585978,Ridge (Sabit) vs Resmi Baz (smf_median_4w),918.13,911.41,6.72,0.291,0.7709,1104.21,1316.31,-212.1,-8.44,<0.0001
+run_1792585978,Ridge (Genişleyen) vs Resmi Baz (smf_median_4w),891.97,911.41,-19.44,-0.94,0.3474,1095.85,1316.31,-220.47,-8.931,<0.0001
+run_1792585978,Ridge (Sabit) vs Lag 168,918.13,1011.8,-93.67,-3.438,0.0006,1104.21,1497.2,-392.99,-10.669,<0.0001
+run_1792585978,Ridge (Genişleyen) vs ptf_lag_24,891.97,865.57,26.4,1.326,0.1849,1095.85,1246.04,-150.19,-7.555,<0.0001
+run_1792585978,Ridge (Genişleyen) vs LightGBM (Genişleyen),891.97,897.82,-5.85,-0.487,0.6266,1095.85,1128.03,-32.18,-2.705,0.0068
+run_1792585978,LightGBM Yayılım vs SMF = PTF,730.14,682.75,47.39,7.321,<0.0001,1003.11,1019.49,-16.38,-1.81,0.0703

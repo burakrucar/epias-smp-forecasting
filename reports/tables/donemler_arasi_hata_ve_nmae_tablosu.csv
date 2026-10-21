@@ -1,0 +1,4 @@
+run_id,Dönem,Saat Sayısı,Ortalama SMF (TL),Ridge MAE (TL),Ridge NMAE (%),LightGBM MAE (TL),LightGBM NMAE (%)
+run_1792585978,Eğitim (Train),5904,2153.21,498.46,23.15,363.05,16.86
+run_1792585978,Doğrulama (Val),8760,2421.62,670.91,27.7,635.71,26.25
+run_1792585978,Dış Test (Test),8760,2198.25,918.13,41.77,947.81,43.12

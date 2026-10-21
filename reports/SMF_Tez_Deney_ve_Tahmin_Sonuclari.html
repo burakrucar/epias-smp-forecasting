@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMF ve Dengeleme Yönü Tahmini - Deney Sonuçları Raporu (Revizyon V5)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- MathJax 3 -->
+    <script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --primary-border: #bfdbfe;
+            --accent: #0284c7;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --success-border: #a7f3d0;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --warning-border: #fde68a;
+            --border-color: #e2e8f0;
+            --border-dark: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.65;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 56px 64px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header & Titles */
+        h1 {
+            color: var(--primary);
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 8px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 16px;
+        }
+
+        h2 {
+            color: #1e293b;
+            font-size: 1.45rem;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1.5px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        h3 {
+            color: #334155;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text-main);
+            font-size: 0.96rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 32px 0;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* Code & Monospace */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid #e2e8f0;
+        }
+
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            border: none;
+        }
+
+        /* Tables Styling */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px 0 28px 0;
+            font-size: 0.86rem;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            text-align: left;
+            padding: 11px 14px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: #1e293b;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fbfcfe;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+            transition: background-color 0.15s ease;
+        }
+
+        /* Highlight classes */
+        td strong, th strong {
+            color: var(--primary);
+        }
+
+        /* Blockquotes / Callouts */
+        blockquote {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            color: #1e3a8a;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.94rem;
+        }
+
+        blockquote p {
+            color: inherit;
+            margin-bottom: 8px;
+        }
+
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+        .badge-success {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid var(--success-border);
+        }
+        .badge-info {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+        }
+
+        /* Print friendly */
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="turkiye-elektrik-piyasasinda-smf-ve-dengeleme-yonu-tahmini">TÜRKİYE ELEKTRİK PİYASASINDA SMF VE DENGELEME YÖNÜ TAHMİNİ</h1>
+<h2 id="asama-2-asama-7-deneysel-dogrulama-ve-model-tahmin-sonuclari-raporu-revizyon-v5">AŞAMA 2 - AŞAMA 7 DENEYSEL DOĞRULAMA VE MODEL TAHMİN SONUÇLARI RAPORU (REVİZYON V5)</h2>
+<p><strong>Öğrenci:</strong> Burak Ramazan Uçar<br />
+<strong>Bölüm:</strong> Matematik Bölümü Lisans Programı<br />
+<strong>Tarih:</strong> 21 Ekim 2026 (Revizyon V5 - Tek Merkezli Tahmin Parquet'si ve Programatik Doğrulama)<br />
+<strong>Çalışma Kimliği (Run ID):</strong> <code>run_1792585978</code><br />
+<strong>Tahmin Veri Kaynağı:</strong> <code>data/processed/test_predictions_master.parquet</code> (8.760 saatlik tek ana dosya)<br />
+<strong>Veri Kaynağı:</strong> EPİAŞ Şeffaflık Platformu Resmi Piyasa Veri Seti<br />
+<strong>Zaman Kapsamı:</strong><br />
+<em> </em><em>Ham Veri:</em><em> 24.096 saat / 1.004 gün (01.01.2024 - 30.09.2026)<br />
+</em> <strong>Kullanılabilir Veri:</strong> 23.424 saat / 976 gün (29.01.2024 - 30.09.2026; 4 haftalık / 672 saatlik gecikme ısınma penceresi arındırılmıştır)<br />
+<em> </em><em>Eğitim Kümesi (Train):</em><em> 29.01.2024 - 30.09.2024 (5.904 saat)<br />
+</em> <strong>Doğrulama Kümesi (Validation):</strong> 01.10.2024 - 30.09.2025 (8.760 saat / 365 gün)<br />
+<em> </em><em>Eğitim + Doğrulama (Full Train):</em><em> 29.01.2024 - 30.09.2025 (14.664 saat; test tahminlerini üreten nihai modeller bu birleşik veriyle eğitilmiştir)<br />
+</em> <strong>Dış Test Kümesi (Test):</strong> 01.10.2025 - 30.09.2026 (8.760 saat / 365 gün)<br />
+<strong>Test Dönemi Fiyat Seviyesi:</strong> Ortalama SMF = <strong>2.198,25 TL/MWh</strong> | Medyan SMF = <strong>2.598,51 TL/MWh</strong>  </p>
+<hr />
+<h2 id="1-yontem-zaman-cizelgesi-ve-sizintisiz-ozellik-mimarisi">1. YÖNTEM, ZAMAN ÇİZELGESİ VE SIZINTISIZ ÖZELLİK MİMARİSİ</h2>
+<h3 id="a-piyasa-zaman-cizelgesi-ve-kesme-an-kurgusu">A. Piyasa Zaman Çizelgesi ve Kesme Anı Kurgusu</h3>
+<p>Ana tahmin kesme anı teslimat gününden bir gün önce ($D-1$) saat <strong>12:00</strong> olarak tanımlanmıştır. Hedef dönem teslimat gününün ($D$) 24 saatidir ($h = 12, 13, \dots, 35$ saatlik gerçek tahmin ufku).</p>
+<ul>
+<li><strong>SMF ve Sistem Yönü Yayın Kuralı:</strong> EPİAŞ piyasa mekanizmasında SMF ve Sistem Yönü (<code>systemStatus</code>) gerçek zamanlı dengeleme verileridir ve teslimat saati tamamlandıktan yaklaşık 2 saat sonra ilan edilir. $D-1$ saat 12:00 kesme anında kamuya açıklanmış en son saat muhafazakar olarak <strong>09:00</strong> ($t - 15 - h$) olarak tanımlanmıştır.</li>
+<li><strong>PTF Yayın Kuralı:</strong> $D-1$ gününün 24 saatlik PTF değerleri, $D-2$ günü saat 14:00'te kesinleşmektedir. Dolayısıyla $D-1$ 12:00 kesme anında $D-1$'in 24 saatinin tamamı kamuya açıktır; bu sebeple <code>ptf_lag_24</code> özelliği meşrudur. Buna karşılık teslimat gününün ($D$) PTF'si $D-1$ saat 14:00'te açıklandığından, GÖP öncesi kesme anında model özelliklerinde yer alamaz.</li>
+<li><strong><code>smf_clean_same_hour_7d_mean</code> Özelliği:</strong> Bu özellik, teslimat saatinden 48, 72, 96, 120, 144 ve 168 saat önceki 6 geçmiş günün aynı saat ortalamasıdır. Kesme anında $D-1$ gününün ilgili saatleri henüz kesinleşmediğinden (özellikle akşam saatleri), sızıntıyı önlemek adına $D-1$ dahil edilmemiş ve en küçük gecikme 48 saat (2 tam gün önce) olarak tutulmuştur. İsimlendirmesi 7 gün çağrışımı yapsa da fiilen 6 gecikme barındırmaktadır.</li>
+</ul>
+<h3 id="tablo-20-model-ozelliginin-yayn-kural-ve-gecikme-takvimi">Tablo: 20 Model Özelliğinin Yayın Kuralı ve Gecikme Takvimi</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Sıra</th>
+<th style="text-align: left;">Özellik Adı</th>
+<th style="text-align: left;">Açıklama</th>
+<th style="text-align: left;">Kaynak Veri</th>
+<th style="text-align: center;">Kesme Anında Gecikme (Lag)</th>
+<th style="text-align: left;">Sızıntı Riski / Kural Notu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1-24</td>
+<td style="text-align: left;"><code>hour_00</code> - <code>hour_23</code></td>
+<td style="text-align: left;">Saatlik kukla değişkenler (One-Hot)</td>
+<td style="text-align: left;">Takvim</td>
+<td style="text-align: center;">Bilinen takvim</td>
+<td style="text-align: left;">Sızıntı riski yok (deterministik).</td>
+</tr>
+<tr>
+<td style="text-align: center;">25</td>
+<td style="text-align: left;"><code>is_weekend</code></td>
+<td style="text-align: left;">Hafta sonu göstergesi (Cumartesi-Pazar: 1)</td>
+<td style="text-align: left;">Takvim</td>
+<td style="text-align: center;">Bilinen takvim</td>
+<td style="text-align: left;">Sızıntı riski yok (deterministik).</td>
+</tr>
+<tr>
+<td style="text-align: center;">26-27</td>
+<td style="text-align: left;"><code>quarter_sin</code>, <code>quarter_cos</code></td>
+<td style="text-align: left;">Yıllık/çeyreklik harmonik mevsimsellik</td>
+<td style="text-align: left;">Takvim</td>
+<td style="text-align: center;">Bilinen takvim</td>
+<td style="text-align: left;">Sızıntı riski yok (deterministik).</td>
+</tr>
+<tr>
+<td style="text-align: center;">28</td>
+<td style="text-align: left;"><code>load_forecast_mw</code></td>
+<td style="text-align: left;">Gün öncesi toplam tüketim yük tahmini</td>
+<td style="text-align: left;">EPİAŞ Yük Tahmini</td>
+<td style="text-align: center;">$D-1$ 10:30 - 11:30</td>
+<td style="text-align: left;">Kesme anından önce yayımlanan resmi tahmin.</td>
+</tr>
+<tr>
+<td style="text-align: center;">29</td>
+<td style="text-align: left;"><code>forecast_wind_ratio</code></td>
+<td style="text-align: left;">Rüzgar tahmini / Toplam yük oranı</td>
+<td style="text-align: left;">EPİAŞ Rüzgar/Yük</td>
+<td style="text-align: center;">$D-1$ 10:30 - 11:30</td>
+<td style="text-align: left;">Oran olarak ölçeklendirilmiş üretim tahmini.</td>
+</tr>
+<tr>
+<td style="text-align: center;">30</td>
+<td style="text-align: left;"><code>ptf_lag_24</code></td>
+<td style="text-align: left;">Dünkü aynı saat PTF</td>
+<td style="text-align: left;">EPİAŞ GÖP</td>
+<td style="text-align: center;">24 saat</td>
+<td style="text-align: left;">$D-2$ 14:00'te açıklanır; kesme anında 100% meşru.</td>
+</tr>
+<tr>
+<td style="text-align: center;">31</td>
+<td style="text-align: left;"><code>ptf_lag_48</code></td>
+<td style="text-align: left;">İki gün önceki aynı saat PTF</td>
+<td style="text-align: left;">EPİAŞ GÖP</td>
+<td style="text-align: center;">48 saat</td>
+<td style="text-align: left;">$D-3$ 14:00'te açıklanır; 100% meşru.</td>
+</tr>
+<tr>
+<td style="text-align: center;">32</td>
+<td style="text-align: left;"><code>ptf_lag_168</code></td>
+<td style="text-align: left;">Geçen haftaki aynı saat PTF</td>
+<td style="text-align: left;">EPİAŞ GÖP</td>
+<td style="text-align: center;">168 saat</td>
+<td style="text-align: left;">7 gün önce açıklanır; 100% meşru.</td>
+</tr>
+<tr>
+<td style="text-align: center;">33</td>
+<td style="text-align: left;"><code>latest_known_smf</code></td>
+<td style="text-align: left;">Kesme anında bilinen en son SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">$15 + h$ saat (D-1 09:00)</td>
+<td style="text-align: left;">Hedef saate göre 15 ila 38 saat öncesidir.</td>
+</tr>
+<tr>
+<td style="text-align: center;">34</td>
+<td style="text-align: left;"><code>legit_same_hour_smf</code></td>
+<td style="text-align: left;">Meşru en son aynı saat SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">$h \le 9 \rightarrow 24$h; $h \ge 10 \rightarrow 48$h</td>
+<td style="text-align: left;">Saat 09:00 sonrası için D-2 kullanılır.</td>
+</tr>
+<tr>
+<td style="text-align: center;">35</td>
+<td style="text-align: left;"><code>smf_lag_48</code></td>
+<td style="text-align: left;">2 gün önceki teslimat saati SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">48 saat</td>
+<td style="text-align: left;">Kesme anında tamamen kesinleşmiştir.</td>
+</tr>
+<tr>
+<td style="text-align: center;">36</td>
+<td style="text-align: left;"><code>smf_lag_72</code></td>
+<td style="text-align: left;">3 gün önceki teslimat saati SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">72 saat</td>
+<td style="text-align: left;">Kesme anında tamamen kesinleşmiştir.</td>
+</tr>
+<tr>
+<td style="text-align: center;">37</td>
+<td style="text-align: left;"><code>smf_lag_168</code></td>
+<td style="text-align: left;">1 hafta önceki aynı saat SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">168 saat</td>
+<td style="text-align: left;">Kesme anında tamamen kesinleşmiştir.</td>
+</tr>
+<tr>
+<td style="text-align: center;">38</td>
+<td style="text-align: left;"><code>smf_median_4w</code></td>
+<td style="text-align: left;">Son 4 haftanın aynı saat medyan SMF</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">Lags [168, 336, 504, 672]</td>
+<td style="text-align: left;">Resmi referans baz modelin temel girdisi.</td>
+</tr>
+<tr>
+<td style="text-align: center;">39</td>
+<td style="text-align: left;"><code>smf_clean_same_hour_7d_mean</code></td>
+<td style="text-align: left;">6 günün aynı saat ortalaması</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">Lags [48, 72, 96, 120, 144, 168]</td>
+<td style="text-align: left;"><strong>Not: İsmi 7 gün çağrıştırsa da sızıntıyı önlemek için 6 gecikme içerir.</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">40</td>
+<td style="text-align: left;"><code>dir_open_ratio_4w</code></td>
+<td style="text-align: left;">Son 4 haftanın aynı saat Açık oranı</td>
+<td style="text-align: left;">EPİAŞ DGP</td>
+<td style="text-align: center;">Lags [168, 336, 504, 672]</td>
+<td style="text-align: left;">Yön modelleri için iklimsel frekans bazı.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b-gelecek-veri-zehirleme-testi-poison-test">B. Gelecek Veri Zehirleme Testi (Poison Test)</h3>
+<p>Özellik matrisi üretim kodunun point-in-time güvenilirliğini test etmek amacıyla, rastgele seçilen test günlerinde teslimat gününden önceki kesme anından ($D-1$ saat 12:00) sonraki tüm gerçekleşen SMF ve yön verileri, ayrıca $D$ gününün tüm PTF verileri <code>NaN</code> ile zehirlenmiştir.<br />
+* Zehirli ham veri üzerinden özellik matrisi baştan çıkarılmıştır.<br />
+* Hedef $D$ gününün 24 saatlik özellik matrisi incelendiğinde <strong>hiçbir özellik sütununda <code>NaN</code> değer oluşmadığı</strong> ve zehirsiz orijinal özellik matrisi ile farkın <strong>$0.0$</strong> olduğu assert ile programatik olarak teyit edilmiştir.</p>
+<hr />
+<h2 id="2-donemler-arasi-model-hata-ve-nmae-karsilastirmasi">2. DÖNEMLER ARASI MODEL HATA VE NMAE KARŞILAŞTIRMASI</h2>
+<p>Nihai modeller, test kümesi (01.10.2025 - 30.09.2026) öncesindeki <strong>14.664 saatlik</strong> birleşik dönem (Eğitim + Doğrulama: 29.01.2024 - 30.09.2025) üzerinde eğitilmiştir. Aşağıdaki tablo, modellerin eğitim, doğrulama ve dış test dönemlerindeki seviyeden arındırılmış normalize mutlak hatalarını (NMAE) özetlemektedir.</p>
+<h3 id="tablo-8-donemler-aras-hata-ve-nmae-daglm-donemler_arasi_hata_ve_nmae_tablosucsv">Tablo 8: Dönemler Arası Hata ve NMAE Dağılımı (<code>donemler_arasi_hata_ve_nmae_tablosu.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Dönem</th>
+<th style="text-align: center;">Saat Sayısı</th>
+<th style="text-align: center;">Ortalama SMF (TL/MWh)</th>
+<th style="text-align: center;">Ridge MAE (TL/MWh)</th>
+<th style="text-align: center;">Ridge NMAE (%)</th>
+<th style="text-align: center;">LightGBM MAE (TL/MWh)</th>
+<th style="text-align: center;">LightGBM NMAE (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Eğitim (Train)</strong></td>
+<td style="text-align: center;">5.904</td>
+<td style="text-align: center;">2.153,21</td>
+<td style="text-align: center;">498,46</td>
+<td style="text-align: center;">%23,15</td>
+<td style="text-align: center;">363,05</td>
+<td style="text-align: center;">%16,86</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Doğrulama (Val)</strong></td>
+<td style="text-align: center;">8.760</td>
+<td style="text-align: center;">2.421,62</td>
+<td style="text-align: center;">670,91</td>
+<td style="text-align: center;">%27,70</td>
+<td style="text-align: center;">635,71</td>
+<td style="text-align: center;">%26,25</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dış Test (Test)</strong></td>
+<td style="text-align: center;">8.760</td>
+<td style="text-align: center;">2.198,25</td>
+<td style="text-align: center;">918,13</td>
+<td style="text-align: center;">%41,77</td>
+<td style="text-align: center;">947,81</td>
+<td style="text-align: center;">%43,12</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Gözlem:</strong> LightGBM modeli eğitim kümesinde Ridge'e kıyasla belirgin şekilde daha düşük hata üretmiştir (363,05 TL vs 498,46 TL; NMAE %16,86 vs %23,15). Ancak doğrulama kümesinde bu fark daralmış (635,71 TL vs 670,91 TL), dış test kümesinde ise LightGBM'in hatası Ridge'in üzerine çıkmıştır (947,81 TL vs 918,13 TL). Bu durum, ağaç tabanlı karmaşık modellerin dağılım kaymalarında ve fiyat rejimi değişimlerinde doğrusal düzenlileştirilmiş modellere (Ridge) göre daha yüksek genelleme bozulması yaşayabildiğini göstermektedir.</p>
+</blockquote>
+<hr />
+<h2 id="3-fiyat-tahmini-karsilastirma-sonuclari">3. FİYAT TAHMİNİ KARŞILAŞTIRMA SONUÇLARI</h2>
+<p>Diebold-Mariano (DM) testleri, saatlik serilerdeki otokorelasyon ve heteroskedastisiteyi arındırmak için <strong>günlük ortalama kayıplar (N = 365 gün)</strong> üzerinden <strong>Newey-West (HAC, 7 lag)</strong> standart hatalarıyla hesaplanmıştır. Kayıp farkı yönü $d_t = L(\text{Model}) - L(\text{Baz})$ şeklinde tanımlanmış olup <strong>negatif değerler modelin daha düşük hataya sahip olduğunu</strong> ifade etmektedir. Güven aralıkları 7 günlük blok bootstrap (1.000 replikasyon) ile üretilmiştir.</p>
+<h3 id="tablo-1-fiyat-tahmini-modelleri-karslastrma-tablosu-tablo1_fiyat_tahmini_karsilastirmacsv">Tablo 1: Fiyat Tahmini Modelleri Karşılaştırma Tablosu (<code>tablo1_fiyat_tahmini_karsilastirma.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model Adı</th>
+<th style="text-align: left;">Model Ailesi</th>
+<th style="text-align: center;">MAE (TL/MWh)</th>
+<th style="text-align: center;">RMSE (TL/MWh)</th>
+<th style="text-align: center;">NMAE (%)</th>
+<th style="text-align: center;">sMAPE (%)</th>
+<th style="text-align: center;">Resmi Baza Göre MAE Farkı (TL)</th>
+<th style="text-align: center;">95% Blok Bootstrap GA (TL)</th>
+<th style="text-align: center;">Günlük HAC DM $t$-stat</th>
+<th style="text-align: center;">Günlük HAC DM İki Taraflı $p$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Resmi Referans Baz: smf_median_4w</strong></td>
+<td style="text-align: left;">Meşru Baz Model</td>
+<td style="text-align: center;"><strong>911,41</strong></td>
+<td style="text-align: center;"><strong>1.316,31</strong></td>
+<td style="text-align: center;"><strong>%41,46</strong></td>
+<td style="text-align: center;"><strong>%67,44</strong></td>
+<td style="text-align: center;"><strong>0,00</strong></td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">0,000</td>
+<td style="text-align: center;">-</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Haftalık Aynı Saat Bazı (Lag 168)</strong></td>
+<td style="text-align: left;">Uzak Baz Model</td>
+<td style="text-align: center;">1.011,80</td>
+<td style="text-align: center;">1.497,20</td>
+<td style="text-align: center;">%46,03</td>
+<td style="text-align: center;">%71,34</td>
+<td style="text-align: center;">+100,39</td>
+<td style="text-align: center;">[+55,74, +150,43]</td>
+<td style="text-align: center;">+3,978</td>
+<td style="text-align: center;">$p &lt; 0.0001$</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. Dünkü Aynı Saat PTF (ptf_lag_24)</strong></td>
+<td style="text-align: left;">Dünkü PTF Bazı</td>
+<td style="text-align: center;">865,57</td>
+<td style="text-align: center;">1.246,04</td>
+<td style="text-align: center;">%39,38</td>
+<td style="text-align: center;">%67,91</td>
+<td style="text-align: center;">-45,84</td>
+<td style="text-align: center;">[-94,32, +0,21]</td>
+<td style="text-align: center;">-1,930</td>
+<td style="text-align: center;">0,0536</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. Meşru Dinamik Aynı Saat Bazı</strong></td>
+<td style="text-align: left;">Dinamik Baz Model</td>
+<td style="text-align: center;">1.065,39</td>
+<td style="text-align: center;">1.557,38</td>
+<td style="text-align: center;">%48,47</td>
+<td style="text-align: center;">%74,04</td>
+<td style="text-align: center;">+153,99</td>
+<td style="text-align: center;">[+102,38, +208,52]</td>
+<td style="text-align: center;">+5,793</td>
+<td style="text-align: center;">$p &lt; 0.0001$</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. GÖP Sonrası Doğal Kural: SMF = PTF</strong></td>
+<td style="text-align: left;">GÖP Sonrası Doğal Baz</td>
+<td style="text-align: center;">682,75</td>
+<td style="text-align: center;">1.019,49</td>
+<td style="text-align: center;">%31,06</td>
+<td style="text-align: center;">%59,78</td>
+<td style="text-align: center;">-228,66</td>
+<td style="text-align: center;">[-273,15, -179,57]</td>
+<td style="text-align: center;">-9,608</td>
+<td style="text-align: center;">$p &lt; 0.0001$</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>6. GÖP Öncesi: Ridge (Sabit Model)</strong></td>
+<td style="text-align: left;">İstatistiksel</td>
+<td style="text-align: center;">918,13</td>
+<td style="text-align: center;">1.104,21</td>
+<td style="text-align: center;">%41,77</td>
+<td style="text-align: center;">%68,32</td>
+<td style="text-align: center;">+6,72</td>
+<td style="text-align: center;">[-34,87, +52,61]</td>
+<td style="text-align: center;">+0,291</td>
+<td style="text-align: center;">0,7709</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>7. GÖP Öncesi: Ridge (Genişleyen Pencere)</strong></td>
+<td style="text-align: left;">İstat. (Aylık Refit)</td>
+<td style="text-align: center;"><strong>891,97</strong></td>
+<td style="text-align: center;"><strong>1.095,85</strong></td>
+<td style="text-align: center;"><strong>%40,58</strong></td>
+<td style="text-align: center;"><strong>%68,73</strong></td>
+<td style="text-align: center;"><strong>-19,44</strong></td>
+<td style="text-align: center;"><strong>[-57,15, +22,18]</strong></td>
+<td style="text-align: center;"><strong>-0,940</strong></td>
+<td style="text-align: center;"><strong>0,3474</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>8. GÖP Öncesi: Ridge Ablasyonu (Yük/Rüzgarsız)</strong></td>
+<td style="text-align: left;">İstat. Ablasyon</td>
+<td style="text-align: center;">899,33</td>
+<td style="text-align: center;">1.114,42</td>
+<td style="text-align: center;">%40,91</td>
+<td style="text-align: center;">%69,61</td>
+<td style="text-align: center;">-12,07</td>
+<td style="text-align: center;">[-45,60, +24,17]</td>
+<td style="text-align: center;">-0,649</td>
+<td style="text-align: center;">0,5161</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>9. GÖP Öncesi: LightGBM (Sabit Model)</strong></td>
+<td style="text-align: left;">Makine Öğrenmesi</td>
+<td style="text-align: center;">947,81</td>
+<td style="text-align: center;">1.168,67</td>
+<td style="text-align: center;">%43,12</td>
+<td style="text-align: center;">%68,68</td>
+<td style="text-align: center;">+36,40</td>
+<td style="text-align: center;">[-17,43, +91,76]</td>
+<td style="text-align: center;">+1,256</td>
+<td style="text-align: center;">0,2093</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>10. GÖP Öncesi: LightGBM (Genişleyen Pencere)</strong></td>
+<td style="text-align: left;">Makine Öğr. (Aylık Refit)</td>
+<td style="text-align: center;">897,82</td>
+<td style="text-align: center;">1.128,03</td>
+<td style="text-align: center;">%40,84</td>
+<td style="text-align: center;">%69,03</td>
+<td style="text-align: center;">-13,59</td>
+<td style="text-align: center;">[-53,30, +29,84]</td>
+<td style="text-align: center;">-0,631</td>
+<td style="text-align: center;">0,5280</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>11. GÖP Sonrası: LightGBM Yayılım Modeli</strong></td>
+<td style="text-align: left;">Makine Öğrenmesi</td>
+<td style="text-align: center;">730,14</td>
+<td style="text-align: center;">1.003,11</td>
+<td style="text-align: center;">%33,21</td>
+<td style="text-align: center;">%68,27</td>
+<td style="text-align: center;">-181,27</td>
+<td style="text-align: center;">[-226,45, -131,63]</td>
+<td style="text-align: center;">-7,425</td>
+<td style="text-align: center;">$p &lt; 0.0001$</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tablo-2-ozel-model-ciftleri-icin-iki-yonlu-newey-west-hac-diebold-mariano-testleri-tablo2_ozel_ciftler_diebold_marianocsv">Tablo 2: Özel Model Çiftleri İçin İki Yönlü Newey-West (HAC) Diebold-Mariano Testleri (<code>tablo2_ozel_ciftler_diebold_mariano.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Karşılaştırma Çifti (Model 1 vs Model 2)</th>
+<th style="text-align: center;">Model 1 MAE</th>
+<th style="text-align: center;">Model 2 MAE</th>
+<th style="text-align: center;">MAE Farkı (M1 - M2)</th>
+<th style="text-align: center;">DM $t$ (MAE)</th>
+<th style="text-align: center;">DM İki Taraflı $p$ (MAE)</th>
+<th style="text-align: center;">Model 1 RMSE</th>
+<th style="text-align: center;">Model 2 RMSE</th>
+<th style="text-align: center;">RMSE Farkı (M1 - M2)</th>
+<th style="text-align: center;">DM $t$ (RMSE)</th>
+<th style="text-align: center;">DM İki Taraflı $p$ (RMSE)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Ridge (Sabit) vs Resmi Baz (smf_median_4w)</strong></td>
+<td style="text-align: center;">918,13</td>
+<td style="text-align: center;">911,41</td>
+<td style="text-align: center;">+6,72</td>
+<td style="text-align: center;">+0,291</td>
+<td style="text-align: center;">0,7709</td>
+<td style="text-align: center;">1.104,21</td>
+<td style="text-align: center;">1.316,31</td>
+<td style="text-align: center;"><strong>-212,10</strong></td>
+<td style="text-align: center;">-8,440</td>
+<td style="text-align: center;"><strong>$p &lt; 0.0001$</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ridge (Genişleyen) vs Resmi Baz (smf_median_4w)</strong></td>
+<td style="text-align: center;">891,97</td>
+<td style="text-align: center;">911,41</td>
+<td style="text-align: center;">-19,44</td>
+<td style="text-align: center;">-0,940</td>
+<td style="text-align: center;">0,3474</td>
+<td style="text-align: center;">1.095,85</td>
+<td style="text-align: center;">1.316,31</td>
+<td style="text-align: center;"><strong>-220,47</strong></td>
+<td style="text-align: center;">-8,931</td>
+<td style="text-align: center;"><strong>$p &lt; 0.0001$</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ridge (Sabit) vs Lag 168</strong></td>
+<td style="text-align: center;">918,13</td>
+<td style="text-align: center;">1.011,80</td>
+<td style="text-align: center;">-93,67</td>
+<td style="text-align: center;">-3,438</td>
+<td style="text-align: center;">0,0006</td>
+<td style="text-align: center;">1.104,21</td>
+<td style="text-align: center;">1.497,20</td>
+<td style="text-align: center;"><strong>-392,99</strong></td>
+<td style="text-align: center;">-10,669</td>
+<td style="text-align: center;"><strong>$p &lt; 0.0001$</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ridge (Genişleyen) vs ptf_lag_24</strong></td>
+<td style="text-align: center;">891,97</td>
+<td style="text-align: center;">865,57</td>
+<td style="text-align: center;">+26,40</td>
+<td style="text-align: center;">+1,326</td>
+<td style="text-align: center;">0,1849</td>
+<td style="text-align: center;">1.095,85</td>
+<td style="text-align: center;">1.246,04</td>
+<td style="text-align: center;"><strong>-150,19</strong></td>
+<td style="text-align: center;">-7,555</td>
+<td style="text-align: center;"><strong>$p &lt; 0.0001$</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ridge (Genişleyen) vs LightGBM (Genişleyen)</strong></td>
+<td style="text-align: center;">891,97</td>
+<td style="text-align: center;">897,82</td>
+<td style="text-align: center;">-5,85</td>
+<td style="text-align: center;">-0,487</td>
+<td style="text-align: center;">0,6266</td>
+<td style="text-align: center;">1.095,85</td>
+<td style="text-align: center;">1.128,03</td>
+<td style="text-align: center;"><strong>-32,18</strong></td>
+<td style="text-align: center;">-2,705</td>
+<td style="text-align: center;"><strong>0,0068</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>LightGBM Yayılım vs SMF = PTF</strong></td>
+<td style="text-align: center;">730,14</td>
+<td style="text-align: center;">682,75</td>
+<td style="text-align: center;"><strong>+47,39</strong></td>
+<td style="text-align: center;">+7,321</td>
+<td style="text-align: center;"><strong>$p &lt; 0.0001$</strong></td>
+<td style="text-align: center;">1.003,11</td>
+<td style="text-align: center;">1.019,49</td>
+<td style="text-align: center;"><strong>-16,38</strong></td>
+<td style="text-align: center;">-1,810</td>
+<td style="text-align: center;">0,0703</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Temel İstatistiksel Çıkarımlar:</strong><br />
+1. <strong>MAE Metriğinde Anlamlı Kazanç Yoktur:</strong> GÖP öncesi kesme anında ne Sabit Ridge ($p = 0.7709$), ne Genişleyen Ridge ($p = 0.3474$), ne de Genişleyen LightGBM ($p = 0.5280$) resmi referans baz modele (<code>smf_median_4w</code>) karşı mutlak hata açısından istatistiki olarak anlamlı bir üstünlük sağlayamamaktadır. Benzer şekilde <code>ptf_lag_24</code> bazına karşı da MAE farkı anlamsızdır ($p = 0.1849$).<br />
+2. <strong>RMSE Metriğinde Güçlü Kazanç Vardır:</strong> Buna karşın karesel kayıp (RMSE) açısından modeller aşırı uç fiyat şoklarını naif medyan bazına kıyasla çok daha iyi törpülemektedir. Genişleyen Ridge modeli, resmi baza kıyasla karesel hatada 220,47 TL/MWh ($p &lt; 0.0001$), <code>ptf_lag_24</code> bazına kıyasla ise 150,19 TL/MWh ($p &lt; 0.0001$) hata azalışı sağlamaktadır.<br />
+3. <strong>GÖP Sonrası Yayılım Modeli Karşıtlığı:</strong> PTF açıklandıktan sonra uygulanan $SMF = PTF$ basit kuralı MAE metriğinde LightGBM yayılım modelinden 47,39 TL daha başarılıdır ($p &lt; 0.0001$). LightGBM ise RMSE metriğinde 16,38 TL daha düşük hata vermektedir ($p = 0.0703$).</p>
+</blockquote>
+<hr />
+<h2 id="4-aylik-ve-saatlik-hata-dagilimi-ve-baz-karsilastirmasi">4. AYLIK VE SAATLİK HATA DAĞILIMI VE BAZ KARŞILAŞTIRMASI</h2>
+<p>Aşağıdaki tablolar, modellerin ve baz modellerin 12 ay ve 24 saat üzerindeki ayrışmasını göstermektedir. Ridge Sabit, Ridge Genişleyen, LightGBM Genişleyen, Resmi Baz (<code>smf_median_4w</code>) ve Dünkü PTF (<code>ptf_lag_24</code>) birlikte sunulmuştur.</p>
+<h3 id="tablo-3-12-aylk-hata-ve-ortalama-hata-mebias-daglm-tablo3_aylik_hata_ve_biascsv">Tablo 3: 12 Aylık Hata ve Ortalama Hata (ME/Bias) Dağılımı (<code>tablo3_aylik_hata_ve_bias.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Ay</th>
+<th style="text-align: center;">Gözlem</th>
+<th style="text-align: center;">Ortalama SMF (TL)</th>
+<th style="text-align: center;">Ridge Sabit ME/Bias (TL)</th>
+<th style="text-align: center;">Ridge Sabit MAE (TL)</th>
+<th style="text-align: center;">Ridge Genişleyen MAE (TL)</th>
+<th style="text-align: center;">Resmi Baz (Medyan 4w) MAE (TL)</th>
+<th style="text-align: center;">Dünkü PTF (ptf_lag_24) MAE (TL)</th>
+<th style="text-align: center;">LightGBM Genişleyen MAE (TL)</th>
+<th style="text-align: center;">Ridge(Gen.) - Resmi Baz Farkı (TL)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>2025-10</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">2.599,90</td>
+<td style="text-align: center;">-92,53</td>
+<td style="text-align: center;">683,04</td>
+<td style="text-align: center;">683,04</td>
+<td style="text-align: center;">633,32</td>
+<td style="text-align: center;">641,39</td>
+<td style="text-align: center;">655,26</td>
+<td style="text-align: center;">+49,72</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2025-11</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">2.765,46</td>
+<td style="text-align: center;">-271,05</td>
+<td style="text-align: center;">719,38</td>
+<td style="text-align: center;">706,93</td>
+<td style="text-align: center;">580,64</td>
+<td style="text-align: center;">616,11</td>
+<td style="text-align: center;">587,09</td>
+<td style="text-align: center;">+126,29</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2025-12</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">2.911,50</td>
+<td style="text-align: center;">-208,67</td>
+<td style="text-align: center;">626,22</td>
+<td style="text-align: center;">596,78</td>
+<td style="text-align: center;">507,69</td>
+<td style="text-align: center;">489,23</td>
+<td style="text-align: center;">564,92</td>
+<td style="text-align: center;">+89,09</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-01</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">2.760,64</td>
+<td style="text-align: center;">-141,94</td>
+<td style="text-align: center;">652,07</td>
+<td style="text-align: center;">632,75</td>
+<td style="text-align: center;">597,45</td>
+<td style="text-align: center;">645,15</td>
+<td style="text-align: center;">646,95</td>
+<td style="text-align: center;">+35,30</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-02</strong></td>
+<td style="text-align: center;">672</td>
+<td style="text-align: center;">1.850,99</td>
+<td style="text-align: center;">+352,62</td>
+<td style="text-align: center;">1.016,24</td>
+<td style="text-align: center;">1.019,81</td>
+<td style="text-align: center;">1.150,53</td>
+<td style="text-align: center;">1.142,40</td>
+<td style="text-align: center;">1.012,90</td>
+<td style="text-align: center;"><strong>-130,72</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-03</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">1.687,62</td>
+<td style="text-align: center;">+182,99</td>
+<td style="text-align: center;">1.017,02</td>
+<td style="text-align: center;">1.007,46</td>
+<td style="text-align: center;">1.216,53</td>
+<td style="text-align: center;">1.028,53</td>
+<td style="text-align: center;">1.031,16</td>
+<td style="text-align: center;"><strong>-209,07</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-04</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">1.185,86</td>
+<td style="text-align: center;">+403,24</td>
+<td style="text-align: center;">1.186,13</td>
+<td style="text-align: center;">1.127,50</td>
+<td style="text-align: center;">1.148,25</td>
+<td style="text-align: center;">921,44</td>
+<td style="text-align: center;">1.255,67</td>
+<td style="text-align: center;"><strong>-20,74</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-05</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">875,30</td>
+<td style="text-align: center;">+389,76</td>
+<td style="text-align: center;">1.141,77</td>
+<td style="text-align: center;">1.026,39</td>
+<td style="text-align: center;">938,18</td>
+<td style="text-align: center;">818,64</td>
+<td style="text-align: center;">1.007,57</td>
+<td style="text-align: center;">+88,21</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-06</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">1.761,27</td>
+<td style="text-align: center;">-81,19</td>
+<td style="text-align: center;">1.234,57</td>
+<td style="text-align: center;">1.215,43</td>
+<td style="text-align: center;">1.197,26</td>
+<td style="text-align: center;">1.220,57</td>
+<td style="text-align: center;">1.160,77</td>
+<td style="text-align: center;">+18,17</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-07</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">2.515,33</td>
+<td style="text-align: center;">+124,87</td>
+<td style="text-align: center;">945,97</td>
+<td style="text-align: center;">923,07</td>
+<td style="text-align: center;">1.129,39</td>
+<td style="text-align: center;">934,47</td>
+<td style="text-align: center;">1.003,71</td>
+<td style="text-align: center;"><strong>-206,32</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-08</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">2.905,90</td>
+<td style="text-align: center;">-112,69</td>
+<td style="text-align: center;">805,86</td>
+<td style="text-align: center;">795,62</td>
+<td style="text-align: center;">836,10</td>
+<td style="text-align: center;">904,02</td>
+<td style="text-align: center;">889,61</td>
+<td style="text-align: center;"><strong>-40,48</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-09</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">2.507,16</td>
+<td style="text-align: center;">+95,76</td>
+<td style="text-align: center;">1.014,28</td>
+<td style="text-align: center;">996,65</td>
+<td style="text-align: center;">1.034,85</td>
+<td style="text-align: center;">1.063,21</td>
+<td style="text-align: center;">982,07</td>
+<td style="text-align: center;"><strong>-38,21</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Ağırlıklı Ort.</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>2.198,25</strong></td>
+<td style="text-align: center;"><strong>+62,55</strong></td>
+<td style="text-align: center;"><strong>918,13</strong></td>
+<td style="text-align: center;"><strong>891,97</strong></td>
+<td style="text-align: center;"><strong>911,41</strong></td>
+<td style="text-align: center;"><strong>865,57</strong></td>
+<td style="text-align: center;"><strong>897,82</strong></td>
+<td style="text-align: center;"><strong>-19,44</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Aylık Dağılım İncelemesi:</strong><br />
+* Ridge (Genişleyen Pencere) modeli, Resmi Baza (<code>smf_median_4w</code>) karşı 12 ayın <strong>6'sında</strong> daha düşük MAE vermiştir (Şubat, Mart, Nisan, Temmuz, Ağustos, Eylül).<br />
+* Dünkü PTF (<code>ptf_lag_24</code>) bazına karşı ise 12 ayın <strong>7'sinde</strong> daha düşük MAE elde etmiştir (Ocak, Şubat, Mart, Haziran, Temmuz, Ağustos, Eylül).<br />
+* <strong>Mayıs 2026 Ayrışması:</strong> Mayıs ayında hidrolojik bolluk ve güneş üretimi nedeniyle ortalama SMF 875,30 TL'ye düşmüştür. Model geçmiş yüksek fiyatlı eğitim verisinin etkisiyle +389,76 TL pozitif bias (aşırı tahmin) üretmiş, MAE 1.026,39 TL seviyesinde kalmıştır.</p>
+</blockquote>
+<h3 id="tablo-4-24-saatin-tamam-icin-saatlik-mae-daglm-tablo4_saatlik_24_saat_maecsv">Tablo 4: 24 Saatin Tamamı İçin Saatlik MAE Dağılımı (<code>tablo4_saatlik_24_saat_mae.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Saat</th>
+<th style="text-align: center;">Ortalama SMF (TL)</th>
+<th style="text-align: center;">Ridge Sabit MAE (TL)</th>
+<th style="text-align: center;">Ridge Genişleyen MAE (TL)</th>
+<th style="text-align: center;">Resmi Baz (Medyan 4w) MAE (TL)</th>
+<th style="text-align: center;">Dünkü PTF (ptf_lag_24) MAE (TL)</th>
+<th style="text-align: center;">Ridge(Gen.) - Resmi Baz Farkı (TL)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>00:00</strong></td>
+<td style="text-align: center;">2.352,56</td>
+<td style="text-align: center;">923,58</td>
+<td style="text-align: center;">908,14</td>
+<td style="text-align: center;">1.037,41</td>
+<td style="text-align: center;">922,50</td>
+<td style="text-align: center;"><strong>-129,27</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>01:00</strong></td>
+<td style="text-align: center;">2.302,59</td>
+<td style="text-align: center;">894,43</td>
+<td style="text-align: center;">873,61</td>
+<td style="text-align: center;">978,64</td>
+<td style="text-align: center;">856,39</td>
+<td style="text-align: center;"><strong>-105,03</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>02:00</strong></td>
+<td style="text-align: center;">2.028,64</td>
+<td style="text-align: center;">891,55</td>
+<td style="text-align: center;">870,15</td>
+<td style="text-align: center;">991,58</td>
+<td style="text-align: center;">850,00</td>
+<td style="text-align: center;"><strong>-121,43</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>03:00</strong></td>
+<td style="text-align: center;">1.836,01</td>
+<td style="text-align: center;">874,18</td>
+<td style="text-align: center;">845,50</td>
+<td style="text-align: center;">972,79</td>
+<td style="text-align: center;">825,13</td>
+<td style="text-align: center;"><strong>-127,29</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>04:00</strong></td>
+<td style="text-align: center;">1.794,72</td>
+<td style="text-align: center;">896,61</td>
+<td style="text-align: center;">861,21</td>
+<td style="text-align: center;">978,75</td>
+<td style="text-align: center;">867,51</td>
+<td style="text-align: center;"><strong>-117,54</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>05:00</strong></td>
+<td style="text-align: center;">1.920,68</td>
+<td style="text-align: center;">864,94</td>
+<td style="text-align: center;">831,72</td>
+<td style="text-align: center;">959,38</td>
+<td style="text-align: center;">853,89</td>
+<td style="text-align: center;"><strong>-127,66</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>06:00</strong></td>
+<td style="text-align: center;">2.042,68</td>
+<td style="text-align: center;">799,37</td>
+<td style="text-align: center;">754,09</td>
+<td style="text-align: center;">778,09</td>
+<td style="text-align: center;">715,67</td>
+<td style="text-align: center;"><strong>-24,00</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>07:00</strong></td>
+<td style="text-align: center;">1.864,43</td>
+<td style="text-align: center;">809,51</td>
+<td style="text-align: center;">754,33</td>
+<td style="text-align: center;">652,91</td>
+<td style="text-align: center;">620,21</td>
+<td style="text-align: center;">+101,42</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>08:00</strong></td>
+<td style="text-align: center;">2.145,56</td>
+<td style="text-align: center;">857,26</td>
+<td style="text-align: center;">826,81</td>
+<td style="text-align: center;">738,17</td>
+<td style="text-align: center;">868,01</td>
+<td style="text-align: center;">+88,63</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>09:00</strong></td>
+<td style="text-align: center;">2.043,45</td>
+<td style="text-align: center;">971,27</td>
+<td style="text-align: center;">942,66</td>
+<td style="text-align: center;">856,78</td>
+<td style="text-align: center;">1.009,97</td>
+<td style="text-align: center;">+85,88</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>10:00</strong></td>
+<td style="text-align: center;">1.667,67</td>
+<td style="text-align: center;">1.009,76</td>
+<td style="text-align: center;">979,29</td>
+<td style="text-align: center;">952,11</td>
+<td style="text-align: center;">986,34</td>
+<td style="text-align: center;">+27,18</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>11:00</strong></td>
+<td style="text-align: center;">1.702,85</td>
+<td style="text-align: center;">1.043,44</td>
+<td style="text-align: center;">1015,59</td>
+<td style="text-align: center;">1.003,01</td>
+<td style="text-align: center;">1.033,00</td>
+<td style="text-align: center;">+12,59</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>12:00</strong></td>
+<td style="text-align: center;">1.220,07</td>
+<td style="text-align: center;">994,89</td>
+<td style="text-align: center;">961,97</td>
+<td style="text-align: center;">948,37</td>
+<td style="text-align: center;">868,85</td>
+<td style="text-align: center;">+13,60</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>13:00</strong></td>
+<td style="text-align: center;">1.461,48</td>
+<td style="text-align: center;">1.032,72</td>
+<td style="text-align: center;">999,88</td>
+<td style="text-align: center;">988,78</td>
+<td style="text-align: center;">951,18</td>
+<td style="text-align: center;">+11,10</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>14:00</strong></td>
+<td style="text-align: center;">1.889,06</td>
+<td style="text-align: center;">1.070,54</td>
+<td style="text-align: center;">1041,88</td>
+<td style="text-align: center;">1.054,13</td>
+<td style="text-align: center;">1.039,31</td>
+<td style="text-align: center;"><strong>-12,25</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>15:00</strong></td>
+<td style="text-align: center;">1.838,04</td>
+<td style="text-align: center;">1.052,92</td>
+<td style="text-align: center;">1024,05</td>
+<td style="text-align: center;">1.003,77</td>
+<td style="text-align: center;">980,36</td>
+<td style="text-align: center;">+20,29</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>16:00</strong></td>
+<td style="text-align: center;">2.199,21</td>
+<td style="text-align: center;">979,64</td>
+<td style="text-align: center;">947,18</td>
+<td style="text-align: center;">916,34</td>
+<td style="text-align: center;">858,25</td>
+<td style="text-align: center;">+30,84</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>17:00</strong></td>
+<td style="text-align: center;">2.648,47</td>
+<td style="text-align: center;">875,94</td>
+<td style="text-align: center;">855,40</td>
+<td style="text-align: center;">785,86</td>
+<td style="text-align: center;">778,04</td>
+<td style="text-align: center;">+69,54</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>18:00</strong></td>
+<td style="text-align: center;">2.930,63</td>
+<td style="text-align: center;">829,20</td>
+<td style="text-align: center;">814,46</td>
+<td style="text-align: center;">806,87</td>
+<td style="text-align: center;">789,68</td>
+<td style="text-align: center;">+7,59</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>19:00</strong></td>
+<td style="text-align: center;">3.178,38</td>
+<td style="text-align: center;">805,33</td>
+<td style="text-align: center;">788,89</td>
+<td style="text-align: center;">814,15</td>
+<td style="text-align: center;">720,89</td>
+<td style="text-align: center;"><strong>-25,26</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>20:00</strong></td>
+<td style="text-align: center;">3.242,12</td>
+<td style="text-align: center;">796,10</td>
+<td style="text-align: center;">778,56</td>
+<td style="text-align: center;">781,48</td>
+<td style="text-align: center;">713,87</td>
+<td style="text-align: center;"><strong>-2,93</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>21:00</strong></td>
+<td style="text-align: center;">3.192,99</td>
+<td style="text-align: center;">846,89</td>
+<td style="text-align: center;">831,75</td>
+<td style="text-align: center;">796,25</td>
+<td style="text-align: center;">751,94</td>
+<td style="text-align: center;">+35,50</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>22:00</strong></td>
+<td style="text-align: center;">2.783,14</td>
+<td style="text-align: center;">932,10</td>
+<td style="text-align: center;">922,98</td>
+<td style="text-align: center;">977,98</td>
+<td style="text-align: center;">932,88</td>
+<td style="text-align: center;"><strong>-55,00</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>23:00</strong></td>
+<td style="text-align: center;">2.472,60</td>
+<td style="text-align: center;">982,86</td>
+<td style="text-align: center;">977,13</td>
+<td style="text-align: center;">1.100,16</td>
+<td style="text-align: center;">979,70</td>
+<td style="text-align: center;"><strong>-123,03</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Aritmetik Ort.</strong></td>
+<td style="text-align: center;"><strong>2.198,25</strong></td>
+<td style="text-align: center;"><strong>918,13</strong></td>
+<td style="text-align: center;"><strong>891,97</strong></td>
+<td style="text-align: center;"><strong>911,41</strong></td>
+<td style="text-align: center;"><strong>865,57</strong></td>
+<td style="text-align: center;"><strong>-19,44</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Saatlik Dağılım İncelemesi:</strong><br />
+* Ridge (Genişleyen) modeli, Resmi Baza karşı 24 saatin tam <strong>12'sinde</strong> daha iyi sonuç vermiştir.<br />
+* Gece saatlerinde (00:00 - 06:00, 22:00 - 23:00) model resmi baza kıyasla 100-130 TL arasında belirgin bir MAE iyileşmesi sağlamaktadır.<br />
+* Gündüz güneş üretimi ve öğle dip saatlerinde (07:00 - 13:00) ise fiyat oynaklığı ve fotovoltaik üretim nedeniyle medyan baz modelinin hatası Ridge'den daha düşüktür.<br />
+* <strong>Assert 1 Teyidi:</strong> Tablo 1'deki genel Ridge Sabit MAE (<strong>918,13 TL</strong>), Tablo 3'teki aylık ağırlıklı Ridge Sabit MAE (<strong>918,13 TL</strong>) ve Tablo 4'teki 24 saatlik aritmetik ortalama Ridge Sabit MAE (<strong>918,13 TL</strong>) birbiriyle kuruşu kuruşuna örtüşmektedir.</p>
+</blockquote>
+<hr />
+<h2 id="5-bias-mincer-zarnowitz-regresyonu-ve-korelasyon-analizi">5. BİAS, MINCER-ZARNOWITZ REGRESYONU VE KORELASYON ANALİZİ</h2>
+<h3 id="tablo-11-mincer-zarnowitz-regresyonu-ve-wald-testi-sonuclar-mincer_zarnowitz_analizicsv">Tablo 11: Mincer-Zarnowitz Regresyonu ve Wald Testi Sonuçları (<code>mincer_zarnowitz_analizi.csv</code>)</h3>
+<p>Tahminlerin yansızlığını ve etkinlik derecesini test etmek amacıyla $SMF_t = \alpha + \beta \cdot \widehat{SMF}_t + \varepsilon_t$ Mincer-Zarnowitz regresyonu Newey-West (HAC, 7 lag) standart hataları ile tahmin edilmiştir ($N = 8.760$ saat).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model Adı</th>
+<th style="text-align: center;">Gözlem ($N$)</th>
+<th style="text-align: center;">$\alpha$ Sabit (HAC se)</th>
+<th style="text-align: center;">$\beta$ Eğim (HAC se)</th>
+<th style="text-align: center;">Belirlilik ($R^2$)</th>
+<th style="text-align: center;">Wald Testi $H_0: (\alpha=0, \beta=1)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Ridge Regresyon (Sabit)</strong></td>
+<td style="text-align: center;">8.760</td>
+<td style="text-align: center;">-530,51 (61,19)</td>
+<td style="text-align: center;">1,2131 (0,0229)</td>
+<td style="text-align: center;">0,4395</td>
+<td style="text-align: center;">$F = 86,87$ ($p = 1,37 \times 10^{-19}$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Resmi Baz (smf_median_4w)</strong></td>
+<td style="text-align: center;">8.760</td>
+<td style="text-align: center;">+812,48 (53,28)</td>
+<td style="text-align: center;">0,6164 (0,0181)</td>
+<td style="text-align: center;">0,2998</td>
+<td style="text-align: center;">$F = 480,54$ ($p = 4,48 \times 10^{-105}$)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>İstatistiksel Yorum:</strong><br />
+1. Her iki model için de $H_0: \alpha=0, \beta=1$ hipotezi kuvvetle reddedilmektedir ($p &lt; 0.0001$).<br />
+2. Ridge modelinde $\beta = 1,2131 &gt; 1$ bulunması, L2 ceza teriminin (shrinkage) tahminleri ortalamaya doğru büzdüğünü ve aşırı uç değerleri bastırdığını <strong>göstermektedir</strong>.<br />
+3. Resmi baz modelde ise $\beta = 0,6164 &lt; 1$ ve $\alpha = +812,48$ bulunmuştur; bu durum naif medyanın cari piyasa fiyat değişimlerine yeterince hızlı uyum sağlayamadığını ve düşük fiyat dönemlerinde yukarı yönlü atalet taşıdığını göstermektedir.</p>
+</blockquote>
+<h3 id="ek-tablo-aylk-ortalama-hata-me-ile-piyasa-fiyat-korelasyonu-aylik_me_smf_korelasyoncsv">Ek Tablo: Aylık Ortalama Hata (ME) ile Piyasa Fiyatı Korelasyonu (<code>aylik_me_smf_korelasyon.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Gözlem Sayısı ($n$)</th>
+<th style="text-align: center;">Pearson Korelasyon Katsayısı ($r$)</th>
+<th style="text-align: center;">$p$-değeri</th>
+<th style="text-align: center;">95% Güven Aralığı (Fisher $z$)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">12 ay</td>
+<td style="text-align: center;"><strong>-0,8355</strong></td>
+<td style="text-align: center;"><strong>0,0007</strong></td>
+<td style="text-align: center;"><strong>[-0,95, -0,50]</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Bias Mekanizması Açıklaması:</strong> Aylık gerçekleşen ortalama SMF ile Ridge modelinin ortalama hatası (ME / Bias) arasında $r = -0,8355$ düzeyinde istatistiki olarak anlamlı negatif bir korelasyon bulunmaktadır ($p = 0.0007$, %95 GA: $[-0,95, -0,50]$). Bu durum, modelin piyasa fiyat seviyesinin düştüğü dönemlerde (örneğin Mayıs 2026'da) pozitif bias (fiyatı olduğundan yüksek tahmin etme), fiyatların yükseldiği kış aylarında ise negatif bias (eksik tahmin etme) ürettiğini göstermektedir.</p>
+</blockquote>
+<hr />
+<h2 id="6-sistem-yonu-siniflandirma-performansi">6. SİSTEM YÖNÜ SINIFLANDIRMA PERFORMANSI</h2>
+<p>Yön tahmini iki sınıflı (Açık: 1 vs Fazla/Dengede: 0) olarak kurgulanmıştır.<br />
+* <strong>Açık Oranı Kayması:</strong> Sistem Açık oranı, Eğitim+Doğrulama döneminde (2024 - 2025 Q3) <strong>%64,38</strong> iken dış test döneminde <strong>%55,74</strong>'e gerilemiştir.<br />
+* <strong>İki Sınıflı Tercihin Gerekçesi:</strong> 3 sınıflı sistemde "Dengede" durumu piyasa verisinde yalnızca <strong>%0,44</strong> sıklıkla görülmektedir (8.760 test saatinin sadece 39'u). Dengeleme Güç Piyasası'nda çift fiyatlandırma ve ceza mekanizması doğrudan sistemin yönüne (Açık veya Fazla) bağlı olduğundan, pratik piyasa riski açısından iki sınıflı kurgu temel alınmıştır.<br />
+* <strong>Birincil ve İkincil İstatistiksel Testler:</strong> Zaman serilerinde ardışık saatlerin bağımlılığı nedeniyle McNemar testi tip 1 hata riskini artırabilmektedir. Bu sebeple <strong>7 günlük blok bootstrap ile %95 güven aralığı birincil test</strong> olarak benimsenmiş; McNemar testi ise ikincil karşılaştırma olarak bağımlılık uyarısıyla raporlanmıştır.</p>
+<h3 id="tablo-5-yon-snflandrma-modelleri-karslastrma-tablosu-tablo5_yon_siniflandirma_karsilastirmacsv">Tablo 5: Yön Sınıflandırma Modelleri Karşılaştırma Tablosu (<code>tablo5_yon_siniflandirma_karsilastirma.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model Adı</th>
+<th style="text-align: center;">Doğruluk (Acc)</th>
+<th style="text-align: center;">Baza Göre Acc GA</th>
+<th style="text-align: center;">Dengeli Doğruluk</th>
+<th style="text-align: center;">MCC</th>
+<th style="text-align: center;">Baza Göre MCC GA</th>
+<th style="text-align: center;">F1 Skoru</th>
+<th style="text-align: center;">ROC AUC</th>
+<th style="text-align: center;">Brier Skoru</th>
+<th style="text-align: center;">BSS vs Hafta/Saat (%)</th>
+<th style="text-align: center;">BSS vs 4w Açık (%)</th>
+<th style="text-align: center;">McNemar Testi (İkincil)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Resmi Referans Baz: Hafta İçi/Sonu x Saat Çoğunluk</strong></td>
+<td style="text-align: center;"><strong>0,6046</strong></td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;"><strong>0,5692</strong></td>
+<td style="text-align: center;"><strong>0,1774</strong></td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">0,7120</td>
+<td style="text-align: center;">0,6357</td>
+<td style="text-align: center;">0,2404</td>
+<td style="text-align: center;">%0,00</td>
+<td style="text-align: center;">%9,10</td>
+<td style="text-align: center;">Referans Baz</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Saat Bazlı Çoğunluk Bazı (Eğitimden)</strong></td>
+<td style="text-align: center;">0,5671</td>
+<td style="text-align: center;">[-5,05, -2,19]%</td>
+<td style="text-align: center;">0,5147</td>
+<td style="text-align: center;">0,0730</td>
+<td style="text-align: center;">[-0,129, -0,076]</td>
+<td style="text-align: center;">0,7144</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">$\chi^2 = 85,5$ ($p &lt; 0.0001$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. Son 4 Haftanın Aynı Saat Açık Oranı Bazı</strong></td>
+<td style="text-align: center;">0,6089</td>
+<td style="text-align: center;">[-1,64, +2,72]%</td>
+<td style="text-align: center;">0,5850</td>
+<td style="text-align: center;">0,1876</td>
+<td style="text-align: center;">[-0,033, +0,055]</td>
+<td style="text-align: center;">0,6934</td>
+<td style="text-align: center;">0,6392</td>
+<td style="text-align: center;">0,2644</td>
+<td style="text-align: center;">%-10,01</td>
+<td style="text-align: center;">%0,00</td>
+<td style="text-align: center;">$\chi^2 = 0,6$ ($p = 0.4488$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. Genel Çoğunluk Sınıfı (Her Zaman Açık)</strong></td>
+<td style="text-align: center;">0,5574</td>
+<td style="text-align: center;">[-6,45, -2,71]%</td>
+<td style="text-align: center;">0,5000</td>
+<td style="text-align: center;">0,0000</td>
+<td style="text-align: center;">[-0,209, -0,145]</td>
+<td style="text-align: center;">0,7158</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">$\chi^2 = 105,1$ ($p &lt; 0.0001$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. Lojistik Regresyon (Validasyon Eşikli)</strong></td>
+<td style="text-align: center;"><strong>0,6312</strong></td>
+<td style="text-align: center;"><strong>[-0,14, +5,79]%</strong></td>
+<td style="text-align: center;"><strong>0,6203</strong></td>
+<td style="text-align: center;"><strong>0,2449</strong></td>
+<td style="text-align: center;"><strong>[+0,016, +0,122]</strong></td>
+<td style="text-align: center;">0,6836</td>
+<td style="text-align: center;"><strong>0,6668</strong></td>
+<td style="text-align: center;"><strong>0,2303</strong></td>
+<td style="text-align: center;"><strong>%4,17</strong></td>
+<td style="text-align: center;"><strong>%12,89</strong></td>
+<td style="text-align: center;">$\chi^2 = 21,2$ ($p &lt; 0.0001$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>6. LightGBM Sınıflandırıcı (Val Eşikli)</strong></td>
+<td style="text-align: center;"><strong>0,6279</strong></td>
+<td style="text-align: center;"><strong>[-0,70, +5,50]%</strong></td>
+<td style="text-align: center;"><strong>0,6256</strong></td>
+<td style="text-align: center;"><strong>0,2501</strong></td>
+<td style="text-align: center;"><strong>[+0,026, +0,118]</strong></td>
+<td style="text-align: center;">0,6591</td>
+<td style="text-align: center;"><strong>0,6812</strong></td>
+<td style="text-align: center;"><strong>0,2261</strong></td>
+<td style="text-align: center;"><strong>%5,92</strong></td>
+<td style="text-align: center;"><strong>%14,48</strong></td>
+<td style="text-align: center;">$\chi^2 = 13,2$ ($p = 0.0003$)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tablo-6-uc-snfl-model-sonuclar-tablo6_uc_sinifli_yon_karsilastirmacsv">Tablo 6: Üç Sınıflı Model Sonuçları (<code>tablo6_uc_sinifli_yon_karsilastirma.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model Adı</th>
+<th style="text-align: center;">Doğruluk (Acc)</th>
+<th style="text-align: center;">Dengeli Doğruluk</th>
+<th style="text-align: center;">Macro F1</th>
+<th style="text-align: center;">MCC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Saat Bazlı Çoğunluk Bazı (3 Sınıflı)</strong></td>
+<td style="text-align: center;">0,5667</td>
+<td style="text-align: center;">0,3436</td>
+<td style="text-align: center;">0,2742</td>
+<td style="text-align: center;">0,0734</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Hafta İçi/Sonu x Saat Bazı (3 Sınıflı)</strong></td>
+<td style="text-align: center;">0,5904</td>
+<td style="text-align: center;">0,3677</td>
+<td style="text-align: center;">0,3334</td>
+<td style="text-align: center;">0,1487</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. LightGBM 3 Sınıflı Model</strong></td>
+<td style="text-align: center;"><strong>0,6281</strong></td>
+<td style="text-align: center;"><strong>0,4087</strong></td>
+<td style="text-align: center;"><strong>0,4028</strong></td>
+<td style="text-align: center;"><strong>0,2386</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tablo-7-24-saat-icin-model-dogrulugu-vs-egitimden-turetilen-saat-baz-tablo7_saatlik_yon_dogrulukcsv">Tablo 7: 24 Saat İçin Model Doğruluğu vs. Eğitimden Türetilen Saat Bazı (<code>tablo7_saatlik_yon_dogruluk.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Saat</th>
+<th style="text-align: center;">Test Açık Oranı (%)</th>
+<th style="text-align: center;">Eğitimden Türetilen Saat Bazı Doğruluğu (%)</th>
+<th style="text-align: center;">LightGBM Doğruluğu (%)</th>
+<th style="text-align: center;">Model - Eğitim Bazı Farkı (% Puan)</th>
+<th style="text-align: center;">Oracle (Test Verisi Çoğunluk Oranı) (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>00:00</strong></td>
+<td style="text-align: center;">54,52</td>
+<td style="text-align: center;">54,52</td>
+<td style="text-align: center;">55,62</td>
+<td style="text-align: center;">+1,10</td>
+<td style="text-align: center;">54,52</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>01:00</strong></td>
+<td style="text-align: center;">60,82</td>
+<td style="text-align: center;">60,82</td>
+<td style="text-align: center;">59,73</td>
+<td style="text-align: center;">-1,10</td>
+<td style="text-align: center;">60,82</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>02:00</strong></td>
+<td style="text-align: center;">50,41</td>
+<td style="text-align: center;">50,41</td>
+<td style="text-align: center;">52,60</td>
+<td style="text-align: center;">+2,19</td>
+<td style="text-align: center;">50,41</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>03:00</strong></td>
+<td style="text-align: center;">42,47</td>
+<td style="text-align: center;">42,47</td>
+<td style="text-align: center;">56,99</td>
+<td style="text-align: center;"><strong>+14,52</strong></td>
+<td style="text-align: center;">57,53</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>04:00</strong></td>
+<td style="text-align: center;">40,00</td>
+<td style="text-align: center;">40,00</td>
+<td style="text-align: center;">59,45</td>
+<td style="text-align: center;"><strong>+19,45</strong></td>
+<td style="text-align: center;">60,00</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>05:00</strong></td>
+<td style="text-align: center;">46,85</td>
+<td style="text-align: center;">46,85</td>
+<td style="text-align: center;">53,15</td>
+<td style="text-align: center;">+6,30</td>
+<td style="text-align: center;">53,15</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>06:00</strong></td>
+<td style="text-align: center;">54,52</td>
+<td style="text-align: center;">54,52</td>
+<td style="text-align: center;">58,63</td>
+<td style="text-align: center;">+4,11</td>
+<td style="text-align: center;">54,52</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>07:00</strong></td>
+<td style="text-align: center;">52,05</td>
+<td style="text-align: center;">52,05</td>
+<td style="text-align: center;">64,66</td>
+<td style="text-align: center;">+12,60</td>
+<td style="text-align: center;">52,05</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>08:00</strong></td>
+<td style="text-align: center;">58,90</td>
+<td style="text-align: center;">58,90</td>
+<td style="text-align: center;">71,23</td>
+<td style="text-align: center;">+12,33</td>
+<td style="text-align: center;">58,90</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>09:00</strong></td>
+<td style="text-align: center;">57,81</td>
+<td style="text-align: center;">57,81</td>
+<td style="text-align: center;">72,60</td>
+<td style="text-align: center;">+14,79</td>
+<td style="text-align: center;">57,81</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>10:00</strong></td>
+<td style="text-align: center;">47,40</td>
+<td style="text-align: center;">47,40</td>
+<td style="text-align: center;">65,75</td>
+<td style="text-align: center;"><strong>+18,36</strong></td>
+<td style="text-align: center;">52,60</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>11:00</strong></td>
+<td style="text-align: center;">48,22</td>
+<td style="text-align: center;">48,22</td>
+<td style="text-align: center;">60,00</td>
+<td style="text-align: center;">+11,78</td>
+<td style="text-align: center;">51,78</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>12:00</strong></td>
+<td style="text-align: center;">38,36</td>
+<td style="text-align: center;">61,64</td>
+<td style="text-align: center;">63,56</td>
+<td style="text-align: center;">+1,92</td>
+<td style="text-align: center;">61,64</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>13:00</strong></td>
+<td style="text-align: center;">44,38</td>
+<td style="text-align: center;">44,38</td>
+<td style="text-align: center;">60,55</td>
+<td style="text-align: center;"><strong>+16,16</strong></td>
+<td style="text-align: center;">55,62</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>14:00</strong></td>
+<td style="text-align: center;">56,44</td>
+<td style="text-align: center;">56,44</td>
+<td style="text-align: center;">61,10</td>
+<td style="text-align: center;">+4,66</td>
+<td style="text-align: center;">56,44</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>15:00</strong></td>
+<td style="text-align: center;">51,78</td>
+<td style="text-align: center;">51,78</td>
+<td style="text-align: center;">63,84</td>
+<td style="text-align: center;">+12,05</td>
+<td style="text-align: center;">51,78</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>16:00</strong></td>
+<td style="text-align: center;">60,55</td>
+<td style="text-align: center;">60,55</td>
+<td style="text-align: center;">65,75</td>
+<td style="text-align: center;">+5,21</td>
+<td style="text-align: center;">60,55</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>17:00</strong></td>
+<td style="text-align: center;">67,95</td>
+<td style="text-align: center;">67,95</td>
+<td style="text-align: center;">73,42</td>
+<td style="text-align: center;">+5,48</td>
+<td style="text-align: center;">67,95</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>18:00</strong></td>
+<td style="text-align: center;">73,97</td>
+<td style="text-align: center;">73,97</td>
+<td style="text-align: center;">75,07</td>
+<td style="text-align: center;">+1,10</td>
+<td style="text-align: center;">73,97</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>19:00</strong></td>
+<td style="text-align: center;">71,51</td>
+<td style="text-align: center;">71,51</td>
+<td style="text-align: center;">69,32</td>
+<td style="text-align: center;">-2,19</td>
+<td style="text-align: center;">71,51</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>20:00</strong></td>
+<td style="text-align: center;">71,78</td>
+<td style="text-align: center;">71,78</td>
+<td style="text-align: center;">68,22</td>
+<td style="text-align: center;">-3,56</td>
+<td style="text-align: center;">71,78</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>21:00</strong></td>
+<td style="text-align: center;">70,14</td>
+<td style="text-align: center;">70,14</td>
+<td style="text-align: center;">67,67</td>
+<td style="text-align: center;">-2,47</td>
+<td style="text-align: center;">70,14</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>22:00</strong></td>
+<td style="text-align: center;">60,00</td>
+<td style="text-align: center;">60,00</td>
+<td style="text-align: center;">55,07</td>
+<td style="text-align: center;">-4,93</td>
+<td style="text-align: center;">60,00</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>23:00</strong></td>
+<td style="text-align: center;">56,99</td>
+<td style="text-align: center;">56,99</td>
+<td style="text-align: center;">52,88</td>
+<td style="text-align: center;">-4,11</td>
+<td style="text-align: center;">56,99</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Ortalama</strong></td>
+<td style="text-align: center;"><strong>55,74</strong></td>
+<td style="text-align: center;"><strong>56,71</strong></td>
+<td style="text-align: center;"><strong>62,79</strong></td>
+<td style="text-align: center;"><strong>+6,08</strong></td>
+<td style="text-align: center;"><strong>59,27</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Assert 2 Teyidi:</strong> Tablo 5'teki Saat Bazlı Çoğunluk Bazı doğruluğu (%56,71) ile Tablo 7'deki Eğitim Saat Bazı ortalaması (%56,71); ve Tablo 5'teki LightGBM doğruluğu (%62,79) ile Tablo 7'deki LightGBM ortalaması (%62,79) birebir aynıdır. Test dönemi Oracle çoğunluk oranı ise %59,27 ile bağımsız bir sütun olarak doğrulanmıştır.</p>
+</blockquote>
+<hr />
+<h2 id="7-coklu-dogrusal-baglanti-vif-ve-katsayi-isaret-kararliligi">7. ÇOKLU DOĞRUSAL BAĞLANTI (VIF) VE KATSAYI İŞARET KARARLILIĞI</h2>
+<h3 id="tablo-9-surekli-degiskenler-icin-coklu-dogrusal-baglant-vif-analizi-vif_analiz_tablosucsv">Tablo 9: Sürekli Değişkenler İçin Çoklu Doğrusal Bağlantı (VIF) Analizi (<code>vif_analiz_tablosu.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Özellik Adı</th>
+<th style="text-align: center;">VIF (Tüm Değişkenler Dahil)</th>
+<th style="text-align: center;">VIF (Residual Load Çıkarılmış - Model Sürümü)</th>
+<th style="text-align: left;">Durum / Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>load_forecast_mw</code></td>
+<td style="text-align: center;">3.559,86</td>
+<td style="text-align: center;"><strong>22,76</strong></td>
+<td style="text-align: left;">Residual load ile tam doğrusal bağımlıydı; arındırıldı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>forecast_residual_load_mw</code></td>
+<td style="text-align: center;">3.097,79</td>
+<td style="text-align: center;"><strong>Çıkarıldı</strong></td>
+<td style="text-align: left;"><code>load_forecast - wind_forecast</code> ilişkisi VIF patlaması yaratıyordu.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>forecast_wind_ratio</code></td>
+<td style="text-align: center;">35,93</td>
+<td style="text-align: center;"><strong>3,76</strong></td>
+<td style="text-align: left;">Kabul edilebilir aralıkta.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>latest_known_smf</code></td>
+<td style="text-align: center;">6,91</td>
+<td style="text-align: center;"><strong>6,91</strong></td>
+<td style="text-align: left;">Düşük çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ptf_lag_24</code></td>
+<td style="text-align: center;">29,71</td>
+<td style="text-align: center;"><strong>29,67</strong></td>
+<td style="text-align: left;">Fiyat serileri arası korelasyon.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ptf_lag_48</code></td>
+<td style="text-align: center;">33,88</td>
+<td style="text-align: center;"><strong>33,63</strong></td>
+<td style="text-align: left;">Fiyat serileri arası korelasyon.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ptf_lag_168</code></td>
+<td style="text-align: center;">35,78</td>
+<td style="text-align: center;"><strong>35,64</strong></td>
+<td style="text-align: left;">Fiyat serileri arası korelasyon.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>legit_same_hour_smf</code></td>
+<td style="text-align: center;">20,13</td>
+<td style="text-align: center;"><strong>20,08</strong></td>
+<td style="text-align: left;">Orta düzey çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_lag_48</code></td>
+<td style="text-align: center;">25,26</td>
+<td style="text-align: center;"><strong>25,23</strong></td>
+<td style="text-align: left;">Orta düzey çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_lag_72</code></td>
+<td style="text-align: center;">14,66</td>
+<td style="text-align: center;"><strong>14,65</strong></td>
+<td style="text-align: left;">Orta düzey çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_lag_168</code></td>
+<td style="text-align: center;">20,98</td>
+<td style="text-align: center;"><strong>20,89</strong></td>
+<td style="text-align: left;">Orta düzey çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_median_4w</code></td>
+<td style="text-align: center;">30,32</td>
+<td style="text-align: center;"><strong>30,30</strong></td>
+<td style="text-align: left;">Orta düzey çoklu bağlantı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_clean_same_hour_7d_mean</code></td>
+<td style="text-align: center;">72,47</td>
+<td style="text-align: center;"><strong>71,96</strong></td>
+<td style="text-align: left;">Yüksek gecikmeli ortalama bağlantısı.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ek-tablo-ridge-katsaylar-ve-isaret-kararllg-analizi-1000-blok-bootstrap-ridge_katsayi_ve_isaret_kararliligicsv">Ek Tablo: Ridge Katsayıları ve İşaret Kararlılığı Analizi (1.000 Blok Bootstrap) (<code>ridge_katsayi_ve_isaret_kararliligi.csv</code>)</h3>
+<p>Aşağıda, 7 günlük blok bootstrap (1.000 replikasyon) ile hesaplanan standartlaştırılmış Ridge katsayıları ($\beta$), %95 güven aralıkları ve katsayının pozitif çıkma sıklığı verilmiştir. <strong>İktisadi yorumlar nedensel kesinlik değil, model atfı (model attribution) olarak değerlendirilmelidir.</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Özellik</th>
+<th style="text-align: center;">$\beta$ Katsayısı</th>
+<th style="text-align: center;">Bootstrap Ortalama</th>
+<th style="text-align: center;">Bootstrap 95% GA</th>
+<th style="text-align: center;">Pozitif Oran (%)</th>
+<th style="text-align: center;">İşaret Kararlılığı</th>
+<th style="text-align: left;">İktisadi Yorum (Model Atfı)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>load_forecast_mw</code></td>
+<td style="text-align: center;"><strong>+225,22</strong></td>
+<td style="text-align: center;">+225,94</td>
+<td style="text-align: center;">[+169,87, +284,79]</td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">Tüketim yükü arttıkça model daha yüksek fiyat atfetmektedir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>smf_median_4w</code></td>
+<td style="text-align: center;"><strong>+168,46</strong></td>
+<td style="text-align: center;">+167,45</td>
+<td style="text-align: center;">[+117,65, +218,97]</td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">4 haftalık aynı saat medyan fiyat çıpası kuvvetli pozitif katkı sağlar.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>forecast_wind_ratio</code></td>
+<td style="text-align: center;"><strong>-104,89</strong></td>
+<td style="text-align: center;">-104,50</td>
+<td style="text-align: center;">[-143,52, -69,51]</td>
+<td style="text-align: center;"><strong>%0,0</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Rüzgar payı arttıkça model merit-order etkisiyle fiyatı düşürmektedir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>hour_12</code></td>
+<td style="text-align: center;"><strong>-89,54</strong></td>
+<td style="text-align: center;">-90,38</td>
+<td style="text-align: center;">[-108,75, -72,06]</td>
+<td style="text-align: center;"><strong>%0,0</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Güneş üretimi etkisiyle günün en derin fiyat düşüş saati (öğle dip).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ptf_lag_24</code></td>
+<td style="text-align: center;"><strong>+93,43</strong></td>
+<td style="text-align: center;">+91,14</td>
+<td style="text-align: center;">[+54,49, +127,69]</td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">Dünkü PTF seviyesi doğrudan fiyat referansı oluşturmaktadır.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ptf_lag_168</code></td>
+<td style="text-align: center;"><strong>+79,91</strong></td>
+<td style="text-align: center;">+82,09</td>
+<td style="text-align: center;">[+34,34, +127,31]</td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">Haftalık aynı saat PTF çıpası.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>legit_same_hour_smf</code></td>
+<td style="text-align: center;"><strong>+63,38</strong></td>
+<td style="text-align: center;">+63,05</td>
+<td style="text-align: center;">[+38,19, +86,21]</td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">Bilinen son aynı saat SMF değeri.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>latest_known_smf</code></td>
+<td style="text-align: center;"><strong>+53,81</strong></td>
+<td style="text-align: center;">+52,30</td>
+<td style="text-align: center;">[+16,78, +89,13]</td>
+<td style="text-align: center;"><strong>%99,8</strong></td>
+<td style="text-align: center;">Kararlı (Pozitif)</td>
+<td style="text-align: left;">Kesme anında açıklanmış en güncel SMF seviyesi.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>hour_13</code></td>
+<td style="text-align: center;"><strong>-70,92</strong></td>
+<td style="text-align: center;">-70,97</td>
+<td style="text-align: center;">[-87,11, -54,50]</td>
+<td style="text-align: center;"><strong>%0,0</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Öğle dip saatleri devamı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>hour_11</code></td>
+<td style="text-align: center;"><strong>-63,46</strong></td>
+<td style="text-align: center;">-64,06</td>
+<td style="text-align: center;">[-77,71, -51,13]</td>
+<td style="text-align: center;"><strong>%0,0</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Öğle dip saatleri başlangıcı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>hour_10</code></td>
+<td style="text-align: center;"><strong>-59,08</strong></td>
+<td style="text-align: center;">-59,48</td>
+<td style="text-align: center;">[-73,63, -45,33]</td>
+<td style="text-align: center;"><strong>%0,0</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Sabah sonrası fotovoltaik üretim artışı.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>is_weekend</code></td>
+<td style="text-align: center;"><strong>-34,93</strong></td>
+<td style="text-align: center;">-33,96</td>
+<td style="text-align: center;">[-69,55, +2,33]</td>
+<td style="text-align: center;"><strong>%3,3</strong></td>
+<td style="text-align: center;">Kararlı (Negatif)</td>
+<td style="text-align: left;">Hafta sonu sanayi tüketim düşüşü.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-coklu-kesme-ani-ile-gercek-ufuk-analizi">8. ÇOKLU KESME ANI İLE GERÇEK UFUK ANALİZİ</h2>
+<p>Teslimat saati ile tahmin ufku arasındaki karışıklığı (confounding) gidermek amacıyla, dış test dönemindeki tüm 365 günün sabit akşam puant saatleri (18:00 - 21:00 arası 4 saat, toplam 1.460 gözlem) üç farklı kesme anında test edilmiştir.</p>
+<h3 id="tablo-10-aksam-puant-saatleri-1800-2100-icin-kesme-anna-gore-basarm-tablo10_gercek_ufuk_analizicsv">Tablo 10: Akşam Puant Saatleri (18:00 - 21:00) İçin Kesme Anına Göre Başarım (<code>tablo10_gercek_ufuk_analizi.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Kesme Anı (Cutoff)</th>
+<th style="text-align: left;">Gerçek Ufuk</th>
+<th style="text-align: left;">Kullanılan Model</th>
+<th style="text-align: center;">Ridge MAE (TL/MWh)</th>
+<th style="text-align: center;">Resmi Baz (Medyan 4w) MAE (TL/MWh)</th>
+<th style="text-align: center;">Dünkü PTF (ptf_lag_24) MAE (TL/MWh)</th>
+<th style="text-align: center;">Son Bilinen SMF Baz MAE (TL/MWh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>$D-1$ saat 12:00 (GÖP Öncesi)</strong></td>
+<td style="text-align: left;">30 - 33 Saat Öncesi</td>
+<td style="text-align: left;">Ridge (Sabit)</td>
+<td style="text-align: center;"><strong>819,38</strong></td>
+<td style="text-align: center;">799,69</td>
+<td style="text-align: center;">744,10</td>
+<td style="text-align: center;">1.519,95</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>$D$ günü saat 06:00 (Gün İçi Sabah)</strong></td>
+<td style="text-align: left;">12 - 15 Saat Öncesi</td>
+<td style="text-align: left;">Ridge (Sabit)</td>
+<td style="text-align: center;"><strong>808,42</strong></td>
+<td style="text-align: center;">799,69</td>
+<td style="text-align: center;">744,10</td>
+<td style="text-align: center;">1.519,86</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>$D$ günü saat 15:00 (Teslimat Öncesi)</strong></td>
+<td style="text-align: left;">3 - 6 Saat Öncesi</td>
+<td style="text-align: left;">Ridge (Sabit)</td>
+<td style="text-align: center;"><strong>818,38</strong></td>
+<td style="text-align: center;">799,69</td>
+<td style="text-align: center;">744,10</td>
+<td style="text-align: center;">1.832,81</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Assert 3 Teyidi ve Bulguların Yorumu:</strong><br />
+1. <strong>Assert Doğrulaması:</strong> Tablo 4'teki 18:00, 19:00, 20:00 ve 21:00 saatlerinin Ridge Sabit MAE ortalaması $(829,20 + 805,33 + 796,10 + 846,89) / 4 = \mathbf{819,38\text{ TL}}$ olup, Tablo 10'daki D-1 12:00 kesme anı puant MAE'si ile (<strong>819,38 TL</strong>) kuruşu kuruşuna örtüşmektedir.<br />
+2. <strong>Ufuk Dinamiği:</strong> Kesme anı teslimat saatine yaklaştığında (30 saatten 3 saate indiğinde) Ridge modelinin puant hatası neredeyse sabit kalmaktadır (819 TL $\rightarrow$ 808 TL $\rightarrow$ 818 TL). Buna karşılık "Son Bilinen SMF" naif bazının hatası 1.519 TL - 1.832 TL gibi son derece yüksek seviyelerdedir. Modelin puant saatlerindeki başarısı, son bilinen anlık fiyattan ziyade saat kuklaları, yük tahmini ve PTF çıpasına dayanmaktadır.</p>
+</blockquote>
+<hr />
+<h2 id="9-kod-ve-tablo-eslestirme-dogrulamasi">9. KOD VE TABLO EŞLEŞTİRME DOĞRULAMASI</h2>
+<p>Revizyon V5 kapsamındaki tüm sayısal değerler, tek bir master tahmin dosyasından (<code>data/processed/test_predictions_master.parquet</code>) ve tek bir çalışma kimliği (<code>run_1792585978</code>) altında üretilmiştir. Raporda yer alan tüm tablolar ve kaynak CSV dosyalarının boyut ve SHA-256 sağlama toplamı (checksum) eşleştirmesi aşağıda sunulmuştur.</p>
+<h3 id="tablo-12-rapor-tablolar-kaynak-dosyalar-ve-sha-256-saglama-toplam-eslestirmesi-tablo_eslestirme_ve_dogrulamacsv">Tablo 12: Rapor Tabloları, Kaynak Dosyalar ve SHA-256 Sağlama Toplamı Eşleştirmesi (<code>tablo_eslestirme_ve_dogrulama.csv</code>)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Rapor Tablosu</th>
+<th style="text-align: left;">Kaynak Dosya Yolu</th>
+<th style="text-align: center;">Boyut (Bayt)</th>
+<th style="text-align: left;">SHA-256 Hash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Tablo 1: Fiyat Tahmini Karşılaştırma</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo1_fiyat_tahmini_karsilastirma.csv</code></td>
+<td style="text-align: center;">1.830</td>
+<td style="text-align: left;"><code>d8c032987308a5c1a09ac087b6269b2a850fbc56dfed46e87048c1a309d29cbc</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 2: Özel Çiftler İçin HAC DM Testleri</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo2_ozel_ciftler_diebold_mariano.csv</code></td>
+<td style="text-align: center;">977</td>
+<td style="text-align: left;"><code>491096638f6fec29c976b7f56abcf85c48d7ff961f923786eea53630fa6f051f</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 3: 12 Aylık Hata ve ME Dağılımı</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo3_aylik_hata_ve_bias.csv</code></td>
+<td style="text-align: center;">1.273</td>
+<td style="text-align: left;"><code>2b43dbbfca30e67f5af3f010176b704b96cd2e109aa05f12bb709e56f2c0f384</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 4: 24 Saatlik MAE Dağılımı</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo4_saatlik_24_saat_mae.csv</code></td>
+<td style="text-align: center;">1.717</td>
+<td style="text-align: left;"><code>7a77027ae2fe8d8d9030eefbe454c9df5d54f227f5170533f5b67c2c6e1cb270</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 5: Yön Sınıflandırma Karşılaştırma</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo5_yon_siniflandirma_karsilastirma.csv</code></td>
+<td style="text-align: center;">1.149</td>
+<td style="text-align: left;"><code>d4936a8859cfd1e3f5c7601e57f9770f4fde3211eb786b0d1ffd15f1d154c2cb</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 6: 3 Sınıflı Yön Modeli ve Bazları</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo6_uc_sinifli_yon_karsilastirma.csv</code></td>
+<td style="text-align: center;">315</td>
+<td style="text-align: left;"><code>57fbacc0cc4b97bbc451d20ed47d3ef8134b6b88c1555d03593576fa9617c4ca</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 7: 24 Saat Yön Doğruluk vs Saat Bazı</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo7_saatlik_yon_dogruluk.csv</code></td>
+<td style="text-align: center;">1.384</td>
+<td style="text-align: left;"><code>39e2ec162b3ee87d97988e1e849a84b0c577084b3bcabfdd093c2d270e046ae1</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 8: Dönemler Arası Hata ve NMAE</strong></td>
+<td style="text-align: left;"><code>reports/tables/donemler_arasi_hata_ve_nmae_tablosu.csv</code></td>
+<td style="text-align: center;">324</td>
+<td style="text-align: left;"><code>82e3b335a4a890471d84f5fd2d2843bf194b8f014c9197628f8f0dc34e1e12a5</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 9: Çoklu Doğrusal Bağlantı (VIF)</strong></td>
+<td style="text-align: left;"><code>reports/tables/vif_analiz_tablosu.csv</code></td>
+<td style="text-align: center;">690</td>
+<td style="text-align: left;"><code>5927b7c350fd084eb3798764faa1209f1e69f46c4c87d9a82f59b8594af06790</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 10: Gerçek Ufuk Analizi (18-21)</strong></td>
+<td style="text-align: left;"><code>reports/tables/tablo10_gercek_ufuk_analizi.csv</code></td>
+<td style="text-align: center;">537</td>
+<td style="text-align: left;"><code>0deb8993bd96c9765c37853050a0509eccd84c8dc3a530605e4b0792fade07c0</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tablo 11: Mincer-Zarnowitz Regresyonu</strong></td>
+<td style="text-align: left;"><code>reports/tables/mincer_zarnowitz_analizi.csv</code></td>
+<td style="text-align: center;">316</td>
+<td style="text-align: left;"><code>5ddaf88ff3fad188c363ad8133d1f818c57bc553dca6815ff19f33ef030e5514</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ek Tablo: Aylık ME-SMF Korelasyonu</strong></td>
+<td style="text-align: left;"><code>reports/tables/aylik_me_smf_korelasyon.csv</code></td>
+<td style="text-align: center;">102</td>
+<td style="text-align: left;"><code>8d0c429140157e8b3d1ec7c33f72913e8918de9faf5d9e2e7137018b808eb0de</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ek Tablo: Ridge Katsayı Kararlılığı</strong></td>
+<td style="text-align: left;"><code>reports/tables/ridge_katsayi_ve_isaret_kararliligi.csv</code></td>
+<td style="text-align: center;">3.319</td>
+<td style="text-align: left;"><code>c035536f8cb01657b17b371685b976c508aa682ad98f11cb4ff4167e5bcc8f15</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kaynak Veri: EPİAŞ Resmi Piyasa Verisi</strong></td>
+<td style="text-align: left;"><code>data/raw/epias_official_market_data_full.parquet</code></td>
+<td style="text-align: center;">806.446</td>
+<td style="text-align: left;"><code>e4748553a38b4fff3f013b75b1b473190f35059972c984f9e4192b4eef941dd5</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Master Tahmin: Tek Kaynak Parquet</strong></td>
+<td style="text-align: left;"><code>data/processed/test_predictions_master.parquet</code></td>
+<td style="text-align: center;">955.464</td>
+<td style="text-align: left;"><code>b67783dedff62b1bc8c0712d8d2f7a95b498323018a29304523f12d2b530f211</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-danisman-hocaya-sunulacak-karar-sorusu">10. DANIŞMAN HOCAYA SUNULACAK KARAR SORUSU</h2>
+<blockquote>
+<p><strong>Danışman Hocaya Soru:</strong><br />
+<em>"Hocam, tezimizin ana problem kurgusunu </em><em>GÖP Öncesi (D-1 saat 12:00)</em><em> mi, yoksa </em><em>GÖP Sonrası (D-1 saat 14:00 - PTF açıklandıktan sonra)</em><em> mı konumlandırmalıyız?<br />
+</em> <strong>GÖP Öncesi Analiz:</strong> MAE metriğinde resmi referans baza (<code>smf_median_4w</code>, 911,41 TL) ve <code>ptf_lag_24</code> bazına (865,57 TL) karşı modellerimiz istatistiki olarak anlamlı bir fark yaratamamaktadır (Ridge Genişleyen MAE: 891,97 TL, $p = 0.3474$). Buna karşılık karesel hata metriğinde (RMSE) aşırı uç fiyat şoklarını törpüleyerek resmi baza karşı <strong>220,47 TL/MWh ($p &lt; 0.0001$)</strong> düzeyinde güçlü ve anlamlı bir hata azalışı sağlamaktadır.<br />
+<em> </em><em>GÖP Sonrası Analiz:</em><em> PTF kesinleştikten sonra uygulanan basit </em><em>$SMF = PTF$ kuralı (682,75 TL MAE)</em><em>, yayılımı modelleyen makine öğrenmesi modelinden (730,14 TL MAE) mutlak hata açısından belirgin biçimde daha başarılıdır ($p &lt; 0.0001$). LightGBM ise sadece RMSE metriğinde 16,38 TL'lik sınırlı bir fark sunabilmektedir ($p = 0.0703$).<br />
+Bu bulgular ışığında, piyasa yapıcı bir katılımcının karar anı açısından çalışmayı GÖP öncesine odaklamak mı daha uygundur, yoksa her iki aşamanın bilgi değerini karşılaştırmalı olarak sunmak mı tercih edilmelidir?"</em></p>
+</blockquote>
+    </div>
+</body>
+</html>

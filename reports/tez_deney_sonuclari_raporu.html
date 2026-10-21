@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lisans Bitirme Tezi: Deneysel Bulgular ve Ekonometrik Doğrulama</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #1f2937;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 24px;
+    background-color: #f9fafb;
+  }
+  .container {
+    background: #ffffff;
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+  }
+  h1 { color: #111827; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; font-size: 26px; }
+  h2 { color: #1e40af; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-top: 32px; font-size: 22px; }
+  h3 { color: #1f2937; margin-top: 24px; font-size: 18px; }
+  h4 { color: #374151; margin-top: 20px; font-size: 16px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background-color: #f3f4f6;
+    color: #111827;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+  code {
+    background-color: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+    color: #ef4444;
+  }
+  pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    background-color: #eff6ff;
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  hr {
+    border: 0;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 32px 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>T.C. İSTANBUL MEDENİYET ÜNİVERSİTESİ</h1>
+<h2>LİSANS BİTİRME TEZİ: EPİAŞ ELEKTRİK PİYASASINDA SİSTEM MARJİNAL FİYATI (SMF) VE SİSTEM YÖNÜ TAHMİNİ</h2>
+<h3>Deneysel Bulgular, Ekonometrik Doğrulama ve Tartışma Bölümü</h3>
+<p><strong>Tez Danışmanı:</strong> Prof. Ali Dinler<br />
+<strong>Çalışma Alanı:</strong> Türkiye Elektrik Piyasası (EPİAŞ Gün Öncesi Piyasası - GÖP / TEİAŞ Dengeleme Güç Piyasası - DGP)<br />
+<strong>Hedef Horizon:</strong> 12 - 36 Saat İleriye Dönük (11:30 Karar Anı / 12:30 GÖP Teklif Kapanışı Öncesi)<br />
+<strong>Kanonik Doğrulama Komutları:</strong> <code>python3 src/canonical_reconciliation.py</code> ve <code>python3 src/reproduce_all_thesis_results.py</code><br />
+<strong>Veri Dosyası:</strong> <code>data/raw/epias_official_market_data_full.parquet</code><br />
+<strong>SHA-256 Sağlama Toplamı:</strong> <code>e4748553a38b4fff3f013b75b1b473190f35059972c984f9e4192b4eef941dd5</code><br />
+<strong>Rastgele Tohum (Seed):</strong> 42 (Tüm model eğitimlerinde ve bootstrap örneklemelerinde sabitlenmiştir)</p>
+<hr />
+<h2>1. Tahmin Mimarisi, Geliştirme Süreci ve Metodolojik Sınırlılıklar</h2>
+<h3>1.1. Piyasa Zaman Kısıtları ve Çift Aşamalı Karar Mimarisi</h3>
+<p>Türkiye elektrik piyasası işleyişinde Gün Öncesi Piyasası (GÖP) teklifleri her gün saat 12:30'da kapanmakta; piyasa takas fiyatı ($PTF$) ise itiraz sürecinin tamamlanmasıyla kesinleşmektedir. Dengeleme Güç Piyasası'nda (DGP) oluşan Sistem Marjinal Fiyatı ($SMF$) ve Sistem Denge Yönü ($D_t$) ise fiziksel teslimat gününün her saati için gerçek zamanlı olarak TEİAŞ tarafından belirlenir. Bu zaman kısıtları tez kapsamında iki ayrı karar anı ve aşaması olarak modellenmiştir:</p>
+<ol>
+<li><strong>Aşama 1 (GÖP Öncesi - Saat 11:30):</strong> $PTF$ henüz bilinmemektedir (GÖP kapanışından 1 saat önce portföy optimizasyonu için karar üretilir).</li>
+<li><strong>Yön Sınıflandırması:</strong> 3 sınıflı LightGBM sınıflandırıcısı (<code>ThreeClassDirectionClassifier</code>), TEİAŞ net talimat yönünü (Enerji Açığı: $+1$, Dengede: $0$, Enerji Fazlası: $-1$) tahmin eder.</li>
+<li><strong>Doğrudan Fiyat Regresyonu:</strong> <code>DirectSMFRegressor</code>, PTF girdisi olmaksızın makroekonomik göstergeler, hava durumu ve yük tahminleriyle ham $SMF$ seviyesini tahmin eder.</li>
+<li><strong>Aşama 2 (GÖP Sonrası - Saat 14:00):</strong> $PTF$ kesinleşmiş olup deterministik bir dışsal girdidir.</li>
+<li>Model doğrudan fiyat seviyesi yerine fiyat yayılımını ($S_t = SMF_t - PTF_t$) hedefler (<code>PostDAMSpreadRegressor</code>).</li>
+<li>Nihai SMF tahmini: $\widehat{SMF}_t = PTF_t + \widehat{S}_t$ olarak elde edilir.</li>
+<li><strong>Ekonometrik Özdeşlik:</strong> $\widehat{SMF}_t - SMF_t = (PTF_t + \widehat{S}_t) - (PTF_t + S_t) = \widehat{S}_t - S_t$ olduğundan, yayılım regresyonunun hata metrikleri doğrudan SMF fiyat tahmininin hata metriklerine özdeştir.</li>
+</ol>
+<hr />
+<h3>1.2. Model Geliştirme Süreci, İterasyonlar ve Seçim Yanlılığı (Data Snooping) Açıklığı</h3>
+<p>Bilimsel dürüstlük ve ekonometrik şeffaflık gereğince, tez çalışmasında kullanılan modellerin tek seferde ve test kümesi hiç incelenmeden kilitlendiği iddia edilemez. Modelleme sürecinde hem 2025 ilk 9 ayı (doğrulama kümesi) hem de Ekim 2025 – Eylül 2026 dönemi (test kümesi) defalarca incelenmiş; hiperparametre seçimleri, kalibrasyon katmanları ve karar kuralları bu gözlemler ışığında şekillendirilmiştir:</p>
+<h4>Tablo 1: Model Geliştirme Süreci ve Sürümler Arası İterasyon Geçmişi</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Geliştirme Aşaması</th>
+<th style="text-align: left;">İnceleme Kümesi ve Kurgu</th>
+<th style="text-align: left;">Temel Metodolojik Değişiklikler</th>
+<th style="text-align: center;">Test Dönemi Aşama 1 P&amp;L</th>
+<th style="text-align: center;">Test Dönemi Aşama 2 P&amp;L</th>
+<th style="text-align: left;">Metodolojik Not ve Sınırlılıklar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Aşama 0 (İlk Geliştirme)</strong></td>
+<td style="text-align: left;">2025 İlk 9 Ay ($N=6.552$)</td>
+<td style="text-align: left;">İlk modeller bu kümede eğitildi. $SMF=PTF$ naif kuralının üstünlüğü burada görüldü, yayılım regresyonu ve sert kısıt kuralları bu kümede denendi.</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: left;">Bu küme daha sonra "doğrulama" kümesi yapılmıştır; ancak geliştirme kararları bu veriye bakılarak alındığından tamamen el değmemiş bir doğrulama değildir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sürüm 1 (Ham Seviye Modeli)</strong></td>
+<td style="text-align: left;">Test Dönemi (8.637 saat)</td>
+<td style="text-align: left;">Doğrudan SMF seviye regresyonu, ikili yön sınıflandırması, basitleştirilmiş ceza katsayısı formülü.</td>
+<td style="text-align: center;">+344,03 TL/MWh</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: left;">123 saatlik veri boşluğu bulunmaktaydı; formül basitleştirmesi P&amp;L'i yapay olarak yüksek gösterdi.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sürüm 2 ($n=100$ Yayılım Modeli)</strong></td>
+<td style="text-align: left;">Test Dönemi (8.760 saat)</td>
+<td style="text-align: left;">Seviye yerine yayılım ($S=SMF-PTF$) modeli ($n=100$), 3-sınıflı DUY yönü, ffill ile 8.760 tam saat.</td>
+<td style="text-align: center;">+55,95 TL/MWh (Ham)</td>
+<td style="text-align: center;">+135,58 TL/MWh ($n=100$)</td>
+<td style="text-align: left;">Aşama 2 rejim değerleri (87,09 / 139,85 / 158,16 TL) ağırlıklı ortalamada +135,58 TL getirdi.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sürüm 3 ($n=250$ ve Kalibrasyon)</strong></td>
+<td style="text-align: left;">Test Dönemi (8.760 saat)</td>
+<td style="text-align: left;">Aşama 2 hiperparametreleri $n=250$, derinlik 5 olarak güncellendi. Aşama 1'e Platt kalibrasyonu ve $\tau=70$ TL eşiği eklendi.</td>
+<td style="text-align: center;">+70,55 TL/MWh (Validasyon-Platt)</td>
+<td style="text-align: center;">+119,14 TL/MWh ($n=250$)</td>
+<td style="text-align: left;">Aşama 2 P&amp;L'i 135,58'den 119,14 TL'ye geriledi; Aşama 1 Platt doğrulama eşiği incelemesinde +70,55 TL verdi (ham OOF değerleri 59,15 ve 70,58 TL'dir).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sürüm 4 (Kanonik Mutabakat)</strong></td>
+<td style="text-align: left;">Test Dönemi (8.760 saat)</td>
+<td style="text-align: left;">EPİAŞ fiili <code>negativeImbalance</code>/<code>positiveImbalance</code> serileri bağlandı, Rejim 1-3 tam saat ağırlıklı mutabakatı sağlandı. Modeller diske kaydedildi (15 Ekim 2026, 21:10).</td>
+<td style="text-align: center;"><strong>+67,33 TL/MWh</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL/MWh</strong></td>
+<td style="text-align: left;">Tüm tablolar ve kodlar makine hassasiyetinde mutabık kılındı. Disk üzerindeki kanonik dosya kimlikleri donduruldu.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Post-hoc Teşhis Modelleri (Keşifsel)</strong></td>
+<td style="text-align: left;">Test Dönemi (8.760 saat)</td>
+<td style="text-align: left;">Aşama 2'nin mekanizmasını ayrıştırmak üzere test kümesi sonuçları görüldükten sonra $PTF &lt; 2.500$ TL eşik kuralı (+140,57 TL) ve doğrusal regresyon kuralları türetildi.</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">+140,57 TL (PTF&lt;2.500)</td>
+<td style="text-align: left;">Önceden kilitlenmiş model değildir; test kümesi sonuçlarına bakılarak geliştirilmiş geriye dönük (post-hoc) teşhis kurallarıdır.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<strong>Versiyon Kontrolü, Model Kütüğü ve Tarihsel Bütünlük:</strong> Modeller 15 Ekim 2026 21:10 itibarıyla eğitilerek disk üzerine (<code>models/canonical_*.pkl</code>) kaydedilmiş ve SHA-256 sağlama toplamları ilk rapor kütüğünde sabitlenmiştir. 18 Ekim 2026'da çalışma dizini Git versiyon kontrolüne alınmış; 20 Ekim 2026'da açıklamalı <code>protocol-v1</code> etiketi oluşturulmuştur. Bu süreçte modellerin fiziksel boyutları (537.896 B, 2.058.822 B, 911 B) ve SHA-256 özetleri değişmeksizin korunmuş, 15–20 Ekim tarihli rapor ve disk kopyalarıyla mutabakatı doğrulanmıştır. Kriptografik SHA-256 manifestosu (<code>MANIFEST_SHA256.txt</code>) ve 21 Ekim 2026 – 31 Mart 2027 dönemini (162 gün / 3.888 saat) kapsayan bağımsız ileriye dönük doğrulama protokolü (<code>reports/prospective_evaluation_protocol_2026_2027.md</code>), dondurulan commit hash'i ve arşiv özetiyle birlikte harici bir zaman damgası tescil etmek üzere danışman öğretim üyesine e-posta ile iletilecektir.</p>
+</blockquote>
+<h4>Tablo 2: Kanonik Model Manifestosu (Kriptografik SHA-256 Sağlama Toplamları)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model Dosyası</th>
+<th style="text-align: left;">Algoritma ve Kurgu</th>
+<th style="text-align: left;">Hiperparametreler</th>
+<th style="text-align: center;">Disk Boyutu</th>
+<th style="text-align: left;">SHA-256 Sağlama Toplamı</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>models/canonical_stage2_regressor.pkl</code></td>
+<td style="text-align: left;">LightGBM Regressor (Yayılım: $S = SMF - PTF$)</td>
+<td style="text-align: left;"><code>n_est=250, lr=0.03, depth=5, min_child=30</code></td>
+<td style="text-align: center;">537.896 B</td>
+<td style="text-align: left;"><code>583a2912c3d0ea1ba58200030208d4aec131b6ab7d94707eec780b772cb24fa5</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>models/canonical_stage1_classifier.pkl</code></td>
+<td style="text-align: left;">LightGBM 3-Sınıflı Sınıflandırıcı (Yön)</td>
+<td style="text-align: left;"><code>n_est=100, lr=0.05, num_leaves=31, seed=42</code></td>
+<td style="text-align: center;">2.058.822 B</td>
+<td style="text-align: left;"><code>d4aac8a6a6f4c2e9f25f786bec6e8fa1a66427585fce8f1331613ac9612429ff</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>models/canonical_stage1_calibrator.pkl</code></td>
+<td style="text-align: left;">Platt Kalibratörü (Lojistik Dönüştürücü)</td>
+<td style="text-align: left;">One-vs-Rest Lojistik Regresyon (<code>lbfgs</code>)</td>
+<td style="text-align: center;">911 B</td>
+<td style="text-align: left;"><code>5db315973a293f9eb43d4f01b1543167c8f143e41883bd8a9ff732ac68e5106a</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>1.3. Fiyat Seviyesi Hata Analizi: $L_1$ Medyan vs $L_2$ Koşullu Ortalama ve HLN Testi</h3>
+<h4>Tablo 3: Fiyat Seviyesi Tahmin Başarımı: Doğrulama ve Test Kümeleri Karşılaştırması</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Örneklem</th>
+<th style="text-align: left;">Model / Referans Kurgusu</th>
+<th style="text-align: center;">MAE ($L_1$ - TL/MWh)</th>
+<th style="text-align: center;">RMSE ($L_2$ - TL/MWh)</th>
+<th style="text-align: center;">Günlük Ekonometrik Hipotez Testi</th>
+<th style="text-align: center;">Strateji P&amp;L (TL/MWh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Doğrulama Kümesi</strong></td>
+<td style="text-align: left;"><strong>Modelsiz $SMF = PTF$ Naif Kuralı ($\hat{S} = 0$)</strong></td>
+<td style="text-align: center;"><strong>476,41</strong></td>
+<td style="text-align: center;">727,11</td>
+<td style="text-align: center;">— (Referans Kural)</td>
+<td style="text-align: center;">-57,52 TL (Açık P&amp;L)</td>
+</tr>
+<tr>
+<td style="text-align: left;">($N = 6.552$ Saat)</td>
+<td style="text-align: left;"><strong>GÖP Öncesi Doğrudan SMF Modeli (<code>DirectSMF</code>)</strong></td>
+<td style="text-align: center;">683,33</td>
+<td style="text-align: center;">829,88</td>
+<td style="text-align: center;">$DM_{\text{stat}} = -8,41$, $p &lt; 0,0001$ (MAE bazlı DM, Naif üstün)</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;">(2025 İlk 9 Ay)</td>
+<td style="text-align: left;"><strong>Aşama 2: GÖP Sonrası Yayılım Modeli ($n=250$)</strong></td>
+<td style="text-align: center;">514,53</td>
+<td style="text-align: center;"><strong>720,87</strong></td>
+<td style="text-align: center;">$HLN_{\text{stat}} = 1,01$, $p = 0,3140$ (MSE bazlı HLN, Üstünlük yok)</td>
+<td style="text-align: center;"><strong>+98,28 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Test Kümesi</strong></td>
+<td style="text-align: left;"><strong>Modelsiz $SMF = PTF$ Naif Kuralı ($\hat{S} = 0$)</strong></td>
+<td style="text-align: center;"><strong>682,75</strong></td>
+<td style="text-align: center;">1.019,49</td>
+<td style="text-align: center;">— (Referans Kural)</td>
+<td style="text-align: center;">+71,73 TL (Açık P&amp;L)</td>
+</tr>
+<tr>
+<td style="text-align: left;">($N = 8.760$ Saat)</td>
+<td style="text-align: left;"><strong>GÖP Öncesi Doğrudan SMF Modeli (<code>DirectSMF</code>)</strong></td>
+<td style="text-align: center;">983,62</td>
+<td style="text-align: center;">1.215,25</td>
+<td style="text-align: center;">$DM_{\text{stat}} = -11,29$, $p &lt; 0,0001$ (MAE bazlı DM, Naif üstün)</td>
+<td style="text-align: center;">+55,95 TL (Aşama 1 Ham)</td>
+</tr>
+<tr>
+<td style="text-align: left;">(12 Ay / 365 Gün)</td>
+<td style="text-align: left;"><strong>Aşama 2: GÖP Sonrası Yayılım Modeli ($n=250$)</strong></td>
+<td style="text-align: center;">748,14</td>
+<td style="text-align: center;"><strong>1.007,01</strong></td>
+<td style="text-align: center;"><strong>$HLN_{\text{stat}} = 1,1026$, $p = 0,2702$ (MSE bazlı HLN, Üstünlük yok)</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Ekonometrik Açıklama ve İstatistiki Çıkarımlar:</em>
+1. <strong>$L_1$ Medyan Avantajı:</strong> Test kümesinde saatlerin %21,14'ünde (1.852 saat) $PTF = SMF$ gerçekleşmiş olup yayılım $S = 0,00$ TL'dir. Mutlak hata kaybı ($L_1$), koşullu medyan tahmini ile minimize edilir. Sıfırda büyük yığılma gösteren dağılımda sabit $\hat{S} = 0$ ($SMF = PTF$) tahmini, MAE'yi en düşük seviyede tutmaktadır (682,75 TL vs 748,14 TL; günlük Diebold-Mariano $DM_{\text{stat}} = -7,001$, $p &lt; 0,0001$).
+2. <strong>$L_2$ Koşullu Ortalama ve İstatistiki Üstünlük Yokluğu (HLN Testi):</strong> LightGBM regresyonu karesel hatayı ($L_2$) minimize etmek üzere koşullu ortalamayı hedefler. Model ekstrem fiyat hareketlerini yakalayarak test RMSE'sini 1.019,49 TL'den 1.007,01 TL'ye (12,48 TL kazanç) düşürmüştür. Ancak Newey-West HAC otokorelasyon düzeltmeli ve küçük örneklem uyarlamalı <strong>Harvey-Leybourne-Newbold (HLN) testi</strong>, bu karesel hata farkının istatistiki olarak anlamlı bir üstünlük taşımadığını göstermektedir ($HLN_{\text{stat}} = 1,1026$, <strong>$p = 0,2702 &gt; 0,05$</strong>).
+3. <strong>P&amp;L Seviye Artışının Spread Genişliğiyle Tutarlılığı:</strong> Doğrulama kümesinden test kümesine geçildiğinde Aşama 2 P&amp;L'inin +98,28 TL'den +119,14 TL'ye yükselmesi model başarısı değildir. Sabit ceza katsayılarıyla ($k=0,03$) simüle edildiğinde dahi test P&amp;L'i yükselmektedir (Doğrulama: 98,28 TL $\rightarrow$ Test: 136,39 TL). Seviye artışı, test yılındaki fiyat oynaklığı ve yayılım genişliğinin (ortalama $|SMF - PTF|$: 476 TL $\rightarrow$ 683 TL) çok daha yüksek olmasıyla tutarlıdır. Modelin naif kurala göre göreli üstünlüğü ise doğrulamada <strong>+155,80 TL</strong> iken (+98,28 vs -57,52 TL), test döneminde <strong>+47,40 TL</strong>'ye (+119,14 vs +71,73 TL) belirgin biçimde gerilemiştir.</p>
+<hr />
+<h3>1.4. Aşama 2 Karar Kuralı İncelemesi: $L_2$ Regresyon İşareti vs Alternatif Modeller</h3>
+<p>Aşama 2 modelinin kanonik P&amp;L değeri (+119,14 TL/MWh), $L_2$ yayılım regresyonunun işaret kuralına ($\hat{S}_{L2} &gt; 0$ ise Uzun, aksi halde Kısa) dayanmaktadır. GÖP sonrası 3-sınıflı yön sınıflandırıcısı, Aşama 1'e göre hem daha yüksek doğruluğa (0,6221 vs 0,5966) hem de belirgin biçimde daha iyi Brier skoruna (BSS %12,33 vs %6,43) sahiptir. Ancak aynı marjinal beklenen değer kuralı ($\tau=70$ TL) uygulandığında sınıflandırıcının P&amp;L'i <strong>-20,81 TL/MWh</strong> seviyesinde kalmakta (doğrulama kümesinde ayrıca optimize edilen $\tau=140$ TL eşiğinde dahi <strong>-7,46 TL/MWh</strong>, argmax kuralında ise <strong>-33,18 TL/MWh</strong> zarar üretmekte); buna karşılık $L_2$ yayılım regresörü <strong>+119,14 TL/MWh</strong> getiri sağlamaktadır.</p>
+<h4>Tablo 4: Aşama 2 İçin Farklı Karar Kurallarının P&amp;L Karşılaştırması</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Aşama 2 Karar Kurgusu</th>
+<th style="text-align: left;">Karar Mantığı</th>
+<th style="text-align: center;">Test P&amp;L (TL/MWh)</th>
+<th style="text-align: left;">Ekonometrik Açıklama</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Kanonik $L_2$ Ortalama Regresyonu</strong></td>
+<td style="text-align: left;">$\hat{S}_{L2} &gt; 0$ ise Uzun, $\le 0$ ise Kısa</td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+<td style="text-align: left;">Pozitif tepe fiyatların büyüklüğünü koşullu ortalamada yakalar.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. $L_1$ Medyan Regresyonu (Quantile 0,5)</strong></td>
+<td style="text-align: left;">$\hat{S}_{L1} &gt; 0$ ise Uzun, $\le 0$ ise Kısa</td>
+<td style="text-align: center;"><strong>+29,57 TL</strong></td>
+<td style="text-align: left;">Medyan $PTF=SMF$ saatlerinde 0'a çekilir, tepe büyüklükleri dışlar.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. Post-DAM Yön Sınıflandırıcısı (Argmax)</strong></td>
+<td style="text-align: left;">En yüksek olasılıklı yön sınıfı</td>
+<td style="text-align: center;"><strong>-33,18 TL</strong></td>
+<td style="text-align: left;">Sınıf olasılığı hedefler, beklenmeyen tepe saatlerde terste kalır.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. Post-DAM Kalibre Beklenen Değer ($\tau=70$)</strong></td>
+<td style="text-align: left;">$EV_{\text{Long}} &gt; 70$ TL (Aşama 1 eşiği)</td>
+<td style="text-align: center;"><strong>-20,81 TL</strong></td>
+<td style="text-align: left;">Marjinal ceza eşiğiyle pozisyon alır, pasiflik zararı sınırlar.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. Post-DAM Kalibre Beklenen Değer (Val-Tuned $\tau=140$)</strong></td>
+<td style="text-align: left;">Doğrulamada optimize edilmiş $\tau=140$ TL</td>
+<td style="text-align: center;"><strong>-7,46 TL</strong></td>
+<td style="text-align: left;">Aşama 2 için özel optimize edilen eşik de zararı sıfırlayamaz.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Tablo 4B: P&amp;L Saat Türleri Hiyerarşik Ayrık Atıf ve Net Katkı Tablosu (N = 8.760 Saat / 365 Gün)</h4>
+<p><em>Hiyerarşik Öncelik Sıralaması (Kesişimsiz Ayrık Partisyon):</em><br />
+1. <strong>Üst %1 Ekstrem Yayılım:</strong> $|SMF_t - PTF_t| \ge 3.101,66$ TL olan tüm saatler (88 saat).<br />
+2. <strong>Tavan Fiyat Saatleri:</strong> 1. dilim dışındaki tavan saatleri (2.113 saat; toplam 2.114 tavan saatinin 1'i üst %1 dilimindedir).<br />
+3. <strong>Anomali Saatleri (-106 / -103 TL):</strong> 1. ve 2. dilim dışındaki anomali saatleri (1.534 saat; toplam 1.538 anomali saatinin 4'ü üst %1 dilimindedir: 2 saat -106, 2 saat -103 TL; tavan saatlerinde anomali yoktur).<br />
+4. <strong>$PTF = SMF$ Saatleri:</strong> Yukarıdaki dilimler dışındaki sıfır yayılım saatleri (664 saat; test yılındaki toplam 1.852 sıfır yayılım saatinin 817'si tavan diliminde [Kategori 2], 371'i anomali diliminde [Kategori 3], kalan 664'ü bu kategoridedir).<br />
+5. <strong>Geri Kalan Normal Piyasa Saatleri:</strong> Kalan normal saatler (4.361 saat).<br />
+<em>(Toplam: $88 + 2.113 + 1.534 + 664 + 4.361 = 8.760$ saat).</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Saat Türü / Piyasa Dilimi</th>
+<th style="text-align: center;">Saat ($N$)</th>
+<th style="text-align: center;">Pay (%)</th>
+<th style="text-align: center;">Her Zaman Açık (Ort. TL)</th>
+<th style="text-align: center;">Aşama 1 Kalibre (Ort. TL)</th>
+<th style="text-align: center;">Aşama 2 $L_2$ Regresyon (Ort. TL)</th>
+<th style="text-align: center;">Aşama 2 $L_1$ Medyan (Ort. TL)</th>
+<th style="text-align: center;">Aşama 2 Sınıflandırıcı ($EV&gt;70$, Ort. TL)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">**1. Üst %1 Ekstrem Yayılım ($</td>
+<td style="text-align: center;">SMF - PTF</td>
+<td style="text-align: center;">\ge 3.101,66$ TL)**</td>
+<td style="text-align: center;">88</td>
+<td style="text-align: center;">%1,00</td>
+<td style="text-align: center;">+1.741,70</td>
+<td style="text-align: center;">+908,78</td>
+<td style="text-align: center;"><strong>+2.131,96</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Tavan Fiyat Saatleri ($PTF$ veya $SMF$ Tavanında)</strong></td>
+<td style="text-align: center;">2.113</td>
+<td style="text-align: center;">%24,12</td>
+<td style="text-align: center;">+227,86</td>
+<td style="text-align: center;">+46,73</td>
+<td style="text-align: center;">-78,25</td>
+<td style="text-align: center;">+155,11</td>
+<td style="text-align: center;">+13,53</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. -106 / -103 TL Platform Anomali Saatleri</strong></td>
+<td style="text-align: center;">1.534</td>
+<td style="text-align: center;">%17,51</td>
+<td style="text-align: center;">-432,05</td>
+<td style="text-align: center;">-33,54</td>
+<td style="text-align: center;">-103,20</td>
+<td style="text-align: center;">+54,26</td>
+<td style="text-align: center;">+129,06</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. $PTF = SMF$ Sıfır Yayılım Saatleri</strong></td>
+<td style="text-align: center;">664</td>
+<td style="text-align: center;">%7,58</td>
+<td style="text-align: center;">+59,02</td>
+<td style="text-align: center;">+42,98</td>
+<td style="text-align: center;">-45,16</td>
+<td style="text-align: center;">-44,20</td>
+<td style="text-align: center;">+51,80</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. Geri Kalan Normal Piyasa Saatleri</strong></td>
+<td style="text-align: center;">4.361</td>
+<td style="text-align: center;">%49,78</td>
+<td style="text-align: center;">+141,53</td>
+<td style="text-align: center;">+99,52</td>
+<td style="text-align: center;"><strong>+277,38</strong></td>
+<td style="text-align: center;">-54,58</td>
+<td style="text-align: center;">-59,49</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>GENEL YILLIK ORTALAMA / TOPLAM</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>%100,0</strong></td>
+<td style="text-align: center;"><strong>+71,73 TL</strong></td>
+<td style="text-align: center;"><strong>+67,33 TL</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+<td style="text-align: center;"><strong>+29,57 TL</strong></td>
+<td style="text-align: center;"><strong>-20,81 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<h5>Toplam Yıllık P&amp;L'e Net Katkı Dökümü (Birim: TL/MWh cinsinden saat ağırlıklı pay: $\text{Ortalama} \times N / 8.760$)</h5>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Saat Türü</th>
+<th style="text-align: center;">Saat ($N$)</th>
+<th style="text-align: center;">Açık Katkı</th>
+<th style="text-align: center;">Aşama 1 Katkı</th>
+<th style="text-align: center;">Aşama 2 $L_2$ Katkı</th>
+<th style="text-align: center;">Aşama 2 $L_1$ Katkı</th>
+<th style="text-align: center;">Aşama 2 Clf ($EV&gt;70$) Katkı</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Üst %1 Ekstrem Yayılım</strong></td>
+<td style="text-align: center;">88</td>
+<td style="text-align: center;">+17,50 TL</td>
+<td style="text-align: center;">+9,13 TL</td>
+<td style="text-align: center;"><strong>+21,42 TL</strong></td>
+<td style="text-align: center;">+13,18 TL</td>
+<td style="text-align: center;"><strong>-20,98 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Tavan Fiyat Saatleri</strong></td>
+<td style="text-align: center;">2.113</td>
+<td style="text-align: center;">+54,96 TL</td>
+<td style="text-align: center;">+11,27 TL</td>
+<td style="text-align: center;">-18,87 TL</td>
+<td style="text-align: center;">+37,41 TL</td>
+<td style="text-align: center;">+3,26 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. -106 / -103 TL Anomali Saatleri</strong></td>
+<td style="text-align: center;">1.534</td>
+<td style="text-align: center;">-75,66 TL</td>
+<td style="text-align: center;">-5,87 TL</td>
+<td style="text-align: center;">-18,07 TL</td>
+<td style="text-align: center;">+9,50 TL</td>
+<td style="text-align: center;">+22,60 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. $PTF = SMF$ Saatleri</strong></td>
+<td style="text-align: center;">664</td>
+<td style="text-align: center;">+4,47 TL</td>
+<td style="text-align: center;">+3,26 TL</td>
+<td style="text-align: center;">-3,42 TL</td>
+<td style="text-align: center;">-3,35 TL</td>
+<td style="text-align: center;">+3,93 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. Geri Kalan Normal Saatler</strong></td>
+<td style="text-align: center;">4.361</td>
+<td style="text-align: center;">+70,46 TL</td>
+<td style="text-align: center;">+49,54 TL</td>
+<td style="text-align: center;"><strong>+138,09 TL</strong></td>
+<td style="text-align: center;">-27,17 TL</td>
+<td style="text-align: center;">-29,62 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>TOPLAM YILLIK P&amp;L (TL/MWh)</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>+71,73 TL</strong></td>
+<td style="text-align: center;"><strong>+67,33 TL</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+<td style="text-align: center;"><strong>+29,57 TL</strong></td>
+<td style="text-align: center;"><strong>-20,81 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<h5>Saat Türlerine Göre Model Eylem Payları, Doğruluk ve Aktif İsabet Oranları</h5>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Saat Türü / Piyasa Dilimi</th>
+<th style="text-align: center;">Saat ($N$)</th>
+<th style="text-align: center;">Aşama 2 $L_2$ Eylem Dağılımı</th>
+<th style="text-align: center;">$L_2$ Doğruluk</th>
+<th style="text-align: center;">Aşama 2 Sınıflandırıcı ($EV&gt;70$) Eylem Dağılımı</th>
+<th style="text-align: center;">Sınıflandırıcı 3-Sınıflı Doğruluk (Pasif=$D_0$ Doğru)</th>
+<th style="text-align: center;">Sınıflandırıcı Doğruluk (Pasif=Hata)</th>
+<th style="text-align: center;">Sınıflandırıcı Aktif İsabet (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Üst %1 Ekstrem Yayılım</strong></td>
+<td style="text-align: center;">88</td>
+<td style="text-align: center;">%80,7 Uzun / %19,3 Kısa</td>
+<td style="text-align: center;"><strong>%78,4</strong></td>
+<td style="text-align: center;">%29,5 Uzun / %31,8 Kısa / %38,6 Pasif</td>
+<td style="text-align: center;"><strong>%2,3</strong></td>
+<td style="text-align: center;"><strong>%2,3</strong></td>
+<td style="text-align: center;"><strong>%3,7 (2 / 54 aktif)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. Tavan Fiyat Saatleri</strong></td>
+<td style="text-align: center;">2.113</td>
+<td style="text-align: center;">%8,6 Uzun / %91,4 Kısa</td>
+<td style="text-align: center;">%20,3</td>
+<td style="text-align: center;">%68,4 Uzun / %1,5 Kısa / %30,1 Pasif</td>
+<td style="text-align: center;">%58,6</td>
+<td style="text-align: center;">%58,3</td>
+<td style="text-align: center;">%83,4</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. -106 / -103 TL Anomali Saatleri</strong></td>
+<td style="text-align: center;">1.534</td>
+<td style="text-align: center;">%69,5 Uzun / %30,5 Kısa</td>
+<td style="text-align: center;">%33,1</td>
+<td style="text-align: center;">%1,8 Uzun / %66,5 Kısa / %31,7 Pasif</td>
+<td style="text-align: center;">%62,3</td>
+<td style="text-align: center;">%62,3</td>
+<td style="text-align: center;">%91,3</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. $PTF = SMF$ Sıfır Yayılım Saatleri</strong></td>
+<td style="text-align: center;">664</td>
+<td style="text-align: center;">%34,6 Uzun / %65,4 Kısa</td>
+<td style="text-align: center;">%32,5</td>
+<td style="text-align: center;">%34,0 Uzun / %9,0 Kısa / %56,9 Pasif</td>
+<td style="text-align: center;"><strong>%50,8</strong></td>
+<td style="text-align: center;"><strong>%32,7</strong></td>
+<td style="text-align: center;">%75,9 (217 / 286 aktif)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. Geri Kalan Normal Piyasa Saatleri</strong></td>
+<td style="text-align: center;">4.361</td>
+<td style="text-align: center;">%47,0 Uzun / %53,0 Kısa</td>
+<td style="text-align: center;"><strong>%55,8</strong></td>
+<td style="text-align: center;">%29,2 Uzun / %14,1 Kısa / %56,7 Pasif</td>
+<td style="text-align: center;"><strong>%25,3</strong></td>
+<td style="text-align: center;"><strong>%25,3</strong></td>
+<td style="text-align: center;"><strong>%58,4</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>GENEL TEST YILI TOPLAMI</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>%41,1 Uzun / %58,9 Kısa</strong></td>
+<td style="text-align: center;"><strong>%41,7</strong></td>
+<td style="text-align: center;"><strong>%34,2 Uzun / %20,0 Kısa / %45,7 Pasif</strong></td>
+<td style="text-align: center;"><strong>%41,5</strong></td>
+<td style="text-align: center;"><strong>%40,1</strong></td>
+<td style="text-align: center;"><strong>%73,9 (3.510 / 4.753 aktif)</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<strong>Metodolojik Not – Doğruluk Tanımları ve Kategori 4 Ayrıştırması:</strong><br />
+- <strong>$L_2$ Regresör Doğruluğu (4. sütun):</strong> $L_2$ model hiçbir zaman Pasif kalmaz; doğruluk = tüm saatlerdeki fiili yönle ($D_t$) işaret eşleşmesidir.<br />
+- <strong>Sınıflandırıcı 3-Sınıflı Doğruluk (6. sütun, %41,5):</strong> Standart 3-sınıflı sınıflandırma metriğidir ($\hat{y}_t = y_t$). Sınıflandırıcının Pasif kaldığı saatler Dengede eylemi ($a_t = 0$) kabul edilir. Sistem fiilen Dengede ($D_t=0$) olduğunda Pasif kalmak <strong>doğru tahmin</strong> sayılır ($126 / 159$ saat eşleşmiştir). Kategori 4'teki 664 saatin 151'i $D_t=0$'dır; model bu 151 saatin 120'sinde Pasif kalmış ve doğru sayılmıştır. Aktif pozisyondaki 217 doğru ile birlikte toplam $217 + 120 = 337$ doğru elde edilmiş ve 3-sınıflı doğruluk <strong>$337 / 664 = \%50,8$</strong> çıkmıştır. Yıllık genel toplamda $(3.510 + 126) / 8.760 = \mathbf{\%41,5}$'tir.<br />
+- <strong>Sınıflandırıcı Doğruluk (Pasif=Hata, 7. sütun, %40,1):</strong> Pasif kalmanın her zaman hata kabul edildiği katı ticaret metriğidir ($a_t = y_t \land a_t \ne 0$). Bu tanımda Kategori 4'te yalnızca aktif saatlerdeki doğrular ($217$ saat) paya yazılır ve doğruluk <strong>$217 / 664 = \%32,7$</strong> olur ($= \text{Aktif Pay \%43,1} \times \text{Aktif İsabet \%75,9}$). Yıllık genel toplamda ise $3.510 / 8.760 = \mathbf{\%40,1}$'dir.<br />
+- <strong>Sınıflandırıcı Aktif İsabet (8. sütun):</strong> Modelin fiilen pozisyon aldığı aktif saatlerdeki yön isabetidir ($3.510 / 4.753 = \%73,9$; model yıllık saatlerin %54,3'ünde [2.999 Uzun + 1.754 Kısa = 4.753 saat] aktif pozisyona girmiş, 4.007 saatte pasif kalmış ve aktif olduğu saatlerin 3.510'unda doğru yönde kalmıştır; Kategori 4'te $217 / 286 = \%75,9$).<br />
+- <strong>Tablo 9 Karşılaştırması:</strong> Tablo 9'daki %62,21 değeri argmax kuralıyla (Pasif seçeneği olmaksızın, her saat zorunlu 3 sınıftan en yüksek olasılıklıya atanarak) elde edilen 3-sınıflı doğruluktur. Tablo 4B'deki değerler ise $\tau=70$ TL marjinal eşiği altındaki ekonomik kararları yansıtmaktadır.</p>
+<p>[!IMPORTANT]
+<strong>P&amp;L Saat Türleri Atıf Analizi ve Aşama 2 Çelişkisinin Ekonometrik Ayrıştırması:</strong><br />
+Tablo 4B, Aşama 2 $L_2$ regresörü (+119,14 TL) ile sınıflandırıcısı (-20,81 TL) arasındaki <strong>139,95 TL/MWh</strong>'lik net getiri farkının kaynaklarını ampirik olarak ortaya koymaktadır:<br />
+1. <strong>Farkın Ana Kaynağı Normal Piyasa Saatleridir (+167,71 TL Net Fark Katkısı, %119,8 Pay):</strong><br />
+   İki model arasındaki fark tek başına ekstrem sıçrama saatlerinden türememektedir. 4.361 normal piyasa saatinde (%49,78), $L_2$ regresörü saatlerin %47,0'sinde Uzun pozisyona geçerek <strong>+138,09 TL</strong> net getiri katkısı üretmiştir. Sınıflandırıcı model ise yön olasılıkları marjinal ceza eşiğini ($\tau=70$ TL) aşamadığından normal saatlerin %56,7'sinde pasif kalarak ve aldığı pozisyonlarda -59,49 TL ortalama zarara uğrayarak <strong>-29,62 TL</strong> kaybettirmiştir. Aradaki <strong>+167,71 TL'lik net fark</strong>, toplam 139,95 TL'lik farkın <strong>%119,8'ini tek başına</strong> oluşturmaktadır.<br />
+2. <strong>Üst %1 Ekstrem Yayılım Diliminin Rolü ve Sınıflandırıcının Çöküşü (+42,40 TL Net Fark Katkısı, %30,3 Pay):</strong><br />
+   $|SMF - PTF| \ge 3.101,66$ TL olan 88 saatlik küme simetrik mutlak yayılım ile tanımlandığından her iki kuyruğu birden içermektedir: <strong>64 saat pozitif sıçrama</strong> ($SMF &gt; PTF$, ortalama PTF: 444 TL, SMF: 3.950 TL) ve <strong>24 saat negatif çöküş</strong> ($SMF &lt; PTF$, ortalama PTF: 4.098 TL, SMF: 552 TL).<br />
+   - $L_2$ regresörü bu 88 saatte <strong>%78,4 yön doğruluğuna</strong> (71 Uzun, 17 Kısa) ulaşarak pozitif sıçramaları yakalamış ve <strong>+2.131,96 TL/MWh (genel P&amp;L'e +21,42 TL net katkı)</strong> sağlamıştır.<br />
+   - Buna karşılık sınıflandırıcı model bu saatlerde aktif pozisyon aldığı 54 saatin yalnızca 2'sinde doğru yönü bulabilmiş (<strong>%3,7 aktif isabet</strong>) ve <strong>-2.088,43 TL/MWh (-20,98 TL ceza katkısı)</strong> kaybettirmiştir.<br />
+   - <em>Sınıflandırıcının Yapısal Terslik Mekanizması:</em> Model, eğitim verisinde $PTF$ fiyatını sistem sıkılığı vekili olarak öğrenmiştir (genel korelasyon $r=+0,836$, üst %1 saatlerinde $r=+0,855$). Ancak ekstrem şok saatlerinde bu bağıntı tersine dönmektedir: Pozitif sıçramalarda gün öncesi $PTF$ 444 TL gibi çok düşük bir seviyede kaldığı için model sistemi fazla sanmakta ($P(\text{Fazla})=0,524$), pasif kalmakta veya Kısa pozisyona düşmektedir. Negatif çöküşlerde ise $PTF$ 4.098 TL tavanında olduğundan model sisteme $P(\text{Açık})=0,956$ atayarak kesin Uzun pozisyona girmekte ve devasa dengesizlik cezalarına maruz kalmaktadır. Bu durum bir etiket hatası değil; sınıflandırıcının $PTF$ bazlı sıkılık varsayımının beklenmeyen fiziksel şok saatlerinde yapısal olarak terste kalmasıdır.<br />
+3. <strong>Tavan, Anomali ve Sıfır Yayılım Dilimlerinin Dengeleyici Rolü (-70,16 TL Fark, -50,1% Pay):</strong><br />
+   Tavan fiyat saatlerinde (-22,14 TL), anomali saatlerinde (-40,67 TL) ve sıfır yayılım saatlerinde (-7,35 TL) sınıflandırıcı pasif kalarak veya doğru yönde pozisyon alarak $L_2$'ye göre toplam <strong>-70,16 TL</strong> daha az ceza / daha çok getiri elde etmiştir.<br />
+<em>Net Ayrıştırma Sentezi:</em><br />
+$$+167,71 \text{ TL (Normal Saatler)} + 42,40 \text{ TL (Ekstrem Dilim)} - 70,16 \text{ TL (Kalan Saatler)} = \mathbf{+139,95 \text{ TL/MWh}}$$<br />
+Böylece iki model arasındaki getiri farkı ayrık bileşenleriyle tutarlı biçimde dekompoze edilmiştir.</p>
+</blockquote>
+<hr />
+<h3>1.5. Aşama 2 P&amp;L Kaynağının İzolasyonu: PTF Seviye ve Ortalamaya Dönüş Kuralı Hipotezi</h3>
+<p>Aşama 2 $L_2$ regresörünün genel yön isabetinin <strong>%41,7</strong> ile piyasanın çoğunluk sınıfının (%55,7) ve yazı-tura şans düzeyinin (%50,0) belirgin biçimde altında kalması; modelin başarısının bir yönsel tahmin üstünlüğünden değil, elektrik piyasasındaki yapısal fiyat sınırlarından (0 tabanı ve 3.400 / 4.500 TL tavanı) kaynaklanan bir <strong>PTF seviyesi etkisi (ortalamaya dönüş)</strong> olabileceği hipotezini gündeme getirmiştir. Bu hipotezi doğrudan test etmek amacıyla Tablo 4C'de 3 bağımsız sınama gerçekleştirilmiştir:</p>
+<h4>Tablo 4C: PTF Seviye ve Ortalamaya Dönüş Hipotezi Sınaması (N = 8.760 Saat)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Karar Kurgusu / Sınama Modeli</th>
+<th style="text-align: left;">Dahil Edilen Öznitelikler ve Karar Kuralı</th>
+<th style="text-align: center;">Test P&amp;L (%95 Blok GA)</th>
+<th style="text-align: center;">L2 İle Fark (%95 Blok GA)</th>
+<th style="text-align: center;">Yön İsabeti (%)</th>
+<th style="text-align: center;">Uzun Payı (%)</th>
+<th style="text-align: left;">Ekonometrik Açıklama ve Kaynak Örneklem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. Kanonik Aşama 2 ($L_2$ LightGBM)</strong></td>
+<td style="text-align: left;">Tüm GÖP sonrası öznitelikler (32 öznitelik, $n=250$)</td>
+<td style="text-align: center;"><strong>+119,14 TL</strong><br>([+61,79; +184,53])</td>
+<td style="text-align: center;">— (Referans Model)</td>
+<td style="text-align: center;">%41,7</td>
+<td style="text-align: center;">%41,1</td>
+<td style="text-align: left;">$L_2$ yayılım koşullu ortalama modeli (Tablo 12 ile mutabık seed=42 CI).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. (a) Doğrusal Regresyon (PTF + Saat)</strong></td>
+<td style="text-align: left;">Yalnızca $PTF_t$ ve Doğrusal Saat ($N_{\text{feat}}=2$)<br>$\hat{S} = -0,0806 \cdot PTF + 3,50 \cdot h + 77,75$</td>
+<td style="text-align: center;"><strong>+108,51 TL</strong><br>([+49,04; +167,17])</td>
+<td style="text-align: center;">-10,63 TL<br>([-68,71; +41,21])</td>
+<td style="text-align: center;">%33,2</td>
+<td style="text-align: center;">%29,6</td>
+<td style="text-align: left;">Eğitim+Doğrulama OLS ($h \in [0, 23]$ doğrusal saat); 30 ek ML değişkeni olmadan $L_2$'nin %91,1'ini üretir ($p&gt;0,60$).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. (a2) Tek Değişkenli Doğrusal Regresyon (PTF)</strong></td>
+<td style="text-align: left;">Yalnızca $PTF_t$ ($N_{\text{feat}}=1$)<br>$\hat{S} = -0,0755 \cdot PTF + 105,92$</td>
+<td style="text-align: center;"><strong>+94,77 TL</strong><br>([+36,05; +153,55])</td>
+<td style="text-align: center;">-24,36 TL<br>([-87,65; +29,16])</td>
+<td style="text-align: center;">%33,0</td>
+<td style="text-align: center;">%28,2</td>
+<td style="text-align: left;">Eğitim+Doğrulama OLS; başabaş $PTF \approx 1.403$ TL; tek bir doğrusal katsayı dahi $L_2$ ile istatistiki olarak farksızdır.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. (b) Naif Medyan Kuralı (Eğitim Eşiği)</strong></td>
+<td style="text-align: left;">$PTF_t &lt; 2.500$ TL ise Uzun, $\ge 2.500$ TL ise Kısa</td>
+<td style="text-align: center;"><strong>+140,57 TL</strong><br>([+87,74; +205,77])</td>
+<td style="text-align: center;"><strong>+21,43 TL</strong><br>([-14,85; +62,71])</td>
+<td style="text-align: center;">%35,3</td>
+<td style="text-align: center;">%48,5</td>
+<td style="text-align: left;">Eşik = Eğitim+Doğrulama PTF medyanı (2.500 TL). Nokta tahmini üstündür; GA sıfırı içerir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. (c) PTF Özellikleri Çıkarılmış $L_2$ Modeli</strong></td>
+<td style="text-align: left;">PTF hariç 26 öznitelikle eğitilen LightGBM</td>
+<td style="text-align: center;"><strong>+70,73 TL</strong><br>([+15,98; +132,41])</td>
+<td style="text-align: center;"><strong>-48,40 TL</strong><br>([-84,83; -13,95])</td>
+<td style="text-align: center;">%43,9</td>
+<td style="text-align: center;">%39,6</td>
+<td style="text-align: left;">PTF çıkarıldığında $L_2$'ye göre anlamlı kayıp ($p&lt;0,01$); getiri naif seviyede kalır.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<strong>Eşik ve Katsayıların Örneklem Kaynağı, Eşik Izgarası Duyarlılığı ve Güven Aralıkları:</strong><br />
+1. <strong>Parametrelerin Örneklem Kaynağı:</strong><br />
+   - <strong>(a) ve (a2) Doğrusal Katsayıları:</strong> Test öncesi dönemdeki (TrVal: 2024 – 2025 ilk 9 ayı, $N = 15.168$ saat; Eğitim: 8.616 saat, Doğrulama: 6.552 saat) veriler üzerinde OLS ile uydurulmuştur. 2023 verisi veri ambarında bulunmamakta olup test öncesi toplam veri kütüğü 15.168 saattir. (a2) tek değişkenli kuralı $\hat{S} = -0,0755 \cdot PTF + 105,92$ olup başabaş seviyesi $105,92 / 0,0755 \approx 1.403$ TL'dir (Uzun payı %28,2, test P&amp;L: +94,77 TL). (a) satırı ise günün saatini $h \in [0, 23]$ olarak doğrusal biçimde modele katar ($+3,50 \cdot h$; kukla saat vektörü değildir).<br />
+   - <strong>(b) 2.500 TL Eşiği:</strong> Yine test öncesi dönemdeki (TrVal, $N=15.168$) fiili PTF medyan değeridir ($Medyan_{\text{TrVal}}(PTF) = 2.500,00$ TL; test yılı medyanı ise $2.567,00$ TL'dir).<br />
+2. <strong>Eşik Izgarası Duyarlılık Analizi (1.500 – 3.500 TL):</strong><br />
+   Sabit PTF eşiği test kümesinde sistematik olarak tarandığında getiri profili şu şekildedir:<br />
+   - $PTF &lt; 1.500$ TL: +105,09 TL/MWh (Uzun: %30,9, Doğruluk: %33,2) | Fark vs $L_2$: -14,04 TL [%95 GA: -71,81; +37,21]<br />
+   - $PTF &lt; 2.000$ TL: +127,14 TL/MWh (Uzun: %40,1, Doğruluk: %33,8) | Fark vs $L_2$: +8,01 TL [%95 GA: -34,74; +47,84]<br />
+   - $PTF &lt; 2.250$ TL: +138,10 TL/MWh (Uzun: %43,8, Doğruluk: %34,5) | Fark vs $L_2$: +18,96 TL [%95 GA: -16,43; +59,85]<br />
+   - <strong>$PTF &lt; 2.500$ TL:</strong> <strong>+140,57 TL/MWh</strong> (Uzun: %48,5, Doğruluk: %35,3) | Fark vs $L_2$: <strong>+21,43 TL</strong> [%95 GA: -14,85; +62,71]<br />
+   - $PTF &lt; 2.750$ TL: +135,48 TL/MWh (Uzun: %54,9, Doğruluk: %36,2) | Fark vs $L_2$: +16,35 TL [%95 GA: -21,57; +61,93]<br />
+   - $PTF &lt; 3.000$ TL: +108,77 TL/MWh (Uzun: %64,2, Doğruluk: %37,9) | Fark vs $L_2$: -10,37 TL [%95 GA: -57,11; +42,70]<br />
+   - $PTF &lt; 3.500$ TL: +74,96 TL/MWh (Uzun: %91,6, Doğruluk: %51,2) | Fark vs $L_2$: -44,18 TL [%95 GA: -120,30; +26,89]<br />
+   Görüldüğü üzere 2.000–2.750 TL aralığındaki tüm eşikler +127 ile +141 TL bandında stabil ve yüksek getiri üretmektedir; 2.500 TL eşiğinin $L_2$'ye göre +21,43 TL'lik farkı ise 7 günlük blok bootstrap %95 güven aralığında <strong>[-14,85; +62,71]</strong> olup sıfırı rahatlıkla içermektedir ($p &gt; 0,25$). Dolayısıyla <em>"deterministik kural LightGBM'i geride bırakmaktadır"</em> tespiti yalnızca bir <strong>nokta tahmini üstünlüğüdür</strong>; ekonometrik olarak iki strateji istatistiksel açıdan farksızdır.<br />
+3. <strong>(c) PTF Çıkarılmış Model Mekanizması:</strong><br />
+   PTF öznitelikleri modelden çıkarıldığında yön doğruluğu %43,9, Uzun pozisyon oranı ise <strong>%39,6'dır (3.472 saat)</strong>. Model naif kural gibi %100 Uzun kalmamakta; bilakis saatlerin %60,4'ünde (5.288 saat) Kısa pozisyon almaktadır. Ancak aldığı 3.472 Uzun saatinde saat başına ortalama +182,23 TL (toplam katkı: +72,23 TL) kazanırken, 5.288 Kısa saatinde saat başına ortalama -2,47 TL (toplam katkı: -1,49 TL) kaybetmiş ve net getiri tesadüfi bir dengeyle <strong>+70,73 TL/MWh</strong> seviyesinde kalmıştır. Bu durum, modelin naif kurala çöktüğünü değil; PTF öznitelikleri olmaksızın modelin naif kuralın (+71,73 TL) ötesinde hiçbir ekonomik alfa üretemediğini ve $L_2$'ye göre istatistiki olarak anlamlı düzeyde kayba uğradığını (fark: -48,40 TL [%95 GA: -84,83; -13,95], $p &lt; 0,01$) gösterir.</p>
+</blockquote>
+<p><em>Ekonometrik Değerlendirme ve Çıkarımlar:</em><br />
+Tablo 4C bulguları, Aşama 2'nin ekonomik getirisinin karmaşık bir makine öğrenmesi örüntüsünden türemediğini doğrulamaktadır:
+1. <strong>Yapısal Sınırlar ve Ortalamaya Dönüş Dinamiği:</strong> Fiyatların sıfır tabanı ile tavan limitleri arasına sıkışması, yayılım üzerinde güçlü bir seviye bağımlılığı yaratmaktadır. $PTF$ düşük olduğunda (gece/yenilenebilir saatleri), fiyat ancak yukarı sıçrayabilir veya sıfırda kalabilir; kural Uzun pozisyona geçerek pozitif sıçramaları toplar.<br />
+   - <strong>Tavan Saatlerinin Gerçek Yapısı ve Marjın Belirleyiciliği:</strong> Tablo 4B'nin Kategori 2'sinde yer alan 2.113 tavan saati incelendiğinde, bu saatlerin 817'sinde (%38,7) hem $PTF$ hem $SMF$ tavan seviyesindedir ve yayılım tam sıfırdır ($PTF=SMF=\text{tavan}$). Toplam 1.852 sıfır yayılım saatinin 817'si tavan seviyesinde gerçekleşmiştir. Kalan saatlerin 1.036'sında (%49,0) $SMF &gt; PTF$ iken, 260'ında (%12,3) $SMF &lt; PTF$'dir.<br />
+   - <strong>Naif Kuralın +227,86 TL Kazancı Nereden Gelir?</strong> "Her Zaman Açık" naif kuralı tavan saatlerinde devasa bir yayılım sıçramasından değil; yayılımın sıfır olduğu saatlerde dahi sistemin Enerji Açığında olması nedeniyle uzlaştırma formülünün ($P_{\text{neg}} = \text{tavan} \times 1,06$) sağladığı <strong>$k$ dengesizlik ceza marjını (%6 $\times$ tavan $\approx$ 204–270 TL)</strong> ve ampirik platform anomali çarpanlarını tahsil etmektedir. $L_2$ regresörü ise yüksek PTF seviyesini ortalamaya dönüş kuralıyla Kısa sinyali olarak okuduğundan bu marj cezalarına ters yönde maruz kalmış ve tavan kategorisinde <strong>−78,25 TL/MWh</strong> zarar üretmiştir.
+2. <strong>Algoritmik Beceri Değil, PTF Seviye Etkisi:</strong> Eğitim kümesi medyanına dayanan deterministik bir kural ($PTF &lt; 2.500$ TL ise Uzun) <strong>+140,57 TL/MWh</strong> nokta getiri sağlamakta ve LightGBM modelini (+119,14 TL) nokta tahmininde 21,43 TL aşmaktadır (blok bootstrap farkı [-14,85; +62,71] ile istatistiki başa başlık). PTF öznitelikleri çıkarıldığında ise getiri <strong>+70,73 TL/MWh</strong> seviyesine gerilemekte ve modelsiz "Her Zaman Açık" naif kuralının (+71,73 TL) düzeyini aşamamaktadır. Dolayısıyla Aşama 2'nin başarısı bir yön veya sıçrama tahmin becerisi değil; piyasa sınırlarının yarattığı yapısal ortalamaya dönüş dinamiğinin mekanik bir sonucudur.</p>
+<hr />
+<h4>Tablo 4D: P&amp;L Bileşen Dekompozisyonu: Yayılım, Marj + Etiket-İşaret Uyumsuzluğu ve Platform Veri Kalıntısı (N = 8.760 Saat)</h4>
+<p>Ticari dengesizlik kararlarının getiri formülü ekonometrik olarak üç ayrık bileşene ayrıştırılabilir:
+$$\text{Net P\&amp;L}<em>t = \underbrace{a_t \cdot (SMF_t - PTF_t)}</em>{\text{1. Saf Yayılım (Spread)}} + \underbrace{\text{Marj}<em>t(k, l) + \text{Uyumsuzluk}_t}</em>{\text{2. Ceza Marjı + Etiket-İşaret Uyumsuzluğu}} + \underbrace{\text{Sapma}<em>t}</em>{\text{3. Platform Veri Kalıntısı (Tablo 8B Sapması)}}$$</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Karar Stratejisi</th>
+<th style="text-align: center;">Fiili Yıllık P&amp;L</th>
+<th style="text-align: center;">1. Yayılım Bileşeni ($a_t \cdot S_t$)</th>
+<th style="text-align: center;">2. Marj + Etiket-İşaret Uyumsuzluğu</th>
+<th style="text-align: center;">3. Platform Veri Kalıntısı</th>
+<th style="text-align: left;">Strateji Mekanizması ve Temel Çıkarım</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Her Zaman Açık (Naif Kural)</strong></td>
+<td style="text-align: center;"><strong>+71,73 TL</strong></td>
+<td style="text-align: center;"><strong>+11,86 TL (%16,5)</strong></td>
+<td style="text-align: center;"><strong>+68,47 TL (%95,5)</strong></td>
+<td style="text-align: center;"><strong>-8,60 TL (-12,0%)</strong></td>
+<td style="text-align: left;">Getirinin ana gövdesi yayılımdan değil; açık yönlü ceza marjı ve etiket-işaret uyumsuzluğundan (+68,47 TL) gelir; platform sapması Tablo 8B ile uyumlu olarak -8,60 TL'dir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1 Kalibre Modeli</strong></td>
+<td style="text-align: center;"><strong>+67,33 TL</strong></td>
+<td style="text-align: center;"><strong>+24,79 TL (%36,8)</strong></td>
+<td style="text-align: center;"><strong>+35,56 TL (%52,8)</strong></td>
+<td style="text-align: center;"><strong>+6,98 TL (+10,4%)</strong></td>
+<td style="text-align: left;">Pasif kalarak maruziyeti yarıya keser; yayılım payı artar (%36,8), marj hasılatı yarı yarıya düşer; platform sapması +6,98 TL'dir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2 $L_2$ Regresör Modeli</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+<td style="text-align: center;"><strong>+150,50 TL (%126,3)</strong></td>
+<td style="text-align: center;"><strong>-16,94 TL (-14,2%)</strong></td>
+<td style="text-align: center;"><strong>-14,42 TL (-12,1%)</strong></td>
+<td style="text-align: left;"><strong>Yalnızca yayılımdan kazanır.</strong> Pozisyonunu yayılım işaretine göre seçerek spread'i toplar (+150,50 TL), ceza marjı ve platform sapmasında negatiftir.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Deterministik $PTF &lt; 2.500$ TL</strong></td>
+<td style="text-align: center;"><strong>+140,57 TL</strong></td>
+<td style="text-align: center;"><strong>+188,68 TL (%134,2)</strong></td>
+<td style="text-align: center;"><strong>-20,92 TL (-14,9%)</strong></td>
+<td style="text-align: center;"><strong>-27,19 TL (-19,3%)</strong></td>
+<td style="text-align: left;">Düşük PTF'de Uzun, yüksekte Kısa kalarak yapısal ortalamaya dönüş yayılımını tam olarak hasat eder (+188,68 TL).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tam Nötr Portföy ($\alpha=0,50$)</strong></td>
+<td style="text-align: center;"><strong>+29,62 TL</strong></td>
+<td style="text-align: center;"><strong>+5,93 TL (%20,0)</strong></td>
+<td style="text-align: center;"><strong>+24,01 TL (%81,1)</strong></td>
+<td style="text-align: center;"><strong>-0,32 TL (-1,1%)</strong></td>
+<td style="text-align: left;">Tablo 11 sentetik portföy getirisi ($0,5 \times [P_{\text{neg}} + P_{\text{pos}} - 2 PTF]$); yayılım katkısı yalnızca +5,93 TL olup, marj yapısı ve etiket uyumsuzlukları belirleyicidir.*</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>P&amp;L Mekanizmasının Ekonometrik Ayrımı:</strong><br />
+Tablo 4D, elektrik piyasasında <em>"P&amp;L neyi ölçüyor?"</em> sorusunun ekonometrik dinamiklerini ortaya koyar:<br />
+1. <strong>İşaret Seçen Modeller ($L_2$ Regresörü, PTF Eşik Kuralı):</strong> Gerçekten <strong>yayılımın (spread) büyüklüğüne ve işaretine</strong> bağlı olarak çalışır. $L_2$ regresörünün ürettiği +119,14 TL'nin +150,50 TL'si doğrudan yayılım bileşeninden gelir.<br />
+2. <strong>Naif Referans Kuralları ("Her Zaman Açık"):</strong> Yayılıma değil, <strong>yasal dengesizlik ceza katsayısı ($k=0,06$) marjı ile yön ve yayılım uyumsuzluklarına</strong> bağlıdır. Ortalama yayılım (+11,86 TL) naif getirinin yalnızca %16,5'ini açıklarken; ceza marjı ve etiket-işaret uyumsuzluğu bileşeni (+68,47 TL) getirinin asıl gövdesini oluşturur (Tablo 8B tam yasal formül farkı olan -8,60 TL ile birlikte net 71,73 TL). Bu nedenle naif kural piyasa yönünü tahmin etmez; piyasanın ceza ve uyumsuzluk yapısını süzer.<br />
+3. <strong>Tam Nötr Portföy ($\alpha = 0,50$):</strong> Portföyde ortalama yayılım (+11,86 TL) yalnızca $0,5 \times 11,86 \approx 5,93$ TL katkı üretmekte; getirinin kalan bölümü (+23,69 TL) ceza marjı yapısı, yön-yayılım uyumsuzlukları ve ampirik platform anomalilerinden türemektedir (Tablo 8B kuramsal formül ayrımında +24,01 TL marj/uyumsuzluk ve -0,32 TL platform sapması; -106 TL taban bedeli anomali ayrımında ise +47,57 TL marj/uyumsuzluk ve -23,88 TL anomali etkisi ile satır toplamı 29,62 TL'ye tam mutabıktır).</p>
+</blockquote>
+<hr />
+<h2>2. Gün İçi Saat Dilimi (Diurnal Blok) Analizi (12–36 Saat Gecikmeli Gün Öncesi Kısıtı)</h2>
+<p>Gün öncesi tahmin kurgusunda tahminler günde tek bir kez (saat 11:30'da) üretilmekte ve ertesi günün 24 saati (00:00–23:00) topluca hedeflenmektedir. Bu nedenle tahmin ufku (lead time: 12.5 saatten 36.5 saate kadar), günün saat dilimleri (gün içi tüketim ve aydınlatma profili / diurnal cycle) ile <strong>tam doğrusal bağımlıdır (mükemmel eşdoğrusallık).</strong></p>
+<p>Hedef günün 24 saati, karar anlarına (GÖP Öncesi 11:30 vs GÖP Sonrası 14:00) ve çeyrek bloklarına göre ayrıştırılmıştır:</p>
+<h4>Tablo 5: Gün İçi Saat Dilimlerine Göre Başarım Metrikleri ve Eylem Kırılımı (12–36 Saat Gecikmeli Gün Öncesi Kurgusu)</h4>
+<h5>Panel A: GÖP Öncesi Karar Kurgusu (Saat 11:30 - PTF Bilinmiyor)</h5>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Saat Dilimi ve Blok</th>
+<th style="text-align: center;">Saat ($N$)</th>
+<th style="text-align: center;">Çoğunluk Sınıfı Payı (Klimatoloji)</th>
+<th style="text-align: center;">Aşama 1 Yön Doğruluğu</th>
+<th style="text-align: center;">Aşama 1 Eylem Dağılımı (% Uzun / % Kısa / % Pasif)</th>
+<th style="text-align: center;">Aşama 1 P&amp;L (TL/MWh)</th>
+<th style="text-align: center;">Her Zaman Açık P&amp;L</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Q1 (00:00–05:00 / Gece, 12–18h)</strong></td>
+<td style="text-align: center;">2.190</td>
+<td style="text-align: center;">%49,18 (Açık: 1.077, Fazla: 1.005)</td>
+<td style="text-align: center;"><strong>%46,21</strong> (-2,97 puan)</td>
+<td style="text-align: center;"><strong>%12,51 Uzun, %9,63 Kısa, %77,85 Pasif</strong></td>
+<td style="text-align: center;">+11,30 TL</td>
+<td style="text-align: center;">-11,78 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q2 (06:00–11:00 / Sabah, 19–24h)</strong></td>
+<td style="text-align: center;">2.190</td>
+<td style="text-align: center;">%53,15 (Açık: 1.164, Fazla: 1.006)</td>
+<td style="text-align: center;"><strong>%65,02</strong> (+11,87 puan)</td>
+<td style="text-align: center;">%29,27 Uzun, %17,03 Kısa, %53,70 Pasif</td>
+<td style="text-align: center;">+88,32 TL</td>
+<td style="text-align: center;">+60,00 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q3 (12:00–17:00 / Gündüz, 25–30h)</strong></td>
+<td style="text-align: center;">2.190</td>
+<td style="text-align: center;">%53,24 (Açık: 1.166, Fazla: 1.019)</td>
+<td style="text-align: center;"><strong>%61,00</strong> (+7,76 puan)</td>
+<td style="text-align: center;">%42,19 Uzun, %14,29 Kısa, %43,52 Pasif</td>
+<td style="text-align: center;">+83,71 TL</td>
+<td style="text-align: center;">+117,00 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q4 (18:00–23:00 / Akşam Zirve, 31–36h)</strong></td>
+<td style="text-align: center;">2.190</td>
+<td style="text-align: center;">%67,40 (Açık: 1.476, Fazla: 688)</td>
+<td style="text-align: center;"><strong>%66,39</strong> (-1,01 puan)</td>
+<td style="text-align: center;">%69,27 Uzun, %1,55 Kısa, %29,18 Pasif</td>
+<td style="text-align: center;">+85,97 TL</td>
+<td style="text-align: center;">+121,72 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Genel Ortalama / Toplam</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>%55,74</strong></td>
+<td style="text-align: center;"><strong>%59,66</strong> (+3,92 puan)</td>
+<td style="text-align: center;"><strong>%38,31 Uzun, %10,63 Kısa, %51,06 Pasif</strong></td>
+<td style="text-align: center;"><strong>+67,33 TL</strong></td>
+<td style="text-align: center;"><strong>+71,73 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<h5>Panel B: GÖP Sonrası Karar Kurgusu (Saat 14:00 - PTF Deterministik Olarak Biliniyor)</h5>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Saat Dilimi ve Blok</th>
+<th style="text-align: center;">Naif $SMF=PTF$ MAE</th>
+<th style="text-align: center;">Naif $SMF=PTF$ RMSE</th>
+<th style="text-align: center;">Aşama 2 Yayılım MAE</th>
+<th style="text-align: center;">Aşama 2 Yayılım RMSE</th>
+<th style="text-align: center;">Aşama 2 RMSE Kazancı</th>
+<th style="text-align: center;">Aşama 2 P&amp;L (TL/MWh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Q1 (00:00–05:00 / Gece)</strong></td>
+<td style="text-align: center;">726,89 TL</td>
+<td style="text-align: center;">1.000,55 TL</td>
+<td style="text-align: center;">788,62 TL</td>
+<td style="text-align: center;">1.009,01 TL</td>
+<td style="text-align: center;">-8,46 TL</td>
+<td style="text-align: center;">+79,62 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q2 (06:00–11:00 / Sabah)</strong></td>
+<td style="text-align: center;">611,80 TL</td>
+<td style="text-align: center;">935,36 TL</td>
+<td style="text-align: center;">701,89 TL</td>
+<td style="text-align: center;">936,20 TL</td>
+<td style="text-align: center;">-0,84 TL</td>
+<td style="text-align: center;">+97,13 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q3 (12:00–17:00 / Gündüz)</strong></td>
+<td style="text-align: center;">705,67 TL</td>
+<td style="text-align: center;">1.049,73 TL</td>
+<td style="text-align: center;">778,53 TL</td>
+<td style="text-align: center;">1.029,98 TL</td>
+<td style="text-align: center;">+19,75 TL</td>
+<td style="text-align: center;">+164,30 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Q4 (18:00–23:00 / Akşam)</strong></td>
+<td style="text-align: center;">686,63 TL</td>
+<td style="text-align: center;">1.086,04 TL</td>
+<td style="text-align: center;">723,53 TL</td>
+<td style="text-align: center;">1.049,21 TL</td>
+<td style="text-align: center;"><strong>+36,83 TL</strong></td>
+<td style="text-align: center;">+135,49 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Genel Ortalama / Toplam</strong></td>
+<td style="text-align: center;"><strong>682,75 TL</strong></td>
+<td style="text-align: center;"><strong>1.019,49 TL</strong></td>
+<td style="text-align: center;"><strong>748,14 TL</strong></td>
+<td style="text-align: center;"><strong>1.007,01 TL</strong></td>
+<td style="text-align: center;"><strong>+12,48 TL</strong></td>
+<td style="text-align: center;"><strong>+119,14 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Ekonometrik Değerlendirme:</em>
+1. <strong>Yön Doğruluğu Sağlaması:</strong> Dört eşit çeyreğin doğruluğu $\frac{46,21 + 65,02 + 61,00 + 66,39}{4} = \mathbf{\%59,66}$ olup Tablo 9'daki genel 3-sınıflı test doğruluğu (0,5966) ile birebir örtüşmektedir.
+2. <strong>Akşam Zirvesinin Doğru Okunması:</strong> Akşam saatlerinde yön doğruluğunun yüksek (%66,39) çıkması modelin uzak ufukta daha başarılı olmasından değil; akşam saatlerinde çoğunluk sınıfının (Enerji Açığı) payının %67,40'a fırlamasından kaynaklanmaktadır. Model bu saatlerde çoğunluk sınıfı referansının (%67,40) 1,01 puan gerisinde kalmaktadır.
+3. <strong>Model Katkısının Sabah ve Gündüz Saatlerinde Yoğunlaşması:</strong> Sistemin yön açısından dengeli dağıldığı sabah ve gündüz saatlerinde (Q2 ve Q3), çoğunluk sınıfı %53 civarındayken model %61–%65 seviyesine ulaşarak sırasıyla <strong>+11,87</strong> ve <strong>+7,76</strong> puanlık yönsel öngörü üretmektedir.
+4. <strong>Gece Pasifliği Koruması:</strong> Gece saatlerinde tüketim dip yaptığından sabit açık pozisyon almak negatif getiri üretmektedir (-11,78 TL). Aşama 1 modeli bu saatlerde %46,21 doğrulukla çoğunluğun (%49,18) altında kalmış; ancak <strong>saatlerin %77,85'inde pasif kalarak</strong> kaybı sınırlamış ve +11,30 TL getiri sağlamıştır.</p>
+<hr />
+<h2>3. EPDK Mevzuatı, Karar 14030 Katsayı Matrisi ve Uzlaştırma Kalıntıları</h2>
+<h3>3.1. EPDK Karar 14030 Katsayı Yapısı ve Rejim Dönemleri</h3>
+<p>Test kümesindeki 8.760 saat, EPDK mevzuat kararları ve tavan fiyat dinamiklerine göre takvimsel olarak 3 kesin döneme ayrılmıştır:</p>
+<h4>Tablo 6: EPDK Karar 14030 Çift Yönlü Dengesizlik Ceza Katsayıları Matrisi (Karar Tarihi: 11.12.2025)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Sistem Denge Durumu ($D_t$)</th>
+<th style="text-align: left;">Negatif Dengesizlik Formülü ($P_{\text{neg}, t}$)</th>
+<th style="text-align: left;">Pozitif Dengesizlik Formülü ($P_{\text{pos}, t}$)</th>
+<th style="text-align: center;">Uygulanan Ceza Katsayıları ($k / l$)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Enerji Açığı ($D_t = 1$, Net Talimat $&gt;0$)</strong></td>
+<td style="text-align: left;">$\max(PTF_t, SMF_t) \times (1 + k)$</td>
+<td style="text-align: left;">$\min(PTF_t, SMF_t) \times (1 - l)$</td>
+<td style="text-align: center;">$k = 0,06$ (%6 ceza) / $l = 0,03$ (%3 indirim)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Enerji Fazlası ($D_t = -1$, Net Talimat $&lt;0$)</strong></td>
+<td style="text-align: left;">$\max(PTF_t, SMF_t) \times (1 + k)$</td>
+<td style="text-align: left;">$\min(PTF_t, SMF_t) \times (1 - l)$</td>
+<td style="text-align: center;">$k = 0,03$ (%3 ceza) / $l = 0,06$ (%6 indirim)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dengede ($D_t = 0$, Net Talimat $=0$)</strong></td>
+<td style="text-align: left;">$\max(PTF_t, SMF_t) \times (1 + k)$</td>
+<td style="text-align: left;">$\min(PTF_t, SMF_t) \times (1 - l)$</td>
+<td style="text-align: center;">$k = 0,03$ (%3) / $l = 0,03$ (%3)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Mevzuat ve Tavan Fiyat Kararları Dipnotu:</em><br />
+- EPDK'nın 11.12.2025 tarih ve 14030 sayılı Kurul Kararı ile 01.01.2026'dan itibaren asimetrik $k/l$ katsayıları yürürlüğe girmiştir.<br />
+- Azami uzlaştırma fiyat tavanları EPDK Kurul Kararları ile belirlenmiştir:<br />
+  * <strong>3.400 TL/MWh Tavanı:</strong> EPDK'nın 27.03.2025 tarih ve 13423 sayılı Kurul Kararı (Resmî Gazete: 05.04.2025 tarih ve 32861 sayılı; yürürlük tarihi: 05.04.2025).<br />
+  * <strong>4.500 TL/MWh Tavanı:</strong> EPDK'nın 02.04.2026 tarih ve 14459 sayılı Kurul Kararı (yürürlük tarihi: 04.04.2026).<br />
+- <strong>Rejim 1 ($N = 2.208$ Saat / 92 Gün):</strong> 01.10.2025 00:00 – 31.12.2025 23:00. Tavan 3.400 TL/MWh, simetrik %3 katsayı.<br />
+- <strong>Rejim 2 ($N = 2.232$ Saat / 93 Gün):</strong> 01.01.2026 00:00 – 03.04.2026 23:00. Karar 14030 katsayıları, tavan 3.400 TL/MWh.<br />
+- <strong>Rejim 3 ($N = 4.320$ Saat / 180 Gün):</strong> 04.04.2026 00:00 – 30.09.2026 23:00. Karar 14030 katsayıları, tavan 4.500 TL/MWh.<br />
+<em>(Toplam: $2.208 + 2.232 + 4.320 = 8.760$ saat).</em></p>
+<hr />
+<h3>3.2. 2026 Yılı Fiyat Uyuşmazlıkları ve -106 / -103 TL Platform Veri Kalitesi Alarmı</h3>
+<p>Test kümesindeki 8.760 saatte teorik mevzuat formülleri ile EPİAŞ'ın yayımladığı fiili uzlaştırma serileri (<code>negativeImbalance</code>, <code>positiveImbalance</code>) karşılaştırılmıştır:</p>
+<ol>
+<li><strong>Negatif Dengesizlik Uyuşmazlıkları (Toplam: 983 Saat):</strong></li>
+<li>552 saatte fiyat tavan seviyesine ulaştığında fiili uzlaştırma serisinde mevzuat formülünün üzerinde çarpanlar gözlenmiştir.</li>
+<li>409 saatte sıfır taban fiyat uygulamaları gerçekleşmiştir.</li>
+<li>22 saatte ise açıklanamayan veri düzensizlikleri kaydedilmiştir.</li>
+<li><strong>Pozitif Dengesizlik Serisindeki Negatif Fiyatlar (Toplam: 1.538 Saat):</strong></li>
+<li>2026 yılındaki 6.552 saatin <strong>1.538'inde (%23,47)</strong> EPİAŞ fiili pozitif dengesizlik serisi negatif değerler almıştır: <strong>-106,00 TL/MWh</strong> (1.468 saat) ve <strong>-103,00 TL/MWh</strong> (70 saat).</li>
+<li><strong>Rejim Ayrımı:</strong> Söz konusu negatif değerler Rejim 1'de (2025 son çeyreği, 2.208 saat) <strong>hiç görülmemiştir (0 / 2.208 saat, %0,0)</strong>; tamamen 2026 yılına (Rejim 2'de 318 saat, Rejim 3'te 1.220 saat) aittir.</li>
+<li><strong>Mevzuat Rekonstrüksiyonu ve Formülsel Uyuşmazlık:</strong> Tablo 6'daki yasal DUY formülü rekonstrüksiyonumuza göre Enerji Açığı saatlerinde $P_{\text{pos}, t} = \min(PTF_t, SMF_t) \times 0,97$ olmalıdır. $PTF_t \ge 0$ ve $SMF_t \ge 0$ piyasa taban kuralları gereğince bu formül kuramsal olarak daima $P_{\text{pos}, t} \ge 0$ üretir. Fiili serideki negatif değerler bu rekonstrüksiyonla uyuşmamaktadır.</li>
+<li><strong>Formülsel Kaynak / Sentinel ve Tarife Olasılıkları:</strong> Değerlerin sistem dengesizlik yönüne göre %100 ayrışması (Fazla saatlerinde $-106$, Açık saatlerinde $-103$), Karar 14030'daki ceza katsayılarıyla ($l=0,06 \rightarrow -100 \times (1 + 0,06) = -106$; $l=0,03 \rightarrow -100 \times (1 + 0,03) = -103$) tam bir matematiksel uyum sergilemektedir. Bu formülsel yapı iki muhtemel kaynağa işaret etmektedir:<ol>
+<li><em>Sistem Raporlama Yer Tutucusu (Sentinel Flag):</em> EPİAŞ veri ambarının taban fiyat veya istisnai saatlerde formül sonucu yerine ceza katsayısını kodlayan formülsel bir yer tutucu hata kodu iletmesi;</li>
+<li><em>2026 Yılı İdari Kuralı / Tarife Uygulaması:</em> EPİAŞ'ın 2026'da DUY uzlaştırmasında kamuoyuna duyurulmamış veya tezin standart yasal rekonstrüksiyonundan farklılaşan yeni bir tarife ya da taban fiyat formülü uygulamış olması.<br />
+   Doğrulanan husus $k$ ve $l$ marjlarının varlığıdır; 2026'daki iç hesaplama motorunun kesin hukuki ve teknik niteliğini netleştirmek üzere EPİAŞ piyasa destek birimine veya 2026 uzlaştırma metodolojisi belgelerine başvurulması tavsiye edilmektedir. Bu nedenle tezde her iki fiyatlandırma yaklaşımı eşit ağırlıkla analiz edilmiştir.</li>
+</ol>
+</li>
+</ol>
+<h4>Tablo 7: Rejim × Sistem Yönü × Fiyat Değeri Çapraz Tablosu (N = 8.760 Saat)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Piyasa Rejimi</th>
+<th style="text-align: left;">Sistem Denge Durumu ($D_t$)</th>
+<th style="text-align: center;">$P_{\text{pos}} = -103,00$ TL (Açık Anomali)</th>
+<th style="text-align: center;">$P_{\text{pos}} = -106,00$ TL (Fazla Anomali)</th>
+<th style="text-align: center;">Normal Fiyat ($P_{\text{pos}} \ge 0$)</th>
+<th style="text-align: center;">Rejim / Durum Toplamı</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Rejim 1</strong> (2025 Son Çeyrek)</td>
+<td style="text-align: left;"><strong>Dengede ($D_t = 0$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">70</td>
+<td style="text-align: center;">70 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Açığı ($D_t = 1$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.525</td>
+<td style="text-align: center;">1.525 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Fazlası ($D_t = -1$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">613</td>
+<td style="text-align: center;">613 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>Rejim 1 Toplamı</em></td>
+<td style="text-align: left;"><em>(Anomali Yok)</em></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>2.208</strong></td>
+<td style="text-align: center;"><strong>2.208 saat</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Rejim 2</strong> (2026 İlk Çeyrek)</td>
+<td style="text-align: left;"><strong>Dengede ($D_t = 0$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">36</td>
+<td style="text-align: center;">36 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Açığı ($D_t = 1$)</strong></td>
+<td style="text-align: center;"><strong>15</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.172</td>
+<td style="text-align: center;">1.187 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Fazlası ($D_t = -1$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>303</strong></td>
+<td style="text-align: center;">706</td>
+<td style="text-align: center;">1.009 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>Rejim 2 Toplamı</em></td>
+<td style="text-align: left;"><em>(318 Saat Anomali)</em></td>
+<td style="text-align: center;"><strong>15</strong></td>
+<td style="text-align: center;"><strong>303</strong></td>
+<td style="text-align: center;"><strong>1.914</strong></td>
+<td style="text-align: center;"><strong>2.232 saat</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Rejim 3</strong> (2026 Yaz Dönemi)</td>
+<td style="text-align: left;"><strong>Dengede ($D_t = 0$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">53</td>
+<td style="text-align: center;">53 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Açığı ($D_t = 1$)</strong></td>
+<td style="text-align: center;"><strong>55</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.116</td>
+<td style="text-align: center;">2.171 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>Enerji Fazlası ($D_t = -1$)</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>1.165</strong></td>
+<td style="text-align: center;">931</td>
+<td style="text-align: center;">2.096 saat</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>Rejim 3 Toplamı</em></td>
+<td style="text-align: left;"><em>(1.220 Saat Anomali)</em></td>
+<td style="text-align: center;"><strong>55</strong></td>
+<td style="text-align: center;"><strong>1.165</strong></td>
+<td style="text-align: center;"><strong>3.100</strong></td>
+<td style="text-align: center;"><strong>4.320 saat</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>GENEL TOPLAM (N = 8.760)</strong></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: center;"><strong>70 saat (%0,8)</strong></td>
+<td style="text-align: center;"><strong>1.468 saat (%16,8)</strong></td>
+<td style="text-align: center;"><strong>7.222 saat (%82,4)</strong></td>
+<td style="text-align: center;"><strong>8.760 saat (%100,0)</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Yerel Dosya ve EPİAŞ API Akışı Tutarlılık Denetimi ve Örnek Saatler:</em><br />
+Yerel veri setindeki kayıtların API veri akışıyla tutarlılığını denetlemek üzere EPİAŞ Şeffaflık Platformu Resmi API servisleri üzerinden farklı aylardan münferit saatler sorgulanmış ve yerel parquet dosyasındaki değerlerin API'den çekilen ham akışla birebir tutarlı olduğu görülmüştür:
+- <strong>$-103,00$ TL (Enerji Açığı) Örnekleri:</strong><br />
+  * 15 Şubat 2026, 08:00 $\rightarrow$ PTF: 50,01 TL | SMF: 1.450,00 TL | $P_{\text{pos}}$: <strong>-103,00 TL</strong> | Durum: Enerji Açığı
+  * 07 Mart 2026, 12:00 $\rightarrow$ PTF: 100,00 TL | SMF: 3.000,00 TL | $P_{\text{pos}}$: <strong>-103,00 TL</strong> | Durum: Enerji Açığı
+  * 16 Nisan 2026, 12:00 $\rightarrow$ PTF: 0,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-103,00 TL</strong> | Durum: Enerji Açığı
+- <strong>$-106,00$ TL (Enerji Fazlası) Örnekleri:</strong><br />
+  * 04 Ocak 2026, 14:00 $\rightarrow$ PTF: 1.400,00 TL | SMF: 100,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Şubat 2026, 09:00 $\rightarrow$ PTF: 1.547,40 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 00:00 $\rightarrow$ PTF: 1.499,99 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 01:00 $\rightarrow$ PTF: 1.250,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 02:00 $\rightarrow$ PTF: 950,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 03:00 $\rightarrow$ PTF: 750,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 04:00 $\rightarrow$ PTF: 500,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası
+  * 01 Nisan 2026, 05:00 $\rightarrow$ PTF: 600,00 TL | SMF: 0,00 TL | $P_{\text{pos}}$: <strong>-106,00 TL</strong> | Durum: Enerji Fazlası</p>
+<p>Bu denetim, yerel veri dosyası ile EPİAŞ API veri akışı arasında tam bir tutarlılık bulunduğunu; ayrışmanın yerel bir aktarım veya saklama hatasından değil, doğrudan API'nin sağladığı ham veri serisinden kaynaklandığını göstermektedir. Ancak bu kontrol aynı veri akışına yönelik bir iç tutarlılık doğrulaması olup bağımsız bir web arayüzü doğrulaması niteliği taşımamaktadır. Bu nedenle değerler tezde ihtiyatla karşılanmış ve hem fiili seri hem yasal formül paralel olarak değerlendirilmiştir.</p>
+<h4>Tablo 8: Fiyatlandırma Varsayımlarına Göre P&amp;L Duyarlılık Analizi (TL/MWh)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Simülasyon Senaryosu</th>
+<th style="text-align: center;">Her Zaman Açık (Naif Kural)</th>
+<th style="text-align: center;">Aşama 1 Platt Kalibre</th>
+<th style="text-align: center;">Aşama 2 Yayılım (Teorik)</th>
+<th style="text-align: center;">Model vs Açık Farkı</th>
+<th style="text-align: center;">Fark %95 Blok Bootstrap GA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Baz Senaryo: EPİAŞ Fiili Yayımlanan Fiyatlar</strong></td>
+<td style="text-align: center;"><strong>71,73 TL</strong></td>
+<td style="text-align: center;"><strong>67,33 TL</strong></td>
+<td style="text-align: center;"><strong>119,14 TL</strong></td>
+<td style="text-align: center;"><strong>-4,41 TL</strong></td>
+<td style="text-align: center;">[-59,28; +44,81] ($p &gt; 0,75$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Duyarlılık A: Yalnızca Pozitif Fiyat Formülü ($P_{\text{pos}}^{\text{stat}}$)</strong></td>
+<td style="text-align: center;"><strong>90,01 TL</strong></td>
+<td style="text-align: center;"><strong>64,80 TL</strong></td>
+<td style="text-align: center;"><strong>126,18 TL</strong></td>
+<td style="text-align: center;"><strong>-25,21 TL</strong></td>
+<td style="text-align: center;">[-84,59; +26,50] ($p &gt; 0,35$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Duyarlılık B: Tam Yasal Formül ($P_{\text{neg}}^{\text{stat}}$ ve $P_{\text{pos}}^{\text{stat}}$)</strong></td>
+<td style="text-align: center;"><strong>80,33 TL</strong></td>
+<td style="text-align: center;"><strong>60,35 TL</strong></td>
+<td style="text-align: center;"><strong>133,56 TL</strong></td>
+<td style="text-align: center;"><strong>-19,98 TL</strong></td>
+<td style="text-align: center;">[-79,27; +32,57] ($p &gt; 0,40$)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Ekonometrik Değerlendirme:</em> Ekonometrik tarafsızlık gereğince iki senaryo eşit ağırlıkla sunulmuştur: Baz Senaryo (EPİAŞ'ın fiilen yayımladığı ve piyasa katılımcılarının fiilen maruz kaldığı nakit akışını yansıtan ham fiyatlar) ve Duyarlılık B Senaryosu (Tezin Karar 14030 metninden türettiği kuramsal yasal formül). İster platformun ham değerleri baz alınsın (Aşama 1: 67,33 vs Açık: 71,73 TL, fark: -4,41 TL), ister tam yasal formül uygulansın (Aşama 1: 60,35 vs Açık: 80,33 TL, fark: -19,98 TL), Aşama 1 yön modelinin naif çoğunluk kuralına karşı istatistiksel olarak anlamlı bir ekonomik üstünlük sağlayamadığı ve tezin temel bilimsel çıkarımlarının her iki senaryoda da niteliksel ve yönsel olarak korunduğu görülmektedir.</p>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Duyarlılık A'da Aşama 2 Getirisinin Artış Mekanizması ve Payda Tanımları:</strong><br />
+Duyarlılık A senaryosunda Aşama 2 getirisinin 119,14 TL'den 126,18 TL'ye yükselmesi model başarısı değildir:<br />
+- <strong>Enerji Fazlası Saatlerindeki Hatalı Uzun Pozisyonlar:</strong> Fiili seride $P_{\text{pos}} = -106$ TL gerçekleşen 1.468 Enerji Fazlası saatinde, Aşama 2 modeli sistem yönünün tersine düşerek saatlerin <strong>%69,01'inde (1.013 / 1.468 saat)</strong> hatalı olarak Uzun (+1) pozisyondadır ($-103$ TL seviyesindeki 70 saat Enerji Açığı olduğundan bu saatlerde Uzun pozisyon yönsel bir hata oluşturmamaktadır).<br />
+- Fiili seride bu hatalı Uzun pozisyonlar -106 TL ceza alırken, kuramsal formüle ($P_{\text{pos}}^{\text{stat}} \ge 0$) geçildiğinde ceza ortadan kalkmakta ve modelin hatalı pozisyonları yapay biçimde kurtulmaktadır.<br />
+- Buna karşılık Aşama 1 modeli aynı 1.538 saatlik kümede <strong>274 saat (%17,82) Uzun</strong>, <strong>512 saat (%33,29) Kısa</strong> ve <strong>752 saat (%48,89) Pasif</strong> kalarak hatalı maruziyetten büyük ölçüde kaçınmıştır.</p>
+</blockquote>
+<hr />
+<h2>4. Sistem Denge Yönü Sınıflandırma ve Kalibrasyon Başarımı</h2>
+<h4>Tablo 9: 3-Sınıflı Sistem Denge Yönü Sınıflandırma Başarımı (N = 8.760 Saat / 365 Gün)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model / Referans Kural</th>
+<th style="text-align: center;">Doğruluk</th>
+<th style="text-align: center;">Dengeli Doğruluk</th>
+<th style="text-align: center;">MCC</th>
+<th style="text-align: center;">Macro-F1</th>
+<th style="text-align: center;">Weighted-F1</th>
+<th style="text-align: center;">Brier Skoru</th>
+<th style="text-align: center;">BSS (Eğitim Klim.)</th>
+<th style="text-align: center;">BSS (Test Empirik)</th>
+<th style="text-align: center;">Ağırlıklı ECE (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Sabit Uzun (Deterministik Açık)</strong></td>
+<td style="text-align: center;">0,5574</td>
+<td style="text-align: center;">0,3333</td>
+<td style="text-align: center;">0,0000</td>
+<td style="text-align: center;">0,2386</td>
+<td style="text-align: center;">0,3990</td>
+<td style="text-align: center;">0,8852</td>
+<td style="text-align: center;">-68,71%</td>
+<td style="text-align: center;">-73,98%</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Eğitim Klimatolojisi Prior Tahmini</strong></td>
+<td style="text-align: center;">0,5574</td>
+<td style="text-align: center;">0,3333</td>
+<td style="text-align: center;">0,0000</td>
+<td style="text-align: center;">0,2386</td>
+<td style="text-align: center;">0,3990</td>
+<td style="text-align: center;">0,5247</td>
+<td style="text-align: center;">%0,00 (Ref)</td>
+<td style="text-align: center;">-3,13%</td>
+<td style="text-align: center;">%8,61</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Lag-168 Naif Takipçi (1 Hafta Önce)</strong></td>
+<td style="text-align: center;">0,5742</td>
+<td style="text-align: center;">0,4128</td>
+<td style="text-align: center;">0,1624</td>
+<td style="text-align: center;">0,4129</td>
+<td style="text-align: center;">0,5740</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1: GÖP Öncesi (Ham Olasılık)</strong></td>
+<td style="text-align: center;">0,5966</td>
+<td style="text-align: center;">0,4653</td>
+<td style="text-align: center;">0,2110</td>
+<td style="text-align: center;">0,4434</td>
+<td style="text-align: center;">0,5963</td>
+<td style="text-align: center;">0,4959</td>
+<td style="text-align: center;">+%5,49</td>
+<td style="text-align: center;">+%2,53</td>
+<td style="text-align: center;">%7,58</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1: GÖP Öncesi (Platt Kalibre)</strong></td>
+<td style="text-align: center;"><strong>0,5966</strong></td>
+<td style="text-align: center;"><strong>0,4653</strong></td>
+<td style="text-align: center;"><strong>0,2110</strong></td>
+<td style="text-align: center;"><strong>0,4434</strong></td>
+<td style="text-align: center;"><strong>0,5963</strong></td>
+<td style="text-align: center;"><strong>0,4761</strong></td>
+<td style="text-align: center;"><strong>+%9,26</strong></td>
+<td style="text-align: center;"><strong>+%6,43</strong></td>
+<td style="text-align: center;"><strong>%4,95</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2: GÖP Sonrası Model (Ham Olasılık)</strong></td>
+<td style="text-align: center;">0,6221</td>
+<td style="text-align: center;">0,4883</td>
+<td style="text-align: center;">0,2721</td>
+<td style="text-align: center;">0,4652</td>
+<td style="text-align: center;">0,6275</td>
+<td style="text-align: center;">0,4763</td>
+<td style="text-align: center;">+%9,22</td>
+<td style="text-align: center;">+%6,38</td>
+<td style="text-align: center;">%8,67</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2: GÖP Sonrası Model (Platt Kalibre)</strong></td>
+<td style="text-align: center;"><strong>0,6221</strong></td>
+<td style="text-align: center;"><strong>0,4883</strong></td>
+<td style="text-align: center;"><strong>0,2721</strong></td>
+<td style="text-align: center;"><strong>0,4652</strong></td>
+<td style="text-align: center;"><strong>0,6275</strong></td>
+<td style="text-align: center;"><strong>0,4460</strong></td>
+<td style="text-align: center;"><strong>+%14,99</strong></td>
+<td style="text-align: center;"><strong>+%12,33</strong></td>
+<td style="text-align: center;"><strong>%4,21</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>İstatistiki ve Metodolojik Değerlendirme:</em>
+1. <strong>Brier Skoru Tanımı:</strong> Brier skoru tek başına güvenilirliği (kalibrasyonu) değil; <strong>güvenilirlik ve çözünürlük bileşenlerinin toplamını ölçen genel bir olasılık skorudur.</strong> Deterministik sabit Uzun tahmininin Brier skoru <strong>0,8852</strong>'dir. Tablodaki 0,5247 değeri eğitim kümesinin prior olasılık vektörüne ($[0,329; 0,032; 0,639]$) aittir.
+2. <strong>Kalibrasyon Metodolojisi Sınırlılığı:</strong> Platt kalibratörü, yalnızca eğitim kümesiyle eğitilen modelin doğrulama kümesi çıktıları üzerinde uydurulmuş; ardından birleşik eğitim+doğrulama kümesiyle eğitilen nihai modelin test tahminlerine uygulanmıştır.
+3. <strong>Aşama 2 Kalibrasyonu ve Olasılık Kalitesi:</strong> Aşama 2 modeli kalibre edildiğinde Brier skoru 0,4763'ten <strong>0,4460</strong>'a düşmekte, test BSS'si ise <strong>+%12,33</strong> seviyesine çıkmaktadır. Bu bulgu, adil bir kıyaslama yapıldığında PTF bilgisinin olasılık tahmin kalitesini de belirgin biçimde iyileştirdiğini doğrulamaktadır.</p>
+<h4>Tablo 10: Günlük Eşleştirilmiş Wilcoxon Testleri ve Genişletilmiş Holm-Bonferroni Düzeltmesi (N = 365 Gün)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Karşılaştırma Hipotezi</th>
+<th style="text-align: center;">Ortalama Günlük Doğruluk Farkı</th>
+<th style="text-align: center;">Wilcoxon $W$</th>
+<th style="text-align: center;">Ham $p$-Değeri</th>
+<th style="text-align: center;">Holm Sırası ($i$)</th>
+<th style="text-align: center;">Holm Eşiği ($\alpha=0,05$)</th>
+<th style="text-align: center;">Düzeltilmiş Anlamlılık</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2 vs Çoğunluk</strong></td>
+<td style="text-align: center;">+%6,47</td>
+<td style="text-align: center;">19.993,0</td>
+<td style="text-align: center;">0,0002</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0,0125 ($0,05/4$)</td>
+<td style="text-align: center;">Anlamlı ($p &lt; 0,05$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2 vs Aşama 1</strong></td>
+<td style="text-align: center;">+%2,56</td>
+<td style="text-align: center;">16.166,5</td>
+<td style="text-align: center;">0,0003</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0,0167 ($0,05/3$)</td>
+<td style="text-align: center;">Anlamlı ($p &lt; 0,05$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1 vs Çoğunluk</strong></td>
+<td style="text-align: center;">+%3,92</td>
+<td style="text-align: center;">21.868,5</td>
+<td style="text-align: center;">0,0169</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0,0250 ($0,05/2$)</td>
+<td style="text-align: center;">Anlamlı ($p_{\text{adj}} \approx 0,034$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Lag-168 vs Çoğunluk</strong></td>
+<td style="text-align: center;">+%1,68</td>
+<td style="text-align: center;">24.110,0</td>
+<td style="text-align: center;">0,1140</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0,0500 ($0,05/1$)</td>
+<td style="text-align: center;">Anlamsız ($p &gt; 0,05$)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Portföy Hizalanma Analizi ve $\alpha = 0,5$ Ceza Asimetrisi İspatı</h2>
+<h3>5.1. 2x2 Portföy Hizalanma Matrisi</h3>
+<p>Piyasa katılımcısının doğal dengesizliğinin sistem yönüyle $\alpha \in [0, 1]$ olasılıkla hizalı olduğu durumda birim megavat başına getiri matrisi:</p>
+<p>$$\begin{array}{|c|c|c|}
+\hline
+\textbf{Strateji Eylemi } (a_t) &amp; D_t = 1 \text{ (Sistem Açıkta)} &amp; D_t = -1 \text{ (Sistem Fazlada)} \
+\hline
+a_t = +1 \text{ (Uzun)} &amp; \alpha (P_{\text{neg}, t} - PTF_t) - (1-\alpha)(PTF_t - P_{\text{pos}, t}) &amp; -\alpha (PTF_t - P_{\text{pos}, t}) + (1-\alpha)(P_{\text{neg}, t} - PTF_t) \
+\hline
+a_t = -1 \text{ (Kısa)} &amp; -\alpha (P_{\text{neg}, t} - PTF_t) + (1-\alpha)(PTF_t - P_{\text{pos}, t}) &amp; \alpha (PTF_t - P_{\text{pos}, t}) - (1-\alpha)(P_{\text{neg}, t} - PTF_t) \
+\hline
+a_t = 0 \text{ (Pasif)} &amp; 0,00 &amp; 0,00 \
+\hline
+\end{array}$$</p>
+<p><em>Not:</em> DUY ve Karar 14030 gereğince sistemin dengede olduğu ($D_t=0$, 159 saat) durumlarda hem Uzun hem Kısa pozisyon alan katılımcılar $-PTF_t \times 0,03$ ceza kesintisine katlanmaktadır. Bu 159 saat 2x2 matriste gösterilmemekle birlikte yıllık portföy getirisi hesaplamalarına doğrudan dahil edilmiştir.</p>
+<h4>Tablo 11: Portföy Hizalanma Olasılığına ($\alpha$) Göre Yıllık Ortalama Getiri (TL/MWh)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Hizalanma Oranı ($\alpha$)</th>
+<th style="text-align: center;">Aşama 2 Yayılım (Teorik)</th>
+<th style="text-align: center;">Aşama 1 Platt Kalibre</th>
+<th style="text-align: center;">Her Zaman Açık (Naif)</th>
+<th style="text-align: center;">Fark [Aşama 1 − Açık]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>%100 (Tam Hizalanma)</strong></td>
+<td style="text-align: center;"><strong>119,14</strong></td>
+<td style="text-align: center;"><strong>67,33</strong></td>
+<td style="text-align: center;"><strong>71,73</strong></td>
+<td style="text-align: center;"><strong>-4,41 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%90</strong></td>
+<td style="text-align: center;">108,73</td>
+<td style="text-align: center;">58,77</td>
+<td style="text-align: center;">63,31</td>
+<td style="text-align: center;">-4,53 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%80</strong></td>
+<td style="text-align: center;">98,32</td>
+<td style="text-align: center;">50,22</td>
+<td style="text-align: center;">54,89</td>
+<td style="text-align: center;">-4,66 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%70</strong></td>
+<td style="text-align: center;">87,91</td>
+<td style="text-align: center;">41,67</td>
+<td style="text-align: center;">46,47</td>
+<td style="text-align: center;">-4,79 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%60</strong></td>
+<td style="text-align: center;">77,50</td>
+<td style="text-align: center;">33,12</td>
+<td style="text-align: center;">38,04</td>
+<td style="text-align: center;">-4,92 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%52,66 ($\alpha_{\text{wind}}$ Rüzgar Portföyü)</strong></td>
+<td style="text-align: center;"><strong>69,85</strong></td>
+<td style="text-align: center;"><strong>26,84</strong></td>
+<td style="text-align: center;"><strong>31,86</strong></td>
+<td style="text-align: center;"><strong>-5,02 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>%50 (Tam Nötr / Rastgele)</strong></td>
+<td style="text-align: center;"><strong>67,08</strong></td>
+<td style="text-align: center;"><strong>24,57</strong></td>
+<td style="text-align: center;"><strong>29,62</strong></td>
+<td style="text-align: center;"><strong>-5,06 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Rüzgar Portföyü ($\alpha_{\text{wind}} = \%52,66$) Tanımı, Sapma-Yön Eşlemesi ve Güven Aralığı:</em><br />
+$\alpha_{\text{wind}}$ parametresi, Türkiye rüzgar santrali kurulu gücünün gün öncesi üretim tahmin sapmaları ($\Delta W_t = W_{\text{fiili}, t} - W_{\text{tahmin}, t}$) ile TEİAŞ sistem dengesizlik yönü ($D_t$) arasındaki ampirik eşleşme sıklığını temsil etmektedir:<br />
+- <strong>Sapma-Yön Eşleme Kuralı ve Sıfır/Dengede Saatleri:</strong> Rüzgar üretiminin tahminden fazla olduğu ($\Delta W_t &gt; 0$) ve sistemin Enerji Fazlasında olduğu ($D_t = -1$) saatler ile rüzgarın yetersiz kaldığı ($\Delta W_t &lt; 0$) ve sistemin Enerji Açığında olduğu ($D_t = 1$) saatler "doğal hizalı" sayılmıştır. Rüzgar sapmasının tam sıfır olduğu ($\Delta W_t = 0$) veya sistemin dengede bulunduğu ($D_t = 0$, 159 saat) saatler <strong>hizalanmamış (nötr) kabul edilmiş ve paydaya tam olarak dahil edilmiştir</strong>.<br />
+- <strong>Nokta Tahmin ve Gün Bloklu Güven Aralığı:</strong> Yıllık $N = 8.760$ saatlik test kümesinde hizalanma oranı $\hat{\alpha}<em>{\text{wind}} = \mathbf{\%52,66}$'dır. Wilson asimptotik aralığı ([%51,61; %53,71]) saatlerin bağımsız olduğunu varsaydığından otokorelasyonu yok sayıp yapay biçimde dar bir aralık üretmektedir. Rüzgar sapmalarının ve sistem yönünün gün içi kümelenmesi ve güçlü serisel bağımlılığı dikkate alınarak gün bloklu bootstrap (Daily Block Bootstrap, $n</em>{\text{eff}} \approx 365$ gün) uygulandığında, %95 güven aralığı <strong>[%48,2; %57,1]</strong> olarak elde edilmektedir. Bu aralık tam nötr (%50,0) eşiğini açıkça içermektedir ($p &gt; 0,20$). 159 Dengede saati dışlandığında dahi ($N = 8.601, \hat{\alpha} = \%53,63$) gün bloklu %95 GA <strong>[%49,1; %58,2]</strong> ile yine %50 eşiğini kapsamakta; rüzgar sapmalarının sistem yönüyle doğal hizalanmasının istatistiki olarak anlamlı bir yönsel üstünlük sağladığı gösterilememiştir.<br />
+Bu ampirik parametre altında portföy getirileri ve 7 günlük blok bootstrap güven aralıkları:
+- <strong>Her Zaman Açık:</strong> <strong>31,86 TL/MWh</strong> [%95 GA: -2,25; 74,92]
+- <strong>Aşama 1 Kalibre:</strong> <strong>26,84 TL/MWh</strong> [%95 GA: 4,54; 57,59]
+- <strong>Fark [Aşama 1 − Açık]:</strong> <strong>-5,02 TL/MWh</strong> [%95 GA: -34,41; +20,71] ($p &gt; 0,60$, farksız).</p>
+<h4>$\alpha = 0,50$ Matematiksel İspatı (Sistem Yönünden Bağımsızlık):</h4>
+<p>Matriste $\alpha = 0,50$ yerine konduğunda, Uzun pozisyon ($a_t = +1$) için her iki sistem durumundaki getiri formülü:
+- $D_t = 1$ durumunda: $0,5 (P_{\text{neg}, t} - PTF_t) - 0,5 (PTF_t - P_{\text{pos}, t}) = \mathbf{0,5 (P_{\text{neg}, t} + P_{\text{pos}, t} - 2 PTF_t)}$
+- $D_t = -1$ durumunda: $-0,5 (PTF_t - P_{\text{pos}, t}) + 0,5 (P_{\text{neg}, t} - PTF_t) = \mathbf{0,5 (P_{\text{neg}, t} + P_{\text{pos}, t} - 2 PTF_t)}$</p>
+<p>Formül $D_t$'den tamamen bağımsızdır. $\alpha = 0,50$ durumunda getirinin $+29,62$ TL çıkması sistemin açıkta olma frekansından değil; <strong>piyasadaki dengesizlik ceza marjı yapısının asimetrisinden</strong> ($(P_{\text{neg}} - PTF) &gt; (PTF - P_{\text{pos}})$) ve ampirik platform anomalilerinden kaynaklanmaktadır. Nitekim Tablo 4D'de gösterildiği üzere, test yılı genelinde ortalama yayılım $+11,86$ TL/MWh'dir; $\alpha = 0,50$ portföyünde yayılım bileşeni yalnızca $0,5 \times 11,86 \approx 5,93$ TL ($\approx 6$ TL) katkı üretirken, kalan yaklaşık $23,69$ TL doğrudan ceza marjı yapısı, yön-yayılım uyumsuzlukları ve ampirik veri kalıntılarından türemektedir. Bu durum naif kuralın getirisinin bir yönsel öngörü becerisi değil, piyasa ceza kuralının asimetrik yapısı olduğunu gösterir.</p>
+<hr />
+<h2>6. Kanonik Mutabakat Tablosu: Genel P&amp;L ve 3-Rejim Ayrıştırması</h2>
+<h4>Tablo 12: Kanonik Mutabakat Tablosu (N = 8.760 Saat / 365 Gün)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Strateji</th>
+<th style="text-align: center;">Genel P&amp;L (TL/MWh)</th>
+<th style="text-align: center;">%95 Blok Bootstrap GA</th>
+<th style="text-align: center;">Rejim 1 (N=2.208)</th>
+<th style="text-align: center;">Rejim 2 (N=2.232)</th>
+<th style="text-align: center;">Rejim 3 (N=4.320)</th>
+<th style="text-align: center;">Ağırlıklı Toplam</th>
+<th style="text-align: center;">Mutabakat Farkı</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Oracle (Tam Bilgi / Teorik Tavan)</strong></td>
+<td style="text-align: center;"><strong>820,38</strong></td>
+<td style="text-align: center;">[756,25; 884,46]</td>
+<td style="text-align: center;">525,61 TL</td>
+<td style="text-align: center;">890,99 TL</td>
+<td style="text-align: center;">934,57 TL</td>
+<td style="text-align: center;"><strong>820,38 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Her Zaman Açık (Çoğunluk)</strong></td>
+<td style="text-align: center;"><strong>71,73</strong></td>
+<td style="text-align: center;">[6,51; 153,68]</td>
+<td style="text-align: center;">-20,87 TL</td>
+<td style="text-align: center;">-0,80 TL</td>
+<td style="text-align: center;">156,54 TL</td>
+<td style="text-align: center;"><strong>71,73 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Her Zaman Fazla (Ters Kural)</strong></td>
+<td style="text-align: center;"><strong>-74,45</strong></td>
+<td style="text-align: center;">[-156,16; -9,42]</td>
+<td style="text-align: center;">+16,01 TL</td>
+<td style="text-align: center;">-1,38 TL</td>
+<td style="text-align: center;">-158,43 TL</td>
+<td style="text-align: center;"><strong>-74,45 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Lag-168 Naif Takipçi</strong></td>
+<td style="text-align: center;"><strong>19,30</strong></td>
+<td style="text-align: center;">[-21,41; 60,21]</td>
+<td style="text-align: center;">+36,43 TL</td>
+<td style="text-align: center;">+19,90 TL</td>
+<td style="text-align: center;">+10,23 TL</td>
+<td style="text-align: center;"><strong>19,30 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1 (Ham, $\tau=70$ TL)</strong></td>
+<td style="text-align: center;"><strong>55,95</strong></td>
+<td style="text-align: center;">[12,52; 110,58]</td>
+<td style="text-align: center;">+47,64 TL</td>
+<td style="text-align: center;">-68,66 TL</td>
+<td style="text-align: center;">+124,59 TL</td>
+<td style="text-align: center;"><strong>55,95 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1 (Platt Kalibre, $\tau=70$ TL)</strong></td>
+<td style="text-align: center;"><strong>67,33</strong></td>
+<td style="text-align: center;">[22,84; 127,00]</td>
+<td style="text-align: center;">+28,39 TL</td>
+<td style="text-align: center;">-59,58 TL</td>
+<td style="text-align: center;">+152,80 TL</td>
+<td style="text-align: center;"><strong>67,33 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2 (GÖP Sonrası Yayılım)</strong></td>
+<td style="text-align: center;"><strong>119,14</strong></td>
+<td style="text-align: center;">[61,79; 184,53]</td>
+<td style="text-align: center;">+69,08 TL</td>
+<td style="text-align: center;">+150,93 TL</td>
+<td style="text-align: center;">+128,29 TL</td>
+<td style="text-align: center;"><strong>119,14 TL</strong></td>
+<td style="text-align: center;"><strong>0,00 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Eşleştirilmiş 7 Günlük Blok Bootstrap Fark Analizleri (Strateji − Her Zaman Açık):</em>
+- <strong>[Aşama 1 Kalibre − Açık]:</strong> <strong>-4,41 TL/MWh</strong> [%95 GA: -59,28; +44,81] ($p &gt; 0,75$, istatistiki olarak farksız).
+- <strong>[Aşama 2 Yayılım − Açık]:</strong> <strong>+47,40 TL/MWh</strong> [%95 GA: -30,95; +124,29] ($p = 0,22$, sıfırı içermektedir).</p>
+<hr />
+<h2>7. Risk Profili, Kuyruk Riski ve Permütasyon Sınaması</h2>
+<h3>7.1. Risk, Çekilme (Drawdown) ve Granülarite Analizi</h3>
+<h4>Tablo 13: Risk ve Oynaklık Profili Karşılaştırması</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Risk Göstergesi</th>
+<th style="text-align: center;">Her Zaman Açık (Naif Kural)</th>
+<th style="text-align: center;">Aşama 1 Platt Kalibre</th>
+<th style="text-align: center;">Aşama 2 Yayılım (Teorik)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Yıllık Ortalama Getiri (TL/MWh)</strong></td>
+<td style="text-align: center;">71,73</td>
+<td style="text-align: center;">67,33</td>
+<td style="text-align: center;">119,14</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aylık Standart Sapma (TL/MWh)</strong></td>
+<td style="text-align: center;">216,27</td>
+<td style="text-align: center;"><strong>155,62 (%28 daha düşük)</strong></td>
+<td style="text-align: center;">178,16</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>En Kötü Ay Getirisi (TL/MWh)</strong></td>
+<td style="text-align: center;">-169,35 (Şubat 2026)</td>
+<td style="text-align: center;"><strong>-75,76 (Mart 2026 - Kayıp %55 sınırlı)</strong></td>
+<td style="text-align: center;">-103,43 (Eylül 2026)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Negatif Getirili Ay Sayısı (N=12)</strong></td>
+<td style="text-align: center;">5 / 12 (Eki, Ara, Şub, Tem, Eyl)</td>
+<td style="text-align: center;">5 / 12 (Ara, Oca, Şub, Mar, Eyl)</td>
+<td style="text-align: center;">3 / 12</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Günlük %95 CVaR (TL/Gün)</strong></td>
+<td style="text-align: center;">-16.210,40 TL</td>
+<td style="text-align: center;"><strong>-13.646,40 TL</strong></td>
+<td style="text-align: center;">-8.114,20 TL</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kümülatif MDD (Günlük Granülarite)</strong></td>
+<td style="text-align: center;"><strong>224.340,12 TL/MW</strong></td>
+<td style="text-align: center;"><strong>183.188,61 TL/MW (%18,3 düşüş)</strong></td>
+<td style="text-align: center;">104.026,23 TL/MW</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kümülatif MDD (Saatlik Granülarite)</strong></td>
+<td style="text-align: center;">236.184,49 TL/MW</td>
+<td style="text-align: center;">187.459,90 TL/MW (%20,6 düşüş)</td>
+<td style="text-align: center;">109.978,13 TL/MW</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kümülatif MDD (Aylık Granülarite)</strong></td>
+<td style="text-align: center;">145.666,20 TL/MW</td>
+<td style="text-align: center;">126.102,00 TL/MW (%13,4 düşüş)</td>
+<td style="text-align: center;">97.444,10 TL/MW</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aylıklandırılmış Sharpe Oranı ($N=12$)</strong></td>
+<td style="text-align: center;">1,14 [%95 GA: -0,92; 3,00]</td>
+<td style="text-align: center;">1,50 [%95 GA: -0,19; 3,08]</td>
+<td style="text-align: center;">2,36 [%95 GA: 0,82; 3,95]</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aktif Saat Payı (%)</strong></td>
+<td style="text-align: center;">%100,00 (8.760 saat)</td>
+<td style="text-align: center;"><strong>%48,94 (4.287 saat aktif)</strong></td>
+<td style="text-align: center;">%100,00 (8.760 saat)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aktif Saat Başına P&amp;L (TL/MWh)</strong></td>
+<td style="text-align: center;">71,73 TL/MWh</td>
+<td style="text-align: center;"><strong>137,57 TL/MWh (1,92 kat yoğunluk)</strong></td>
+<td style="text-align: center;">119,14 TL/MWh</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>7.2. Haziran 2026 Ayı Bağımlılığı (June Dominance)</h3>
+<p>Yıllık nakit akışı ayrıştırıldığında sonuçların aşırı derecede tek bir aya bağımlı olduğu görülmektedir:
+- <strong>Haziran 2026 Nakit Akışı Payı:</strong> Aşama 1 modelinin test yılındaki toplam net getirisi <strong>589.780,73 TL</strong> olup, bunun <strong>364.926,88 TL'si (%61,9)</strong> yalnızca Haziran 2026'da gerçekleşmiştir. Naif Açık kuralında da yıllık 628.380,18 TL'nin <strong>414.178,00 TL'si (%65,9)</strong> Haziran ayına aittir.
+- <strong>Haziran Hariç 11 Ayın Ortalaması (8.040 Saat):</strong>
+  - <strong>Aşama 1 Kalibre:</strong> <strong>27,97 TL/MWh</strong>
+  - <strong>Her Zaman Açık:</strong> <strong>26,64 TL/MWh</strong>
+  - <strong>Fark [Aşama 1 − Açık]:</strong> Sadece <strong>+1,32 TL/MWh</strong>!
+- <strong>Aylık Korelasyon:</strong> İki stratejinin 12 aylık P&amp;L serileri arasındaki Pearson korelasyonu <strong>$r = 0,796 \approx 0,80$</strong>'dir.</p>
+<hr />
+<h3>7.3. Maruziyet-Eşleşmiş Permütasyon Sınaması ve Aşağı Yönlü Risk Analizi</h3>
+<p>Aşama 1 modelinin sağladığı çekilme ve oynaklık düşüşünün bir "akıllı risk filtresi başarısı" mı yoksa maruziyeti yarıya (%48,94) indirmenin doğrudan mekanik bir sonucu mu olduğunu test etmek amacıyla; modelin eylemleri aynı aktiflik oranıyla 365 gün boyunca <strong>2.000 kez rastgele karıştırılmış (maruziyet-eşleşmiş permütasyon boş dağılımı)</strong> ve aşağı yönlü risk ölçüleri kıyaslanmıştır:</p>
+<h4>Tablo 14: Maruziyet-Eşleşmiş Permütasyon Boş Dağılım Sınaması (N = 2.000 Tekrar, Tüm Metrikler Tek Koşudan)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Ekonometrik Gösterge</th>
+<th style="text-align: center;">Aşama 1 Gerçek Değeri</th>
+<th style="text-align: center;">Boş Dağılım Ortalaması</th>
+<th style="text-align: center;">Boş Dağılım %95 GA</th>
+<th style="text-align: center;">$p_{\text{tek}}$ (Tek Yönlü)</th>
+<th style="text-align: center;">$p_{\text{çift}}$ (İki Yönlü)</th>
+<th style="text-align: center;">Holm Düzeltmeli $p$</th>
+<th style="text-align: left;">İstatistiki Sonuç</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Aylık Standart Sapma (TL/MWh)</strong></td>
+<td style="text-align: center;"><strong>155,62</strong></td>
+<td style="text-align: center;">86,25</td>
+<td style="text-align: center;">[56,86; 117,51]</td>
+<td style="text-align: center;">1,0000</td>
+<td style="text-align: center;">&lt; 0,001</td>
+<td style="text-align: center;"><strong>0,003</strong></td>
+<td style="text-align: left;">Model oynaklığı rastgeleden yüksek (Haziran etkisi)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>P&amp;L (Tüm Yıl - TL/MWh)</strong></td>
+<td style="text-align: center;"><strong>67,33</strong></td>
+<td style="text-align: center;">30,62</td>
+<td style="text-align: center;">[5,37; 54,80]</td>
+<td style="text-align: center;">0,0010</td>
+<td style="text-align: center;">0,0020</td>
+<td style="text-align: center;"><strong>0,010</strong></td>
+<td style="text-align: left;">Anlamlı ($p &lt; 0,05$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Günlük %95 CVaR (TL/Gün)</strong></td>
+<td style="text-align: center;"><strong>-13.646,40</strong></td>
+<td style="text-align: center;">-15.495,30</td>
+<td style="text-align: center;">[-17.837,81; -13.378,77]</td>
+<td style="text-align: center;">0,0470</td>
+<td style="text-align: center;">0,0940</td>
+<td style="text-align: center;"><strong>0,376</strong></td>
+<td style="text-align: left;">Çoklu test sonrası anlamsız ($p &gt; 0,05$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>P&amp;L (Haziran Hariç - TL/MWh)</strong></td>
+<td style="text-align: center;"><strong>27,97</strong></td>
+<td style="text-align: center;">15,96</td>
+<td style="text-align: center;">[-9,06; 39,83]</td>
+<td style="text-align: center;">0,1840</td>
+<td style="text-align: center;">0,3680</td>
+<td style="text-align: center;"><strong>1,000</strong></td>
+<td style="text-align: left;"><strong>Anlamsız ($p &gt; 0,10$)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>En Kötü Ay Getirisi (TL/MWh)</strong></td>
+<td style="text-align: center;"><strong>-75,76</strong></td>
+<td style="text-align: center;">-96,80</td>
+<td style="text-align: center;">[-181,47; -34,96]</td>
+<td style="text-align: center;">0,3180</td>
+<td style="text-align: center;">0,6360</td>
+<td style="text-align: center;"><strong>1,000</strong></td>
+<td style="text-align: left;">Anlamsız ($p &gt; 0,50$)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kümülatif Günlük MDD (TL/MW)</strong></td>
+<td style="text-align: center;"><strong>183.188,61</strong></td>
+<td style="text-align: center;">173.215,05</td>
+<td style="text-align: center;">[77.992,45; 281.585,26]</td>
+<td style="text-align: center;">0,5925</td>
+<td style="text-align: center;">0,8150</td>
+<td style="text-align: center;"><strong>1,000</strong></td>
+<td style="text-align: left;">Anlamsız ($p &gt; 0,50$)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Metodolojik ve Yönsel İzah ($p$-Değerleri Tanımı ve Holm-Bonferroni Sıralaması):</em>
+- $p_{\text{tek}}$: Boş dağılımın gerçek modele kıyasla daha iyi veya eşit performans gösterme olasılığıdır ($P(\text{Boş} \text{ daha iyi})$). 2.000 tekrarlı permütasyonda sayısal çözünürlük $\approx 0,0005$ olup sıfır gözlenen değerler $p &lt; 0,001$ olarak raporlanmıştır.
+- P&amp;L göstergelerinde $P(\text{Boş} \ge \text{Model})$, CVaR ve En Kötü Ayda $P(\text{Boş} \ge \text{Model})$ (kayıp büyüklüğü daha az), MDD'de ise $P(\text{Boş} \le \text{Model})$ (çekilme daha düşük) olarak tanımlanmıştır.
+- <strong>Holm-Bonferroni Çoklu Test Düzeltmesi ($m=6$ İki Yönlü Test):</strong> 6 gösterge üzerinden uygulanan adım-küçültme (step-down) prosedürü:
+  1. Aylık SD ($p &lt; 0,001 \rightarrow p_{\text{adj}} \approx 0,003 \le 0,05$, anlamlı: model oynaklığı Haziran sıçraması nedeniyle rastgeleden yüksektir).
+  2. Tüm Yıl P&amp;L ($p = 0,0020 \rightarrow p_{\text{adj}} = 0,010 \le 0,05$, anlamlı).
+  3. Günlük CVaR ($p = 0,0940 \rightarrow p_{\text{adj}} = 0,376 &gt; 0,05$, çoklu test sonrası anlamsız).
+  4. Haziran Hariç P&amp;L ($p = 0,3680 \rightarrow p_{\text{adj}} = 1,000$, anlamsız).
+  5. En Kötü Ay ($p = 0,6360 \rightarrow p_{\text{adj}} = 1,000$, anlamsız).
+  6. Günlük MDD ($p = 0,8150 \rightarrow p_{\text{adj}} = 1,000$, anlamsız).
+- <strong>Kuyruk Riski (CVaR) Yorumu:</strong> Modelin günlük CVaR değeri (-13.646 TL), boş dağılım ortalamasından (-15.495 TL) tek yönlü bakıldığında iyi görünse de ($p_{\text{tek}} = 0,0470$, iki yönlü $p = 0,0940$), 6 test üzerinden uygulanan Holm-Bonferroni düzeltmesi ($p_{\text{adj}} = 0,376$) sonrasında istatistiksel anlamlılığını kaybetmektedir.
+- <strong>Genel Değerlendirme:</strong> Aşama 1 maruziyeti yaklaşık yarıya indirir; getiri ve çekilmedeki azalma bununla tutarlıdır. Çoklu test düzeltmesi sonrası risk metrikleri rastgele zamanlamadan farksız olup, modelin akıllı bir risk filtresi olarak etkinliği gösterilememiştir.</p>
+<hr />
+<h3>7.4. 12 Aylık P&amp;L Tablosu ve Yıllık Ağırlıklı Ortalamalar</h3>
+<h4>Tablo 15: 12 Aylık P&amp;L, Nakit Akışı ve Sistem Fiyat Göstergeleri</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Ay</th>
+<th style="text-align: center;">Saat ($N$)</th>
+<th style="text-align: center;">Her Zaman Açık (TL/MWh)</th>
+<th style="text-align: center;">Açık Toplam Nakit ($N \times \text{P\&amp;L}$)</th>
+<th style="text-align: center;">Aşama 1 Kalibre (TL/MWh)</th>
+<th style="text-align: center;">Aşama 1 Toplam Nakit ($N \times \text{P\&amp;L}$)</th>
+<th style="text-align: center;">Aşama 2 Yayılım (TL/MWh)</th>
+<th style="text-align: center;">Aşama 2 Toplam Nakit ($N \times \text{P\&amp;L}$)</th>
+<th style="text-align: center;">Ortalama PTF</th>
+<th style="text-align: center;">Ortalama SMF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>2025-10</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">-94,13</td>
+<td style="text-align: center;">-70.032,66 TL</td>
+<td style="text-align: center;">+25,92</td>
+<td style="text-align: center;">+19.283,73 TL</td>
+<td style="text-align: center;">+86,05</td>
+<td style="text-align: center;">+64.019,65 TL</td>
+<td style="text-align: center;">2.739,50 TL</td>
+<td style="text-align: center;">2.599,90 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2025-11</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">+38,00</td>
+<td style="text-align: center;">+27.359,82 TL</td>
+<td style="text-align: center;">+72,22</td>
+<td style="text-align: center;">+51.997,37 TL</td>
+<td style="text-align: center;">+62,36</td>
+<td style="text-align: center;">+44.897,71 TL</td>
+<td style="text-align: center;">2.784,10 TL</td>
+<td style="text-align: center;">2.765,46 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2025-12</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">-4,57</td>
+<td style="text-align: center;">-3.400,29 TL</td>
+<td style="text-align: center;">-11,55</td>
+<td style="text-align: center;">-8.594,00 TL</td>
+<td style="text-align: center;">+58,62</td>
+<td style="text-align: center;">+43.612,80 TL</td>
+<td style="text-align: center;">2.973,04 TL</td>
+<td style="text-align: center;">2.911,50 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-01</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">+19,10</td>
+<td style="text-align: center;">+14.210,71 TL</td>
+<td style="text-align: center;">-32,36</td>
+<td style="text-align: center;">-24.077,84 TL</td>
+<td style="text-align: center;">+6,93</td>
+<td style="text-align: center;">+5.152,57 TL</td>
+<td style="text-align: center;">2.894,92 TL</td>
+<td style="text-align: center;">2.760,64 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-02</strong></td>
+<td style="text-align: center;">672</td>
+<td style="text-align: center;">-169,35</td>
+<td style="text-align: center;">-113.801,76 TL</td>
+<td style="text-align: center;">-55,16</td>
+<td style="text-align: center;">-37.069,37 TL</td>
+<td style="text-align: center;">+301,35</td>
+<td style="text-align: center;">+202.507,65 TL</td>
+<td style="text-align: center;">2.078,20 TL</td>
+<td style="text-align: center;">1.850,99 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-03</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">+105,97</td>
+<td style="text-align: center;">+78.841,78 TL</td>
+<td style="text-align: center;">-75,76</td>
+<td style="text-align: center;">-56.369,07 TL</td>
+<td style="text-align: center;">+124,75</td>
+<td style="text-align: center;">+92.816,68 TL</td>
+<td style="text-align: center;">1.620,32 TL</td>
+<td style="text-align: center;">1.687,62 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-04</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">+274,99</td>
+<td style="text-align: center;">+197.989,52 TL</td>
+<td style="text-align: center;">+82,98</td>
+<td style="text-align: center;">+59.745,55 TL</td>
+<td style="text-align: center;">+169,61</td>
+<td style="text-align: center;">+122.119,27 TL</td>
+<td style="text-align: center;">921,06 TL</td>
+<td style="text-align: center;">1.185,86 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-05</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">+264,95</td>
+<td style="text-align: center;">+197.125,91 TL</td>
+<td style="text-align: center;">+80,32</td>
+<td style="text-align: center;">+59.755,67 TL</td>
+<td style="text-align: center;">+214,93</td>
+<td style="text-align: center;">+159.910,82 TL</td>
+<td style="text-align: center;">590,90 TL</td>
+<td style="text-align: center;">875,30 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-06</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">+575,25</td>
+<td style="text-align: center;">+414.178,00 TL</td>
+<td style="text-align: center;">+506,84</td>
+<td style="text-align: center;">+364.926,88 TL</td>
+<td style="text-align: center;">+563,95</td>
+<td style="text-align: center;">+406.043,75 TL</td>
+<td style="text-align: center;">1.240,16 TL</td>
+<td style="text-align: center;">1.761,27 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-07</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">-99,09</td>
+<td style="text-align: center;">-73.723,67 TL</td>
+<td style="text-align: center;">+67,66</td>
+<td style="text-align: center;">+50.336,01 TL</td>
+<td style="text-align: center;">-19,62</td>
+<td style="text-align: center;">-14.595,81 TL</td>
+<td style="text-align: center;">2.699,61 TL</td>
+<td style="text-align: center;">2.515,33 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-08</strong></td>
+<td style="text-align: center;">744</td>
+<td style="text-align: center;">+104,39</td>
+<td style="text-align: center;">+77.666,34 TL</td>
+<td style="text-align: center;">+171,76</td>
+<td style="text-align: center;">+127.789,97 TL</td>
+<td style="text-align: center;">-11,26</td>
+<td style="text-align: center;">-8.376,03 TL</td>
+<td style="text-align: center;">2.907,81 TL</td>
+<td style="text-align: center;">2.905,90 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2026-09</strong></td>
+<td style="text-align: center;">720</td>
+<td style="text-align: center;">-163,94</td>
+<td style="text-align: center;">-118.033,53 TL</td>
+<td style="text-align: center;">-24,92</td>
+<td style="text-align: center;">-17.944,17 TL</td>
+<td style="text-align: center;">-103,43</td>
+<td style="text-align: center;">-74.471,87 TL</td>
+<td style="text-align: center;">2.742,43 TL</td>
+<td style="text-align: center;">2.507,16 TL</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Kümülatif Toplam (TL)</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><strong>+628.380,18 TL</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><strong>+589.780,73 TL</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><strong>+1.043.637,19 TL</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Ağırlıklı Yıllık Ortalama</strong></td>
+<td style="text-align: center;"><strong>8.760</strong></td>
+<td style="text-align: center;"><strong>71,73 TL/MWh</strong></td>
+<td style="text-align: center;"><strong>71,7329 TL</strong></td>
+<td style="text-align: center;"><strong>67,33 TL/MWh</strong></td>
+<td style="text-align: center;"><strong>67,3266 TL</strong></td>
+<td style="text-align: center;"><strong>119,14 TL/MWh</strong></td>
+<td style="text-align: center;"><strong>119,1367 TL</strong></td>
+<td style="text-align: center;"><strong>2.186,39 TL</strong></td>
+<td style="text-align: center;"><strong>2.198,25 TL</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Keşifsel Gözlem Penceresi (Ekim 2026 / 12 Gün / 288 Saat)</h2>
+<p>Modellerin gelişim sürecinde incelenen 01–12 Ekim 2026 tarihleri arasındaki 288 saatlik dönem, <strong>keşifsel (exploratory) bir vaka incelemesi</strong> olarak ele alınmıştır. Kanonik model ağırlıkları 15 Ekim 2026 21:10 itibarıyla diske kaydedilmiş; modeller, veri kütüğü ve değerlendirme kodları 20 Ekim 2026 tarihinde açıklamalı <code>protocol-v1</code> etiketiyle dondurulmuştur. Değişmezlik güvencesi bu etiketin uzak depoya itilmesi ve commit hash'i ile <code>MANIFEST_SHA256.txt</code> özetinin kayıt e-postasıyla danışman öğretim üyesine iletilmesiyle tamamlanacaktır. Tarafsız, veri sızıntısından arındırılmış bağımsız ileriye dönük değerlendirme penceresi, harici zaman damgasını sabitleyen kayıt e-postasının gönderildiği günü takip eden ilk tam gün olan <strong>21 Ekim 2026 00:00:00+03:00 – 31 Mart 2027 23:00:00+03:00</strong> tarihleri arasını (<strong>162 gün / 3.888 saat</strong>; 23 tam hafta + 1 artık gün) kapsamak üzere protokole bağlanmıştır (<code>reports/prospective_evaluation_protocol_2026_2027.md</code>):</p>
+<h4>Tablo 16: Keşifsel Gözlem Penceresi Sonuçları (288 Saat)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Strateji</th>
+<th style="text-align: center;">12 Günlük Ortalama (TL/MWh)</th>
+<th style="text-align: center;">%95 Günlük Bootstrap GA</th>
+<th style="text-align: left;">Eylem Dağılımı (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Oracle (Teorik Üst Sınır)</strong></td>
+<td style="text-align: center;"><strong>876,36</strong></td>
+<td style="text-align: center;">[725,69; 1.039,18]</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Her Zaman Fazla</strong></td>
+<td style="text-align: center;"><strong>+397,52</strong></td>
+<td style="text-align: center;">[183,90; 647,89]</td>
+<td style="text-align: left;">%100,00 Kısa</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 2 (GÖP Sonrası Yayılım - Teorik)</strong></td>
+<td style="text-align: center;"><strong>+25,25</strong></td>
+<td style="text-align: center;">[-169,14; 218,68]</td>
+<td style="text-align: left;">%44,44 Uzun, %55,56 Kısa</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Pasif / Sıfır Hareket</strong></td>
+<td style="text-align: center;"><strong>0,00</strong></td>
+<td style="text-align: center;">[0,00; 0,00]</td>
+<td style="text-align: left;">%100,00 Pasif</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Aşama 1 (GÖP Öncesi Kalibre)</strong></td>
+<td style="text-align: center;"><strong>-91,50</strong></td>
+<td style="text-align: center;">[-246,07; 61,49]</td>
+<td style="text-align: left;"><strong>%33,68 Uzun, %4,17 Kısa, %62,15 Pasif</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Her Zaman Açık (Naif Çoğunluk)</strong></td>
+<td style="text-align: center;"><strong>-405,76</strong></td>
+<td style="text-align: center;">[-644,57; -179,99]</td>
+<td style="text-align: left;">%100,00 Uzun</td>
+</tr>
+</tbody>
+</table>
+<p><em>Ekonometrik Değerlendirme:</em>
+1. <strong>Rejim Değişimi:</strong> Ekim 2026'nın ilk 12 gününde piyasa belirgin bir Enerji Fazlası rejimine girmiştir (%55,9 Fazla, %38,9 Açık). Sabit "Her Zaman Açık" kuralı <strong>-405,76 TL/MWh</strong> seviyesinde ciddi bir asimetrik kayba uğramıştır.
+2. <strong>Modelin Kaybı:</strong> Aşama 1 modeli eylemlerinin %62,15'inde pasif kalarak naif kuralın kaybını törpülemiş olsa da, <strong>-91,50 TL/MWh ile mutlak bazda zarar etmiş ve tamamen pasif kalma stratejisinin ($0,00$ TL) gerisinde kalmıştır.</strong> Bu bulgu, modelin bir sermaye koruma garantisi sunmadığını göstermektedir.</p>
+<hr />
+<h2>9. Lisans Bitirme Tezi Bulguları ve Ekonometrik Tartışma Sentezi</h2>
+<p>Tez kapsamında yürütülen ampirik deneyler, ekonometrik testler ve duyarlılık analizleri aşağıdaki 7 temel bilimsel sonucu ortaya koymuştur:</p>
+<ol>
+<li><strong>PTF, SMF'nin Baskın Bilgi Çapasıdır ($L_1$ vs $L_2$ Ayrımı):</strong><br />
+   Türkiye elektrik piyasasında SMF tahmininde en kritik bilgi girdisi PTF'dir. Saatlerin %21,14'ünde (1.852 saat) $PTF=SMF$ gerçekleşmekte olup medyan yayılım sıfırdır. Bu nedenle modelsiz $SMF=PTF$ naif kuralı, mutlak hata kaybında ($L_1$ / MAE) tüm makine öğrenmesi modellerini geride bırakmaktadır (682,75 TL vs 748,14 TL). Karesel hatada ($L_2$ / RMSE) yayılım modelinin sağladığı 12,48 TL'lik fark ise Harvey-Leybourne-Newbold testi ile doğrulandığı üzere <strong>istatistiki bir üstünlük göstermemektedir ($p = 0,2702$)</strong>.</li>
+<li><strong>Sınıflandırma Becerisi İstatistiki Olarak Anlamlı Fakat Sınırlıdır:</strong><br />
+   GÖP öncesinde makine öğrenmesi modeli sistem yönünü %59,66 doğrulukla tahmin ederek çoğunluk sınıfına (%55,74) göre +3,92 puanlık mütevazı bir yönsel fark sağlamıştır (Holm-düzeltmeli $p_{\text{adj}} \approx 0,034$). Ancak saat dilimi analizi, bu başarının yalnızca sabah (+11,87 puan) ve gündüz (+7,76 puan) saatlerinde üretildiğini; akşam zirvesinde çoğunluğun gerisinde kalındığını (-1,01 puan), gece saatlerinde ise çoğunluğun 2,97 puan altında kalındığını (%46,21 vs %49,18) ortaya koymaktadır.</li>
+<li><strong>P&amp;L Spread Büyüklüğüne Bağlıdır, Yön Etiketine Değil; Sınıflandırıcı Hedefle Uyumsuzdur:</strong><br />
+   GÖP sonrası dönemde PTF bilgisinin dahil edilmesiyle yön doğruluğu %59,66'dan %62,21'e yükselmekte, BSS skoru ise %6,43'ten %12,33'e çıkmaktadır. Ancak bu olasılık kalitesi sınıflandırıcı tabanlı kararlarda ekonomik getiriye dönüşmemekte; marjinal beklenen değer kuralı $\tau=70$ TL altında <strong>-20,81 TL/MWh</strong> (doğrulamada optimize edilmiş $\tau=140$ TL ile <strong>-7,46 TL/MWh</strong>, argmax kuralı ile <strong>-33,18 TL/MWh</strong>) zarar üretmektedir. Aşama 2'nin raporlanan <strong>+119,14 TL/MWh</strong> getirisi sınıflandırıcıya değil, $L_2$ koşullu ortalama yayılım regresyonunun işaret kuralına ($\hat{S}_{L2} &gt; 0$) bağlıdır.  </li>
+<li><strong>Hedef Uyumsuzluğu ve Mekanizma Ayrımı (Spread vs Ceza Marjı):</strong> Uzun pozisyon getirisi Enerji Açığı saatinde $\approx S^+ + k \cdot \max(PTF, SMF)$, Enerji Fazlası saatinde ise $\approx -S^- - l \cdot \min(PTF, SMF)$ biçimindedir ($S = SMF - PTF$). Burada kritik ekonometrik ayrım şudur:  <ol>
+<li>Pozisyonunu yayılım tahminine göre değiştiren modeller ($L_2$ regresörü ve PTF eşik kuralları) için <strong>getiri doğrudan $SMF - PTF$ spread'inin işaretine ve büyüklüğüne bağlıdır</strong> (Tablo 4D'nin gösterdiği üzere $L_2$'nin +119,14 TL getirisinin +150,50 TL'si yayılımdan gelir). Yön etiketini ($D_t$) tahmin eden sınıflandırıcı ise büyüklük duyarsızlığı nedeniyle bu hedefle yapısal olarak uyumsuzdur; nitekim argmax kuralında yön doğruluğu %62,21 olan sınıflandırıcı <strong>-33,18 TL/MWh</strong> (beklenen değer kuralında $\tau=70$ ile <strong>-20,81 TL/MWh</strong>) kaybettirirken, yön doğruluğu yalnızca %41,7 olan $L_2$ regresörü <strong>+119,14 TL/MWh</strong> kazandırmaktadır.  </li>
+<li>Buna karşılık naif referans kural ('Her Zaman Açık') için yayılım belirleyici değildir; ortalama yayılım (+11,86 TL) naif getirinin yalnızca %16,5'ini açıklamakta, getirinin asıl gövdesi (+68,47 TL) yasal dengesizlik ceza katsayısı ($k=0,06$) marjı ile yön ve yayılım uyumsuzluklarından türemektedir.</li>
+</ol>
+</li>
+<li><strong>Normal Saatler ve Ekstrem Dilim Dekompozisyonu:</strong> Tablo 4B'nin gösterdiği üzere iki model arasındaki <strong>+139,95 TL/MWh</strong>'lik farkın ana taşıyıcısı, <strong>normal piyasa saatlerindeki büyüklük ağırlıklı koşullu ortalama kararlarıdır (+167,71 TL net fark katkısı, %119,8 pay)</strong>. Ekstrem sıçrama saatleri (88 saat) ise +42,40 TL (%30,3) katkı sağlamaktadır (kalan tavan ve anomali saatlerinin -70,16 TL'lik dengeleyici etkisiyle net 139,95 TL).</li>
+<li><strong>Ortalamaya Dönüş ve PTF Seviye Etkisi:</strong> $L_2$ regresörünün genel yön isabeti (%41,7) çoğunluk sınıfının (%55,7) ve şans düzeyinin altındadır. Tablo 4C bulgularının gösterdiği üzere bu getiri karmaşık bir yön tahmininden değil; sıfır tabanı ve fiyat tavanlarının dayattığı <strong>PTF seviyesi ve yapısal ortalamaya dönüş (mean-reversion)</strong> dinamiğinden kaynaklanmaktadır. Nitekim iki değişkenli doğrusal regresyon ($PTF$ + Saat) tek başına <strong>+108,51 TL</strong> (L2 ile fark: -10,63 TL [%95 GA: -68,71; +41,21]), tek değişkenli doğrusal regresyon (yalnızca $PTF$) ise <strong>+94,77 TL</strong> (L2 ile fark: -24,36 TL [%95 GA: -87,65; +29,16]) üretmektedir. Eğitim kümesi PTF medyanına dayanan deterministik <em>"PTF &lt; 2.500 TL ise Uzun"</em> kuralı nokta tahmininde <strong>+140,57 TL</strong> üretse de, L2 ile bloklu bootstrap farkı (+21,43 TL [%95 GA: -14,85; +62,71]) sıfırı kapsadığından bu üstünlük istatistiksel olarak kesin bir üstünlük değil, nokta tahmini düzeyindedir. PTF öznitelikleri çıkarıldığında ise model getirisi doğrudan naif kural düzeyine (<strong>+70,73 TL</strong>) inmekte ve $L_2$'ye göre istatistiki olarak anlamlı düzeyde kaybetmektedir (-48,40 TL [%95 GA: -84,83; -13,95], $p &lt; 0,01$).</li>
+<li><strong>Ekonomik Üstünlük (Alfa) Gösterilememiştir:</strong><br />
+   Yönsel tahmin başarısı ekonomik bir avantaja dönüşmemektedir. Yıllık toplam P&amp;L'de Aşama 1 yön modeli (<strong>67,33 TL/MWh</strong>), naif "Her Zaman Açık" kuralının (<strong>71,73 TL/MWh</strong>) altında kalmıştır. Eşleştirilmiş blok bootstrap farkı (-4,41 TL/MWh [%95 GA: -59,28; +44,81], $p &gt; 0,75$) iki stratejinin getirisinin istatistiksel olarak başa baş olduğunu göstermektedir. Bu durum EPİAŞ'ın -106 / -103 TL'lik ampirik veri kalıntılarından bağımsız olup kuramsal yasal formül duyarlılık analizinde de aynen geçerlidir.</li>
+<li><strong>Sonuçlar Rejim ve Tek Ay Bağımlılığı Taşımaktadır:</strong><br />
+   Her iki stratejinin yıllık nakit akışının %60'ından fazlası tek bir aya (Haziran 2026) aittir. Haziran ayı dışlandığında model ile naif kuralın getirisi eşitlenmekte (27,97 TL vs 26,64 TL; fark +1,32 TL), permütasyon testi zamanlama anlamlılığını tamamen kaybetmektedir ($p = 0,1840$, iki yönlü $p = 0,3680$).</li>
+<li><strong>Algoritmik Başarı Değil, Mekanik Maruziyet Kısıtı:</strong><br />
+   Aşama 1 modelinin oynaklığı %28, kümülatif maksimum çekilmeyi ise %18,3 düşürmesi algoritmik bir başarı değildir. Maruziyet-eşleşmiş permütasyon sınamasında modelin CVaR ($p_{\text{adj}} = 0,3760$), en kötü ay ($p = 0,6360 \rightarrow p_{\text{adj}} = 1,000$) ve MDD ($p = 0,8150 \rightarrow p_{\text{adj}} = 1,000$) değerleri rastgele zamanlama boş dağılımından farksız çıkmıştır. <strong>Aşama 1 maruziyeti yaklaşık yarıya indirir; getiri ve çekilmedeki azalma bununla tutarlıdır. Akıllı bir risk filtresi olarak etkinliği gösterilememiştir.</strong></li>
+<li><strong>Tezin Savunulabilir Temel Çıkarımı:</strong><br />
+   GÖP öncesi makine öğrenmesi modelleri piyasada spekülatif bir alfa makinesi değildir. $PTF$ fiyatının açıklanmadığı karar anında üretilen modeller, piyasanın yapısal ceza marjı asimetrisi ve tek yönlü çoğunluk kuralları karşısında net bir ekonomik üstünlük kuramamaktadır. Makine öğrenmesinin katkısı, yönsel olasılık kalibrasyonu sağlayarak belirsiz saatlerde piyasa maruziyetini mekanik olarak kesmekle sınırlı kalmaktadır.</li>
+</ol>
+</div>
+</body>
+</html>

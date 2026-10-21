@@ -1,0 +1,4 @@
+Karşılaştırma Çifti (Model 1 vs Model 2),Model 1 MAE,Model 2 MAE,MAE Farkı,DM t-stat (MAE),DM p-değeri (MAE),Model 1 RMSE,Model 2 RMSE,RMSE Farkı,DM t-stat (RMSE),DM p-değeri (RMSE)
+Ridge (Sabit) vs Lag 168,913.45,1011.8,98.35,3.825,<0.0001,1103.76,1497.2,393.44,10.808,<0.0001
+Ridge (Sabit) vs LightGBM (GÖP Öncesi),913.45,965.53,52.07,2.437,0.0074,1103.76,1180.97,77.21,3.229,0.0006
+LightGBM Yayılım vs SMF=PTF Kuralı,728.78,682.75,-46.03,-7.126,1.0000,997.41,1019.49,22.08,2.247,0.0123

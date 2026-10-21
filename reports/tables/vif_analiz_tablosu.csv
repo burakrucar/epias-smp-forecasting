@@ -1,0 +1,14 @@
+run_id,Özellik,VIF (Tüm Değişkenler Dahil),VIF (Residual Load Çıkarılmış - Model Sürümü)
+run_1792585978,load_forecast_mw,3559.86,22.76
+run_1792585978,forecast_residual_load_mw,3097.79,Çıkarıldı (Lineer Bağımlı)
+run_1792585978,forecast_wind_ratio,35.93,3.76
+run_1792585978,ptf_lag_24,29.71,29.67
+run_1792585978,ptf_lag_48,33.88,33.63
+run_1792585978,ptf_lag_168,35.78,35.64
+run_1792585978,latest_known_smf,6.91,6.91
+run_1792585978,legit_same_hour_smf,20.13,20.08
+run_1792585978,smf_lag_48,25.26,25.23
+run_1792585978,smf_lag_72,14.66,14.65
+run_1792585978,smf_lag_168,20.98,20.89
+run_1792585978,smf_median_4w,30.32,30.3
+run_1792585978,smf_clean_same_hour_7d_mean,72.47,71.96

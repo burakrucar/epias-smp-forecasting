@@ -1,0 +1,2 @@
+Model,Doğruluk (Accuracy),Dengeli Doğruluk,Macro F1,MCC
+LightGBM 3 Sınıflı Model,0.6191,0.4031,0.3974,0.2188

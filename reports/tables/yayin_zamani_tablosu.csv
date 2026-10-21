@@ -1,0 +1,6 @@
+Veri,Yayınlayan,Yayın Zamanı,D-1 12:00 Durumu
+SMF (Sistem Marjinal Fiyatı),TEİAŞ / EPİAŞ,D+1 veya saatlik gecikmeyle,Yalnızca t-24 ve önceki saatler kesin bilinir
+PTF (Piyasa Takas Fiyatı),EPİAŞ GÖP,D-1 13:00 - 14:00,D-1 12:00'de HENÜZ YOK (Aşama 1'de girdi olamaz)
+Yük Tahmin Planı (Load Forecast),TEİAŞ,D-1 saat 10:30 - 11:30,D gününün 24 saati için kamuya açıklanmış (KULLANILABİLİR)
+Rüzgar Üretim Tahmini (Wind Forecast),TEİAŞ RİTM,D-1 saat 10:30 - 11:30,D gününün 24 saati için kamuya açıklanmış (KULLANILABİLİR)
+Sistem Denge Yönü (systemStatus),TEİAŞ,D günü gerçek zaman,D günü gerçekleşen yön bilinmez; geçmiş gecikmeli yön bilinir

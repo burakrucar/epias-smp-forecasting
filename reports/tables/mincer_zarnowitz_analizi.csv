@@ -1,0 +1,3 @@
+run_id,Model,Gözlem Sayısı (N),alpha (HAC se),beta (HAC se),R2,"Wald Testi H0: (alpha=0, beta=1)"
+run_1792585978,Ridge Regresyon (Sabit),8760,-530.51 (61.19),1.2131 (0.0229),0.4395,F=86.87 (p=1.3693e-19)
+run_1792585978,Resmi Baz (smf_median_4w),8760,812.48 (53.28),0.6164 (0.0181),0.2998,F=480.54 (p=4.4830e-105)

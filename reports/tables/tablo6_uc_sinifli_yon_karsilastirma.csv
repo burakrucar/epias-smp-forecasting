@@ -1,0 +1,4 @@
+run_id,Model,Doğruluk (Acc),Dengeli Doğruluk,Macro F1,MCC
+run_1792585978,1. Saat Bazlı Çoğunluk Bazı (3 Sınıflı),0.5667,0.3436,0.2742,0.0734
+run_1792585978,2. Hafta İçi/Sonu x Saat Bazı (3 Sınıflı),0.5904,0.3677,0.3334,0.1487
+run_1792585978,3. LightGBM 3 Sınıflı Model,0.6281,0.4087,0.4028,0.2386

@@ -1,0 +1,5 @@
+Seri Adı,ADF Test İstatistiği,ADF p-değeri,ADF Kararı (p<0.05),KPSS Test İstatistiği,KPSS p-değeri,KPSS Kararı (p>=0.05)
+Ham SMF (TL/MWh),-11.7933,9.7118e-22,Durağan (Birim Kök Reddedildi),1.3103,1.0000e-02,Durağan Değil (H0 Reddedildi)
+Log(SMF),-10.7359,2.8993e-19,Durağan (Birim Kök Reddedildi),4.3846,1.0000e-02,Durağan Değil (H0 Reddedildi)
+Fark Serisi (Delta SMF),-35.085,0.0000e+00,Durağan (Birim Kök Reddedildi),0.0296,1.0000e-01,Durağan (H0 Reddedilemedi)
+Yayılım Serisi (SMF - PTF),-18.6912,2.0393e-30,Durağan (Birim Kök Reddedildi),0.9363,1.0000e-02,Durağan Değil (H0 Reddedildi)

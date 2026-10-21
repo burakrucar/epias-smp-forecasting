@@ -1,0 +1,11 @@
+Sıra,Özellik Adı,Ortalama Mutlak SHAP (TL),Piyasa Mantığı ve İktisadi Açıklama
+1,ptf_lag_168,190.28,Piyasanın otoregresif fiyat hafızası ve son bilinen rejim etkisi.
+2,hour_cos,170.75,Puant saatler (17:00-21:00) ile gece saatleri arasındaki talep farkı.
+3,smf_same_hour_7d_mean,142.79,Puant saatler (17:00-21:00) ile gece saatleri arasındaki talep farkı.
+4,latest_known_smf,113.11,Piyasanın otoregresif fiyat hafızası ve son bilinen rejim etkisi.
+5,forecast_residual_load_mw,103.01,"Kalan yük arttıkça pahalı yakıtlı santraller devreye girer, SMF yükselir."
+6,month,60.01,Takvim ve döngüsel mevsimsellik bileşeni.
+7,dow,56.25,Takvim ve döngüsel mevsimsellik bileşeni.
+8,latest_known_ptf,44.62,Piyasanın otoregresif fiyat hafızası ve son bilinen rejim etkisi.
+9,ptf_lag_72,44.37,Piyasanın otoregresif fiyat hafızası ve son bilinen rejim etkisi.
+10,forecast_wind_ratio,39.41,"Rüzgar üretimi arttıkça linyit/gaz santralleri kısılır, SMF düşer."

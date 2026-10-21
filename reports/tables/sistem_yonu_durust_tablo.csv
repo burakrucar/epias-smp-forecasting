@@ -1,0 +1,5 @@
+Model Adı,Model Tipi,Doğruluk (Acc),Dengeli Doğruluk (Bal. Acc),F1 Skoru (Açık),MCC
+1. Çoğunluk Sınıfı (Her Zaman Açık),Baz Model,0.5574,0.5,0.7158,0.0
+2. Meşru Aynı Saat Yön Bazı,Meşru Baz Model,0.5725,0.5666,0.617,0.1333
+3. Lojistik Regresyon (Dengeli),İstatistiksel,0.6249,0.6259,0.6471,0.2502
+4. LightGBM Sınıflandırıcı,Makine Öğrenmesi,0.6285,0.6224,0.6697,0.2455
